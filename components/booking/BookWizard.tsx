@@ -6,7 +6,7 @@ import { useWizard, type Lang, type ServiceType, type ExportVolume, type Platfor
 import { t } from "@/lib/wizard-i18n";
 import { ArrowRight, ArrowLeft, CheckCircle, Calendar, MessageCircle, Loader2, Check } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
-import { parseISO, format } from "date-fns";
+import { parseISO } from "date-fns";
 
 // ── Country codes ──
 const COUNTRIES = [
