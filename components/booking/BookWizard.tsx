@@ -100,9 +100,8 @@ export default function BookWizard({
   // Load slots when reaching step 4
   useEffect(() => {
     if (w.step !== 4) return;
-    const uid = repUserId || "general";
     setLoadingSlots(true);
-    fetch(`/api/slots?userId=${uid}&timezone=${encodeURIComponent(timezone)}`)
+    fetch(`/api/slots?timezone=${encodeURIComponent(timezone)}`)
       .then(r => r.json())
       .then(d => {
         setSlotsData(d);
@@ -111,7 +110,8 @@ export default function BookWizard({
         setLoadingSlots(false);
       })
       .catch(() => setLoadingSlots(false));
-  }, [w.step, repUserId, timezone]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [w.step, timezone]);
 
   const isPersonalEmail = (email: string) => {
     const domain = email.split("@")[1]?.toLowerCase();
@@ -181,51 +181,111 @@ export default function BookWizard({
   if (confirmed) {
     const slotDate = w.selectedSlot ? parseISO(w.selectedSlot) : null;
     const formattedSlot = slotDate
-      ? formatInTimeZone(slotDate, timezone, "EEEE d MMMM · h:mm a zzz")
+      ? formatInTimeZone(slotDate, timezone, "EEEE d MMMM · h:mm a")
       : "";
+
+    const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
     const googleCalUrl = slotDate ? (() => {
       const end = new Date(slotDate.getTime() + 30 * 60 * 1000);
-      const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-      return `https://calendar.google.com/calendar/r/eventedit?text=Consulta+FastForward&dates=${fmt(slotDate)}/${fmt(end)}&details=Consulta+con+FastForward+FDA+Experts`;
+      const details = encodeURIComponent("Consulta con FastForward ® | FDA Experts\n\nMiami, FL · fastfwdus.com");
+      return `https://calendar.google.com/calendar/r/eventedit?text=Consulta+FastForward&dates=${fmt(slotDate)}/${fmt(new Date(slotDate.getTime()+30*60000))}&details=${details}`;
     })() : "#";
+
+    const icsContent = slotDate ? (() => {
+      const end = new Date(slotDate.getTime() + 30 * 60 * 1000);
+      return [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//FastForward LLC//Scheduling//EN",
+        "BEGIN:VEVENT",
+        `DTSTART:${fmt(slotDate)}`,
+        `DTEND:${fmt(end)}`,
+        "SUMMARY:Consulta FastForward ® | FDA Experts",
+        "DESCRIPTION:Consulta con FastForward LLC · Miami FL · fastfwdus.com",
+        "ORGANIZER:MAILTO:info@fastfwdus.com",
+        "STATUS:CONFIRMED",
+        "END:VEVENT",
+        "END:VCALENDAR",
+      ].join("\r\n");
+    })() : "";
+
+    const downloadIcs = () => {
+      const blob = new Blob([icsContent], { type: "text/calendar" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "consulta-fastforward.ics";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
 
     return (
       <WizardShell language={w.language} onLangChange={w.setLanguage} repInfo={repInfo}>
         <div className="text-center py-4">
+          {/* Check icon */}
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
                style={{ background: "rgba(201,168,76,0.12)" }}>
             <CheckCircle className="w-8 h-8" style={{ color: "#C9A84C" }} />
           </div>
+
           <h2 className="text-2xl font-bold mb-2" style={{ color: "#27295C" }}>{tr.successTitle}</h2>
           <p className="text-gray-400 text-sm mb-6">{tr.successSub}</p>
 
-          {confirmed.isPending ? (
-            <div className="p-4 rounded-xl mb-6 text-sm"
-                 style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)", color: "#8a6d1e" }}>
-              {tr.pendingAssignment}
+          {/* Resumen cita */}
+          <div className="p-5 rounded-xl mb-4 text-left"
+               style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                   style={{ background: "#27295C" }}>
+                <Calendar className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="font-semibold text-sm capitalize" style={{ color: "#27295C" }}>{formattedSlot}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{timezone}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium capitalize"
+                        style={{ background: "rgba(39,41,92,0.08)", color: "#27295C" }}>
+                    {w.platform === "meet" ? "🎥 Google Meet" : w.platform === "zoom" ? "📹 Zoom" : "💬 WhatsApp"}
+                  </span>
+                  <span className="text-xs text-gray-400">30 min</span>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="p-4 rounded-xl mb-6 text-left"
-                 style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">{w.language === "es" ? "Tu cita" : w.language === "en" ? "Your appointment" : "Sua consulta"}</p>
-              <p className="font-semibold text-sm" style={{ color: "#27295C" }}>{formattedSlot}</p>
-              <p className="text-xs text-gray-400 mt-1 capitalize">{w.platform}</p>
+          </div>
+
+          {confirmed.isPending && (
+            <div className="p-3 rounded-xl mb-4 text-xs text-left"
+                 style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)", color: "#92640a" }}>
+              ℹ️ {tr.pendingAssignment}
             </div>
           )}
 
-          <div className="flex flex-col gap-3">
-            <a href={googleCalUrl} target="_blank"
-               className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold border-2 transition-all"
-               style={{ borderColor: "#27295C", color: "#27295C" }}>
+          {/* Cliente info */}
+          <div className="p-4 rounded-xl mb-6 text-left"
+               style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
+            <p className="text-xs text-gray-400 mb-1">{w.language === "es" ? "Confirmación enviada a" : w.language === "en" ? "Confirmation sent to" : "Confirmação enviada para"}</p>
+            <p className="text-sm font-medium" style={{ color: "#27295C" }}>{w.clientEmail}</p>
+          </div>
+
+          {/* Calendar buttons */}
+          <div className="flex flex-col gap-2.5">
+            <a href={googleCalUrl} target="_blank" rel="noreferrer"
+               className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
+               style={{ background: "#27295C", color: "white" }}>
               <Calendar className="w-4 h-4" /> {tr.addGoogle}
             </a>
-            <button
-              onClick={() => { w.reset(); }}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
-              {w.language === "es" ? "Volver al inicio" : w.language === "en" ? "Back to start" : "Voltar ao início"}
+            <button onClick={downloadIcs}
+               className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold border-2 transition-all hover:-translate-y-0.5"
+               style={{ borderColor: "#E5E7EB", color: "#374151" }}>
+              🍎 {tr.addApple}
             </button>
           </div>
+
+          <button onClick={() => { w.reset(); window.location.href = "/"; }}
+            className="mt-5 text-xs transition-colors" style={{ color: "#9CA3AF" }}>
+            ← {w.language === "es" ? "Volver al inicio" : w.language === "en" ? "Back to home" : "Voltar ao início"}
+          </button>
         </div>
       </WizardShell>
     );
