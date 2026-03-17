@@ -207,8 +207,7 @@ export async function POST(req: NextRequest) {
     // Send confirmation email
     try {
       await resend.emails.send({
-        from: "FastForward FDA Experts <onboarding@resend.dev>",
-        replyTo: "info@fastfwdus.com",
+        from: "FastForward ® | FDA Experts <noreply@fastfwdus.com>",
         to: clientEmail,
         subject,
         html,
@@ -217,7 +216,7 @@ export async function POST(req: NextRequest) {
       // Notify admin/manager if unassigned
       if (status === "pending_assignment") {
         await resend.emails.send({
-          from: "FastForward Scheduling <onboarding@resend.dev>",
+          from: "FastForward Scheduling <noreply@fastfwdus.com>",
           to: ["info@fastfwdus.com", "tmarino@fastfwdus.com"],
           subject: `⚡ Nueva cita sin asignar — ${clientName} (${clientCompany})`,
           html: `
