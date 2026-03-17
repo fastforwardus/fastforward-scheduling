@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -20,20 +18,25 @@ export default function LoginPage() {
     setLoading(true);
 
     const res = await signIn("credentials", {
-      email: email.trim(),
+      email: email.trim().toLowerCase(),
       password,
       redirect: false,
     });
 
-    setLoading(false);
-
-    if (!res || res.error) {
-      setError("Email o contraseña incorrectos.");
+    if (!res) {
+      setError("Sin respuesta del servidor.");
+      setLoading(false);
       return;
     }
 
-    router.push("/dashboard");
-    router.refresh();
+    if (res.error) {
+      setError("Email o contraseña incorrectos.");
+      setLoading(false);
+      return;
+    }
+
+    // Login OK — redirigir
+    window.location.href = "/dashboard";
   }
 
   return (
@@ -42,7 +45,6 @@ export default function LoginPage() {
 
       <div className="w-full max-w-sm">
 
-        {/* Logo */}
         <div className="flex justify-center mb-10">
           <Image
             src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
@@ -55,7 +57,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Card */}
         <div className="rounded-2xl p-8"
              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}>
 
@@ -66,7 +67,6 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
-            {/* Email */}
             <div>
               <label className="block text-xs font-semibold mb-2 uppercase tracking-widest"
                      style={{ color: "rgba(255,255,255,0.4)" }}>
@@ -80,17 +80,12 @@ export default function LoginPage() {
                 required
                 autoComplete="email"
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-                style={{
-                  background: "rgba(255,255,255,0.08)",
-                  border: "1.5px solid rgba(255,255,255,0.12)",
-                  color: "white",
-                }}
+                style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.12)", color: "white" }}
                 onFocus={e => e.currentTarget.style.borderColor = "#C9A84C"}
                 onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"}
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-xs font-semibold mb-2 uppercase tracking-widest"
                      style={{ color: "rgba(255,255,255,0.4)" }}>
@@ -105,28 +100,18 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   className="w-full px-4 py-3 pr-12 rounded-xl text-sm outline-none transition-all"
-                  style={{
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1.5px solid rgba(255,255,255,0.12)",
-                    color: "white",
-                  }}
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.12)", color: "white" }}
                   onFocus={e => e.currentTarget.style.borderColor = "#C9A84C"}
                   onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: "rgba(255,255,255,0.3)" }}
-                  onMouseEnter={e => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
-                  onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.3)"}
-                >
+                <button type="button" onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: "rgba(255,255,255,0.35)" }}>
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {/* Error */}
             {error && (
               <div className="px-4 py-3 rounded-xl text-sm"
                    style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.25)", color: "#fca5a5" }}>
@@ -134,17 +119,9 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold transition-all duration-200 active:scale-95 mt-2"
-              style={{
-                background: loading ? "#a68a3a" : "#C9A84C",
-                color: "#1A1C3E",
-                cursor: loading ? "not-allowed" : "pointer",
-              }}
-            >
+            <button type="submit" disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold transition-all duration-200 active:scale-95"
+              style={{ background: "#C9A84C", color: "#1A1C3E", opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
               {loading
                 ? <Loader2 className="w-4 h-4 animate-spin" />
                 : <> Ingresar <ArrowRight className="w-4 h-4" /> </>
