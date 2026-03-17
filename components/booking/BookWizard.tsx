@@ -647,16 +647,23 @@ function WizardShell({ children, language, onLangChange, repInfo }: {
         <div className="w-full max-w-lg">
           {/* Rep badge */}
           {repInfo && (
-            <div className="flex items-center gap-3 mb-6 p-3 rounded-xl"
-                 style={{ background: "white", border: "1px solid #E5E7EB" }}>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                   style={{ background: "#27295C" }}>
-                {repInfo.fullName[0]}
+            <div className="flex items-center gap-3 mb-6 p-4 rounded-xl"
+                 style={{ background: "white", border: "1px solid #E5E7EB", boxShadow: "0 2px 8px rgba(39,41,92,0.06)" }}>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                   style={{ background: "linear-gradient(135deg, #27295C, #373CA7)", fontSize: "18px" }}>
+                {repInfo.avatarUrl
+                  ? <img src={repInfo.avatarUrl} alt={repInfo.fullName} className="w-full h-full rounded-full object-cover" />
+                  : repInfo.fullName[0]
+                }
               </div>
-              <div>
-                <p className="text-xs text-gray-400">{t.es.talkingWith}</p>
-                <p className="font-semibold text-sm" style={{ color: "#27295C" }}>{repInfo.fullName}</p>
+              <div className="flex-1">
+                <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: "#9CA3AF" }}>
+                  {language === "en" ? "Your expert" : language === "pt" ? "Seu especialista" : "Tu experto"}
+                </p>
+                <p className="font-bold text-sm" style={{ color: "#27295C" }}>{repInfo.fullName}</p>
+                <p className="text-xs" style={{ color: "#C9A84C" }}>FastForward ® | FDA Experts</p>
               </div>
+              <div className="w-2 h-2 rounded-full" style={{ background: "#22C55E" }} title="Disponible" />
             </div>
           )}
 
