@@ -97,10 +97,10 @@ export async function POST(req: NextRequest) {
          </a>`;
 
     const subject = lang === "en"
-      ? `Your meeting with FastForward is confirmed — ${formattedDate}`
+      ? `Meeting confirmed - FastForward FDA Experts - ${formattedDate}`
       : lang === "pt"
-      ? `Sua reunião com FastForward está confirmada — ${formattedDate}`
-      : `Tu cita con FastForward está confirmada — ${formattedDate}`;
+      ? `Reuniao confirmada - FastForward FDA Experts - ${formattedDate}`
+      : `Cita confirmada - FastForward FDA Experts - ${formattedDate}`;
 
     const greeting = lang === "en" ? `Hi ${clientName},`
       : lang === "pt" ? `Olá ${clientName},`
@@ -207,7 +207,7 @@ export async function POST(req: NextRequest) {
     // Send confirmation email
     try {
       await resend.emails.send({
-        from: "FastForward ® | FDA Experts <noreply@fastfwdus.com>",
+        from: "FastForward FDA Experts <noreply@fastfwdus.com>",
         to: clientEmail,
         subject,
         html,
