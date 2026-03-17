@@ -130,7 +130,7 @@ export default function AdminDashboardClient({ user }: { user: { id?: string; fu
                 Ver todo →
               </a>
             </div>
-            <div className="divide-y" style={{ divideColor: "#F0F0F0" }}>
+            <div className="divide-y" style={{ borderColor: "#F0F0F0" }}>
               {repStats.map(rep => (
                 <div key={rep.id} className="flex items-center gap-4 px-6 py-3.5">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"

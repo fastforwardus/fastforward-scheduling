@@ -74,6 +74,7 @@ export function NotesPanel({
 
   useEffect(() => {
     loadNotes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appointmentId]);
 
   useEffect(() => {
