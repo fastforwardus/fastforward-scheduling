@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
+import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
@@ -11,22 +12,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning className={GeistSans.variable}>
-      <body className="font-sans antialiased bg-white dark:bg-navy-900 transition-colors duration-300">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange={false}
-        >
-          {children}
-        </ThemeProvider>
+      <body className="font-sans antialiased bg-white dark:bg-[#0F1023] transition-colors duration-300">
+        <SessionProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange={false}>
+            {children}
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
