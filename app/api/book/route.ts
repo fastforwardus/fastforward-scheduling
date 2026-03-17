@@ -89,6 +89,12 @@ export async function POST(req: NextRequest) {
     const formattedTime = formatInTimeZone(slotDate, tz, "h:mm a");
 
     const platformLabel = platform === "meet" ? "Google Meet" : platform === "zoom" ? "Zoom" : "WhatsApp";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://fastforward-scheduling.vercel.app";
+    const meetingLinkHtml = platform === "whatsapp"
+      ? `<span style="font-size:14px;font-weight:600;color:#27295C;">📞 ${clientWhatsapp}</span>`
+      : `<a href="${appUrl}/book/confirm/${confirmToken}" style="font-size:14px;font-weight:600;color:#C9A84C;text-decoration:none;">
+          ${lang === "en" ? "Click here to get your meeting link" : lang === "pt" ? "Clique aqui para obter o link da reunião" : "Hacé click para obtener el link de la reunión"} →
+         </a>`;
 
     const subject = lang === "en"
       ? `Your meeting with FastForward is confirmed — ${formattedDate}`
@@ -135,9 +141,16 @@ export async function POST(req: NextRequest) {
         <tr><td style="background:#ffffff;padding:32px;border-radius:0 0 16px 16px;border:1px solid #E5E7EB;border-top:none;">
 
           <!-- Check icon -->
-          <div style="text-align:center;margin-bottom:24px;">
-            <div style="width:56px;height:56px;background:rgba(201,168,76,0.12);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:24px;">✓</div>
-          </div>
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr><td align="center">
+              <table cellpadding="0" cellspacing="0">
+                <tr><td width="56" height="56" align="center" valign="middle"
+                    style="background:#C9A84C;border-radius:28px;font-size:26px;color:#ffffff;font-weight:700;line-height:56px;">
+                  ✓
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
 
           <p style="font-size:22px;font-weight:700;color:#27295C;margin:0 0 8px;text-align:center;">${greeting}</p>
           <p style="font-size:15px;color:#6B7280;margin:0 0 28px;text-align:center;">${bodyIntro}</p>
@@ -155,6 +168,12 @@ export async function POST(req: NextRequest) {
                 <td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
                   <span style="font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;">🎥 ${lang === "en" ? "Platform" : lang === "pt" ? "Plataforma" : "Plataforma"}</span><br>
                   <span style="font-size:14px;font-weight:600;color:#27295C;">${platformLabel}</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
+                  <span style="font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;">🔗 ${lang === "en" ? "Meeting Link" : lang === "pt" ? "Link da Reunião" : "Link de la reunión"}</span><br>
+                  ${meetingLinkHtml}
                 </td>
               </tr>
               <tr>
@@ -188,7 +207,8 @@ export async function POST(req: NextRequest) {
     // Send confirmation email
     try {
       await resend.emails.send({
-        from: "FastForward ® | FDA Experts <noreply@fastfwdus.com>",
+        from: "FastForward FDA Experts <onboarding@resend.dev>",
+        replyTo: "info@fastfwdus.com",
         to: clientEmail,
         subject,
         html,
@@ -197,7 +217,7 @@ export async function POST(req: NextRequest) {
       // Notify admin/manager if unassigned
       if (status === "pending_assignment") {
         await resend.emails.send({
-          from: "FastForward Scheduling <noreply@fastfwdus.com>",
+          from: "FastForward Scheduling <onboarding@resend.dev>",
           to: ["info@fastfwdus.com", "tmarino@fastfwdus.com"],
           subject: `⚡ Nueva cita sin asignar — ${clientName} (${clientCompany})`,
           html: `
