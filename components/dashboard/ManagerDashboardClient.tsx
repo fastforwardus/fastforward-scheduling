@@ -22,7 +22,7 @@ interface Appt {
   assignedTo: string | null;
 }
 
-export default function ManagerDashboardClient({ user }: { user: { fullName: string; email: string; role: string } }) {
+export default function ManagerDashboardClient({ user }: { user: { id?: string; fullName: string; email: string; role: string; slug?: string } }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"unassigned" | "all" | "today">("unassigned");
@@ -142,7 +142,7 @@ export default function ManagerDashboardClient({ user }: { user: { fullName: str
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
               {tabData.map(appt => (
-                <AppointmentCard key={appt.id} appt={appt} canAssign={true} onRefresh={load} />
+                <AppointmentCard key={appt.id} appt={appt} canAssign={true} onRefresh={load} currentUserId={user.id ?? ""} currentRole={user.role} />
               ))}
             </div>
           )}

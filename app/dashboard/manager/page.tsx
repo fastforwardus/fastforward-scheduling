@@ -6,5 +6,5 @@ export default async function ManagerPage() {
   const session = await getSession();
   if (!session) redirect("/login");
   if (session.role === "sales_rep") redirect("/dashboard/sales");
-  return <ManagerDashboardClient user={session} />;
+  return <ManagerDashboardClient user={{ ...session, id: session.id }} />;
 }

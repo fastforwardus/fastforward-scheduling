@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
       .where(eq(appointments.id, appointmentId));
 
     // Email al sales rep asignado
-    const lang = appt.clientLanguage || "es";
     const slotDate = new Date(appt.scheduledAt);
     const formattedDate = slotDate.toLocaleDateString("es-ES", {
       weekday: "long", year: "numeric", month: "long", day: "numeric",

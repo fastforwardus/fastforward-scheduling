@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Calendar, Video, MessageCircle, Phone, Clock, Building2, Mail } from "lucide-react";
 import { AssignModal } from "./AssignModal";
+import { NotesPanel } from "./NotesPanel";
 
 interface Appointment {
   id: string;
@@ -38,12 +39,17 @@ export function AppointmentCard({
   appt,
   canAssign = false,
   onRefresh,
+  currentUserId = "",
+  currentRole = "sales_rep",
 }: {
   appt: Appointment;
   canAssign?: boolean;
   onRefresh?: () => void;
+  currentUserId?: string;
+  currentRole?: string;
 }) {
   const [showAssign, setShowAssign] = useState(false);
+  const [showNotes, setShowNotes] = useState(false);
   const status = STATUS_COLORS[appt.status] || STATUS_COLORS.scheduled;
 
   const slotDate = new Date(appt.scheduledAt);
@@ -126,6 +132,28 @@ export function AppointmentCard({
                 {appt.repName[0]}
               </div>
               <span className="text-xs" style={{ color: "#27295C" }}>{appt.repName}</span>
+            </div>
+          )}
+
+          {/* Notes toggle */}
+          <button onClick={() => setShowNotes(!showNotes)}
+            className="flex items-center gap-1.5 w-full mb-3 px-3 py-2 rounded-xl text-xs font-medium transition-all border"
+            style={{
+              borderColor: showNotes ? "#27295C" : "#E5E7EB",
+              background: showNotes ? "rgba(39,41,92,0.04)" : "transparent",
+              color: showNotes ? "#27295C" : "#9CA3AF",
+            }}>
+            📝 Notas internas
+            {showNotes ? " ▲" : " ▼"}
+          </button>
+
+          {showNotes && (
+            <div className="mb-3">
+              <NotesPanel
+                appointmentId={appt.id}
+                currentUserId={currentUserId}
+                currentRole={currentRole}
+              />
             </div>
           )}
 

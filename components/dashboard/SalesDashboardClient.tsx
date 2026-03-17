@@ -12,7 +12,7 @@ interface Appt {
   repName: string | null; repSlug: string | null; assignedTo: string | null;
 }
 
-export default function SalesDashboardClient({ user }: { user: { fullName: string; email: string; role: string; slug?: string } }) {
+export default function SalesDashboardClient({ user }: { user: { id?: string; fullName: string; email: string; role: string; slug?: string } }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"today" | "upcoming" | "all">("today");
@@ -121,7 +121,7 @@ export default function SalesDashboardClient({ user }: { user: { fullName: strin
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
               {tabData.map(appt => (
-                <AppointmentCard key={appt.id} appt={appt} canAssign={false} onRefresh={load} />
+                <AppointmentCard key={appt.id} appt={appt} canAssign={false} onRefresh={load} currentUserId={user.id ?? ""} currentRole={user.role} />
               ))}
             </div>
           )}

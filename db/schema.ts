@@ -152,6 +152,26 @@ export const availabilityRulesRelations = relations(availabilityRules, ({ one })
   user: one(users, { fields: [availabilityRules.userId], references: [users.id] }),
 }));
 
+
+// ── Appointment Notes ──
+export const appointmentNotes = pgTable("appointment_notes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  appointmentId: uuid("appointment_id").references(() => appointments.id, { onDelete: "cascade" }).notNull(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  authorName: text("author_name").notNull(),
+  authorRole: text("author_role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
+});
+
+export const appointmentNotesRelations = relations(appointmentNotes, ({ one }) => ({
+  appointment: one(appointments, { fields: [appointmentNotes.appointmentId], references: [appointments.id] }),
+  user: one(users, { fields: [appointmentNotes.userId], references: [users.id] }),
+}));
+
+export type AppointmentNote = typeof appointmentNotes.$inferSelect;
+export type NewAppointmentNote = typeof appointmentNotes.$inferInsert;
+
 // ── Types ──
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

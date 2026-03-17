@@ -30,7 +30,7 @@ interface Rep {
   slug: string | null;
 }
 
-export default function AdminDashboardClient({ user }: { user: { fullName: string; email: string; role: string } }) {
+export default function AdminDashboardClient({ user }: { user: { id?: string; fullName: string; email: string; role: string; slug?: string } }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [reps, setReps] = useState<Rep[]>([]);
   const [loading, setLoading] = useState(true);
@@ -202,7 +202,7 @@ export default function AdminDashboardClient({ user }: { user: { fullName: strin
           ) : (
             <div className="grid sm:grid-cols-2 gap-4">
               {tabData.map(appt => (
-                <AppointmentCard key={appt.id} appt={appt} canAssign={true} onRefresh={load} />
+                <AppointmentCard key={appt.id} appt={appt} canAssign={true} onRefresh={load} currentUserId={user.id ?? ""} currentRole={user.role} />
               ))}
             </div>
           )}
