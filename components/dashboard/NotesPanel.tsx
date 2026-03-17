@@ -63,7 +63,7 @@ export function NotesPanel({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const allAuthors = [...new Set(notes.map(n => n.authorName))];
+  const allAuthors = notes.map(n => n.authorName).filter((v, i, a) => a.indexOf(v) === i);
 
   async function loadNotes() {
     const res = await fetch(`/api/appointments/notes?appointmentId=${appointmentId}`);
