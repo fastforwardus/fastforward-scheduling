@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useWizard, type Lang, type ServiceType, type ExportVolume, type Platform } from "@/lib/wizard-store";
 import { t } from "@/lib/wizard-i18n";
-import { ArrowRight, ArrowLeft, CheckCircle, Calendar, Video, MessageCircle, Loader2, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle, Calendar, MessageCircle, Loader2, Check } from "lucide-react";
 import { formatInTimeZone } from "date-fns-tz";
 import { parseISO, format } from "date-fns";
 
@@ -86,6 +86,7 @@ export default function BookWizard({
     if (prefilled?.email) w.setClientEmail(prefilled.email);
     if (prefilled?.company) w.setClientCompany(prefilled.company);
     if (prefilled?.phone) w.setClientWhatsapp(prefilled.phone);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load rep user id for slots
