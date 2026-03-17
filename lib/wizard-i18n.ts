@@ -6,9 +6,8 @@ export const t = {
     step4Title: "Elegí tu horario",
     step5Title: "Elegí la plataforma",
     services: {
+      fda_fsma: "Cumplir con FDA",
       register_company: "Registrar mi empresa en EE.UU.",
-      fda_fsma: "Cumplir con FDA / FSMA",
-      regulatory_audit: "Auditoría regulatoria",
       market_entry: "Ingresar mis productos al mercado americano",
       not_sure: "No sé por dónde empezar",
     },
@@ -62,9 +61,8 @@ export const t = {
     step4Title: "Choose your time slot",
     step5Title: "Choose your platform",
     services: {
+      fda_fsma: "FDA compliance",
       register_company: "Register my company in the US",
-      fda_fsma: "FDA / FSMA compliance",
-      regulatory_audit: "Regulatory audit",
       market_entry: "Enter my products into the US market",
       not_sure: "I don't know where to start",
     },
@@ -110,9 +108,8 @@ export const t = {
     step4Title: "Escolha seu horário",
     step5Title: "Escolha a plataforma",
     services: {
+      fda_fsma: "Conformidade FDA",
       register_company: "Registrar minha empresa nos EUA",
-      fda_fsma: "Conformidade FDA / FSMA",
-      regulatory_audit: "Auditoria regulatória",
       market_entry: "Entrada dos meus produtos no mercado americano",
       not_sure: "Não sei por onde começar",
     },
