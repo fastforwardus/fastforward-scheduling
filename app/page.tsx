@@ -1,129 +1,224 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
-import { ArrowRight, Shield, TrendingUp, Globe, Award } from "lucide-react";
+import { ArrowRight, CheckCircle } from "lucide-react";
+
+type Lang = "es" | "en" | "pt";
+
+const copy = {
+  es: {
+    nav: "Agendar consulta",
+    pill: "Consulta gratuita · 30 minutos",
+    h1a: "Expertos en entrada al",
+    h1b: "mercado de EE.UU.",
+    sub: "FDA compliance, formación de LLC y estrategia regulatoria para empresas que exportan a Estados Unidos.",
+    cta: "Agendar consulta gratuita",
+    ctaSub: "Sin costo · Con un experto senior",
+    items: [
+      "FDA / FSMA compliance",
+      "Formación de LLC con EIN",
+      "Registro de instalaciones",
+      "Certificaciones internacionales",
+    ],
+    stats: [
+      { n: "300+", l: "Empresas atendidas" },
+      { n: "15+", l: "Países" },
+      { n: "98%", l: "Aprobación FDA" },
+    ],
+    footer: "Todos los derechos reservados.",
+  },
+  en: {
+    nav: "Book consultation",
+    pill: "Free consultation · 30 minutes",
+    h1a: "Experts in entering the",
+    h1b: "US market.",
+    sub: "FDA compliance, LLC formation and regulatory strategy for companies exporting to the United States.",
+    cta: "Book your free consultation",
+    ctaSub: "No cost · With a senior expert",
+    items: [
+      "FDA / FSMA compliance",
+      "LLC formation with EIN",
+      "Facility registration",
+      "International certifications",
+    ],
+    stats: [
+      { n: "300+", l: "Companies served" },
+      { n: "15+", l: "Countries" },
+      { n: "98%", l: "FDA approval rate" },
+    ],
+    footer: "All rights reserved.",
+  },
+  pt: {
+    nav: "Agendar consulta",
+    pill: "Consulta gratuita · 30 minutos",
+    h1a: "Especialistas em entrada no",
+    h1b: "mercado dos EUA.",
+    sub: "Conformidade FDA, formação de LLC e estratégia regulatória para empresas que exportam para os Estados Unidos.",
+    cta: "Agendar consulta gratuita",
+    ctaSub: "Sem custo · Com especialista sênior",
+    items: [
+      "Conformidade FDA / FSMA",
+      "Formação de LLC com EIN",
+      "Registro de instalações",
+      "Certificações internacionais",
+    ],
+    stats: [
+      { n: "300+", l: "Empresas atendidas" },
+      { n: "15+", l: "Países" },
+      { n: "98%", l: "Aprovação FDA" },
+    ],
+    footer: "Todos os direitos reservados.",
+  },
+};
+
+const flags: { code: Lang; flag: string; label: string }[] = [
+  { code: "es", flag: "🇪🇸", label: "ES" },
+  { code: "en", flag: "🇺🇸", label: "EN" },
+  { code: "pt", flag: "🇧🇷", label: "PT" },
+];
 
 export default function Home() {
-  return (
-    <div className="min-h-screen bg-white dark:bg-navy-900">
+  const [lang, setLang] = useState<Lang>("es");
+  const [mounted, setMounted] = useState(false);
 
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10
-                         bg-navy-500/95 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+  useEffect(() => {
+    setMounted(true);
+    const bl = navigator.language.toLowerCase();
+    if (bl.startsWith("pt")) setLang("pt");
+    else if (bl.startsWith("en")) setLang("en");
+    else setLang("es");
+  }, []);
+
+  const t = copy[lang];
+  if (!mounted) return null;
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-[#0F1023] text-gray-900 dark:text-white">
+
+      {/* ── Header ── */}
+      <header className="fixed inset-x-0 top-0 z-50 h-16 border-b border-white/10
+                         bg-[#27295C]/95 backdrop-blur-md">
+        <div className="max-w-5xl mx-auto px-6 h-full flex items-center justify-between">
           <Image
             src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
             alt="FastForward ® | FDA Experts"
-            width={180}
-            height={40}
+            width={160}
+            height={36}
             className="object-contain"
             priority
           />
           <div className="flex items-center gap-3">
+            {/* Language switcher */}
+            <div className="hidden sm:flex items-center gap-1 mr-2">
+              {flags.map((f) => (
+                <button
+                  key={f.code}
+                  onClick={() => setLang(f.code)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-all
+                    ${lang === f.code
+                      ? "bg-[#C9A84C] text-white"
+                      : "text-white/50 hover:text-white"
+                    }`}
+                >
+                  {f.flag} {f.label}
+                </button>
+              ))}
+            </div>
             <ThemeToggle />
-            <a href="/book" className="btn-gold text-sm px-4 py-2">
-              Agendar consulta <ArrowRight className="w-4 h-4" />
+            
+              href="/book"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg
+                         bg-[#C9A84C] hover:bg-[#E5BA52] text-white text-sm font-semibold
+                         transition-all duration-200"
+            >
+              {t.nav} <ArrowRight className="w-3.5 h-3.5" />
             </a>
           </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="pt-16 bg-gradient-to-br from-navy-900 via-navy-500 to-navy-600
-                          min-h-[92vh] flex items-center">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-24 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8
-                          bg-gold-400/15 border border-gold-400/30 text-gold-300 text-sm font-medium">
-            ✦ Consulta gratuita · 30 minutos · Experto senior
-          </div>
+      {/* ── Hero ── */}
+      <section className="pt-16 min-h-screen flex flex-col justify-center
+                          bg-[#27295C] dark:bg-[#1A1C3E]">
+        <div className="max-w-5xl mx-auto px-6 py-24">
+          <div className="max-w-3xl">
 
-          <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6 leading-tight"
-              style={{ letterSpacing: "-0.02em" }}>
-            Tu empresa latinoamericana<br />
-            <span className="text-gold-400">merece estar en EE.UU.</span>
-          </h1>
+            {/* Pill */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8
+                            border border-[#C9A84C]/30 bg-[#C9A84C]/10
+                            text-[#E5BA52] text-xs font-medium tracking-wide uppercase">
+              {t.pill}
+            </div>
 
-          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
-            FDA compliance, LLC formation y entrada al mercado americano.
-            Más de 300 empresas ya lo lograron con FastForward.
-          </p>
+            {/* Headline */}
+            <h1 className="text-5xl sm:text-6xl font-bold text-white leading-[1.1] mb-6"
+                style={{ letterSpacing: "-0.03em" }}>
+              {t.h1a}<br />
+              <span className="text-[#C9A84C]">{t.h1b}</span>
+            </h1>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/book" className="btn-gold text-lg px-8 py-4">
-              Agendar consulta gratuita <ArrowRight className="w-5 h-5" />
-            </a>
-            <a href="https://fastfwdus.com" target="_blank"
-               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl
-                          border-2 border-white/20 text-white font-semibold
-                          hover:bg-white/10 transition-all duration-200">
-              Conocer FastForward
-            </a>
+            {/* Subheadline */}
+            <p className="text-lg text-white/60 mb-10 max-w-xl leading-relaxed">
+              {t.sub}
+            </p>
+
+            {/* Checklist */}
+            <ul className="grid sm:grid-cols-2 gap-2.5 mb-10">
+              {t.items.map((item) => (
+                <li key={item} className="flex items-center gap-2.5 text-sm text-white/70">
+                  <CheckCircle className="w-4 h-4 text-[#C9A84C] flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              
+                href="/book"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl
+                           bg-[#C9A84C] hover:bg-[#E5BA52] text-white font-semibold
+                           transition-all duration-200 hover:-translate-y-0.5
+                           hover:shadow-xl hover:shadow-[#C9A84C]/25 text-base"
+              >
+                {t.cta} <ArrowRight className="w-4 h-4" />
+              </a>
+              <span className="text-sm text-white/40">{t.ctaSub}</span>
+            </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-6 mt-20 max-w-2xl mx-auto">
-            {[
-              { n: "300+", label: "Empresas atendidas" },
-              { n: "15+", label: "Países de LATAM" },
-              { n: "98%", label: "Tasa de aprobación FDA" },
-            ].map((stat) => (
-              <div key={stat.n} className="text-center">
-                <div className="text-3xl font-bold text-gold-400">{stat.n}</div>
-                <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
+          <div className="flex gap-12 mt-20 pt-12 border-t border-white/10">
+            {t.stats.map((s) => (
+              <div key={s.n}>
+                <div className="text-3xl font-bold text-[#C9A84C]">{s.n}</div>
+                <div className="text-sm text-white/40 mt-0.5">{s.l}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-24 bg-gray-50 dark:bg-navy-800">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl font-bold text-center mb-12 text-navy-500 dark:text-white">
-            ¿En qué podemos ayudarte?
-          </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Shield, title: "FDA / FSMA", text: "Cumplimiento total con regulaciones para alimentos, suplementos y cosméticos." },
-              { icon: TrendingUp, title: "LLC Formation", text: "Constituimos tu empresa en EE.UU. con EIN, agente registrado y cuenta bancaria." },
-              { icon: Globe, title: "Market Entry", text: "Estrategia completa para ingresar al mercado americano con tus productos." },
-              { icon: Award, title: "Certificaciones", text: "Orgánico, Kosher, Halal, BRC y más certificaciones internacionales." },
-            ].map((f) => (
-              <div key={f.title} className="card p-6 hover:shadow-md transition-shadow">
-                <f.icon className="w-10 h-10 mb-4 text-gold-400" />
-                <h3 className="font-bold text-lg mb-2 text-navy-500 dark:text-white">{f.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{f.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 border-t border-gray-100 dark:border-navy-700 
-                         bg-white dark:bg-navy-900">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row 
+      {/* ── Footer ── */}
+      <footer className="py-8 bg-[#0F1023] border-t border-white/5">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row
                         items-center justify-between gap-4">
-          <Image
-            src="https://fastfwdus.com/wp-content/uploads/2025/05/logoR.png"
-            alt="FastForward ® | FDA Experts"
-            width={140}
-            height={32}
-            className="object-contain dark:hidden"
-          />
           <Image
             src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
             alt="FastForward ® | FDA Experts"
-            width={140}
-            height={32}
-            className="object-contain hidden dark:block"
+            width={130}
+            height={30}
+            className="object-contain"
           />
-          <p className="text-gray-400 text-sm">
-            FastForward ® | FDA Experts · Miami, FL ·{" "}
-            <a href="https://fastfwdus.com" className="hover:text-navy-500 dark:hover:text-gold-400 transition-colors">
+          <p className="text-white/30 text-xs">
+            © {new Date().getFullYear()} FastForward ® | FDA Experts · Miami, FL ·{" "}
+            <a href="https://fastfwdus.com"
+               className="hover:text-white/60 transition-colors">
               fastfwdus.com
             </a>
+            {" "}· {t.footer}
           </p>
         </div>
       </footer>
