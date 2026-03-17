@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 
@@ -17,43 +16,39 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    const res = await signIn("credentials", {
-      email: email.trim().toLowerCase(),
-      password,
-      redirect: false,
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+      });
 
-    if (!res) {
-      setError("Sin respuesta del servidor.");
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setError(data.error || "Email o contraseña incorrectos.");
+        setLoading(false);
+        return;
+      }
+
+      window.location.href = "/dashboard";
+    } catch {
+      setError("Error de conexión. Intentá de nuevo.");
       setLoading(false);
-      return;
     }
-
-    if (res.error) {
-      setError("Email o contraseña incorrectos.");
-      setLoading(false);
-      return;
-    }
-
-    // Login OK — redirigir
-    window.location.href = "/dashboard";
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4"
          style={{ background: "linear-gradient(135deg, #1A1C3E 0%, #27295C 100%)" }}>
-
       <div className="w-full max-w-sm">
 
         <div className="flex justify-center mb-10">
           <Image
             src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
             alt="FastForward ® | FDA Experts"
-            width={200}
-            height={45}
-            className="object-contain"
-            priority
-            unoptimized
+            width={200} height={45}
+            className="object-contain" priority unoptimized
           />
         </div>
 
@@ -66,19 +61,14 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-
             <div>
               <label className="block text-xs font-semibold mb-2 uppercase tracking-widest"
-                     style={{ color: "rgba(255,255,255,0.4)" }}>
-                Email
-              </label>
+                     style={{ color: "rgba(255,255,255,0.4)" }}>Email</label>
               <input
-                type="email"
-                value={email}
+                type="email" value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nombre@fastfwdus.com"
-                required
-                autoComplete="email"
+                required autoComplete="email"
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.12)", color: "white" }}
                 onFocus={e => e.currentTarget.style.borderColor = "#C9A84C"}
@@ -88,17 +78,14 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-xs font-semibold mb-2 uppercase tracking-widest"
-                     style={{ color: "rgba(255,255,255,0.4)" }}>
-                Contraseña
-              </label>
+                     style={{ color: "rgba(255,255,255,0.4)" }}>Contraseña</label>
               <div className="relative">
                 <input
                   type={showPass ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  required
-                  autoComplete="current-password"
+                  required autoComplete="current-password"
                   className="w-full px-4 py-3 pr-12 rounded-xl text-sm outline-none transition-all"
                   style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.12)", color: "white" }}
                   onFocus={e => e.currentTarget.style.borderColor = "#C9A84C"}
@@ -120,14 +107,12 @@ export default function LoginPage() {
             )}
 
             <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold transition-all duration-200 active:scale-95"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold transition-all active:scale-95"
               style={{ background: "#C9A84C", color: "#1A1C3E", opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
               {loading
                 ? <Loader2 className="w-4 h-4 animate-spin" />
-                : <> Ingresar <ArrowRight className="w-4 h-4" /> </>
-              }
+                : <> Ingresar <ArrowRight className="w-4 h-4" /> </>}
             </button>
-
           </form>
         </div>
 

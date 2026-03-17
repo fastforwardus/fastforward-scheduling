@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { jwtVerify } from "jose";
+
+const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || "ff-secret");
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const token = req.cookies.get("ff-session")?.value;
 
-  const token = await getToken({
-    req,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  let isValid = false;
+  if (token) {
+    try {
+      await jwtVerify(token, secret);
+      isValid = true;
+    } catch {}
+  }
 
-  if (pathname.startsWith("/dashboard") && !token) {
+  if (pathname.startsWith("/dashboard") && !isValid) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (pathname === "/login" && token) {
+  if (pathname === "/login" && isValid) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
