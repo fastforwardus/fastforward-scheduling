@@ -30,10 +30,6 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }>
   cancelled:         { bg: "rgba(156,163,175,0.2)", text: "#6b7280", label: "Cancelada" },
 };
 
-const SCORE_COLORS: Record<string, string> = {
-  hot: "#ef4444", warm: "#f59e0b", cold: "#3b82f6",
-};
-
 const SCORE_ICONS: Record<string, string> = {
   hot: "🔥", warm: "🟡", cold: "❄️",
 };

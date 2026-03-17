@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { AppointmentCard } from "@/components/dashboard/AppointmentCard";
-import { AlertCircle, Calendar, Users, TrendingUp, RefreshCw, UserPlus, BarChart2 } from "lucide-react";
+import { AlertCircle, Calendar, Users, TrendingUp, RefreshCw, BarChart2 } from "lucide-react";
 
 interface Appt {
   id: string;

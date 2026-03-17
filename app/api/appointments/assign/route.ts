@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
     // Email al sales rep asignado
     const lang = appt.clientLanguage || "es";
     const slotDate = new Date(appt.scheduledAt);
-    const locale = lang === "pt" ? "pt-BR" : lang === "en" ? "en-US" : "es-ES";
     const formattedDate = slotDate.toLocaleDateString("es-ES", {
       weekday: "long", year: "numeric", month: "long", day: "numeric",
       timeZone: "America/New_York",

@@ -652,6 +652,7 @@ function WizardShell({ children, language, onLangChange, repInfo }: {
               <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
                    style={{ background: "linear-gradient(135deg, #27295C, #373CA7)", fontSize: "18px" }}>
                 {repInfo.avatarUrl
+                  // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={repInfo.avatarUrl} alt={repInfo.fullName} className="w-full h-full rounded-full object-cover" />
                   : repInfo.fullName[0]
                 }

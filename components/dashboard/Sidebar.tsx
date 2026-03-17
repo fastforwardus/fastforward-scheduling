@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Calendar, Users, LayoutDashboard, LogOut,
-  ChevronDown, Bell, Menu, X, Settings
+  Menu, X, Settings
 } from "lucide-react";
 
 interface SidebarProps {
@@ -16,9 +16,6 @@ interface SidebarProps {
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  const isAdmin = user.role === "admin";
-  const isManager = user.role === "sales_manager";
 
   const links = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Inicio", roles: ["admin","sales_manager","sales_rep"] },
