@@ -179,7 +179,7 @@ export default function BookWizard({
 
     const googleCalUrl = slotDate ? (() => {
       const details = encodeURIComponent("Consulta con FastForward ® | FDA Experts\n\nMiami, FL · fastfwdus.com");
-      return `https://calendar.google.com/calendar/r/eventedit?text=Consulta+FastForward&dates=${fmt(slotDate)}/${fmt(new Date(slotDate.getTime()+30*60000))}&details=${details}`;
+      return `https://calendar.google.com/calendar/r/eventedit?text=Reuni%C3%B3n+FastForward&dates=${fmt(slotDate)}/${fmt(new Date(slotDate.getTime()+30*60000))}&details=${details}`;
     })() : "#";
 
     const icsContent = slotDate ? (() => {
@@ -191,7 +191,7 @@ export default function BookWizard({
         "BEGIN:VEVENT",
         `DTSTART:${fmt(slotDate)}`,
         `DTEND:${fmt(end)}`,
-        "SUMMARY:Consulta FastForward ® | FDA Experts",
+        "SUMMARY:Reunión FastForward ® | FDA Experts",
         "DESCRIPTION:Consulta con FastForward LLC · Miami FL · fastfwdus.com",
         "ORGANIZER:MAILTO:info@fastfwdus.com",
         "STATUS:CONFIRMED",
@@ -240,6 +240,18 @@ export default function BookWizard({
                   </span>
                   <span className="text-xs text-gray-400">30 min</span>
                 </div>
+                {w.platform !== "whatsapp" && (
+                  <div className="mt-3 p-2.5 rounded-lg text-xs"
+                       style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)" }}>
+                    <p className="text-gray-400 mb-1">{w.language === "es" ? "El link de la reunión será enviado por email." : w.language === "en" ? "The meeting link will be sent by email." : "O link da reunião será enviado por email."}</p>
+                  </div>
+                )}
+                {w.platform === "whatsapp" && (
+                  <div className="mt-3 p-2.5 rounded-lg text-xs"
+                       style={{ background: "rgba(37,211,102,0.08)", border: "1px solid rgba(37,211,102,0.2)", color: "#166534" }}>
+                    {w.language === "es" ? "📞 Te llamaremos al " : w.language === "en" ? "📞 We'll call you at " : "📞 Ligaremos para "}{w.clientCountryCode} {w.clientWhatsapp}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -483,6 +495,10 @@ export default function BookWizard({
                 {Object.keys(slotsData.grouped).slice(0, 10).map((date) => {
                   const d = new Date(date + "T12:00:00");
                   const isSelected = selectedDate === date;
+                  const locale = w.language === "pt" ? "pt-BR" : w.language === "en" ? "en-US" : "es-ES";
+                  const dayName = d.toLocaleDateString(locale, { weekday: "short" }).toUpperCase();
+                  const dayNum = d.toLocaleDateString(locale, { day: "numeric" });
+                  const monthName = d.toLocaleDateString(locale, { month: "short" });
                   return (
                     <button key={date} onClick={() => setSelectedDate(date)}
                       className="flex-shrink-0 flex flex-col items-center px-4 py-2.5 rounded-xl border-2 text-xs font-medium transition-all"
@@ -492,9 +508,9 @@ export default function BookWizard({
                         color: isSelected ? "white" : "#6B7280",
                         minWidth: "64px",
                       }}>
-                      <span style={{ fontSize: "10px", opacity: 0.7 }}>{format(d, "EEE").toUpperCase()}</span>
-                      <span className="font-bold text-sm">{format(d, "d")}</span>
-                      <span style={{ fontSize: "10px", opacity: 0.7 }}>{format(d, "MMM")}</span>
+                      <span style={{ fontSize: "10px", opacity: 0.7 }}>{dayName}</span>
+                      <span className="font-bold text-sm">{dayNum}</span>
+                      <span style={{ fontSize: "10px", opacity: 0.7 }}>{monthName}</span>
                     </button>
                   );
                 })}
