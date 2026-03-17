@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments } from "@/db/schema";
-import { and, gte } from "drizzle-orm";
+import { gte } from "drizzle-orm";
 import { addMinutes, isBefore, addDays, startOfDay } from "date-fns";
 import { toZonedTime, fromZonedTime, formatInTimeZone } from "date-fns-tz";
 import { format } from "date-fns";

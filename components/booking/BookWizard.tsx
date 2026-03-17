@@ -65,7 +65,6 @@ export default function BookWizard({
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState<{ appointmentId: string; isPending: boolean } | null>(null);
   const [blocked, setBlocked] = useState(false);
-  const [repUserId, setRepUserId] = useState<string | null>(null);
 
   const tr = t[w.language];
 
@@ -88,14 +87,6 @@ export default function BookWizard({
     if (prefilled?.phone) w.setClientWhatsapp(prefilled.phone);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Load rep user id for slots
-  useEffect(() => {
-    if (!repSlug || repSlug === "general") return;
-    fetch(`/api/users/by-slug?slug=${repSlug}`)
-      .then(r => r.json())
-      .then(d => { if (d.id) setRepUserId(d.id); });
-  }, [repSlug]);
 
   // Load slots when reaching step 4
   useEffect(() => {
