@@ -178,7 +178,6 @@ export default function BookWizard({
     const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
     const googleCalUrl = slotDate ? (() => {
-      const end = new Date(slotDate.getTime() + 30 * 60 * 1000);
       const details = encodeURIComponent("Consulta con FastForward ® | FDA Experts\n\nMiami, FL · fastfwdus.com");
       return `https://calendar.google.com/calendar/r/eventedit?text=Consulta+FastForward&dates=${fmt(slotDate)}/${fmt(new Date(slotDate.getTime()+30*60000))}&details=${details}`;
     })() : "#";
