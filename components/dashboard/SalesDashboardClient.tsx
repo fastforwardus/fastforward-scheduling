@@ -12,10 +12,10 @@ interface Appt {
   repName: string | null; repSlug: string | null; assignedTo: string | null;
 }
 
-export default function SalesDashboardClient({ user }: { user: { id?: string; fullName: string; email: string; role: string; slug?: string } }) {
+export default function SalesDashboardClient({ user, defaultTab }: { user: { id?: string; fullName: string; email: string; role: string; slug?: string }; defaultTab?: string }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"today" | "upcoming" | "all">("today");
+  const [tab, setTab] = useState<"today" | "upcoming" | "all">((defaultTab as "today" | "upcoming" | "all") || "today");
 
   const load = useCallback(async () => {
     setLoading(true);

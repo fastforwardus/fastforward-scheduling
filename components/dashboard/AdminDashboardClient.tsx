@@ -30,11 +30,11 @@ interface Rep {
   slug: string | null;
 }
 
-export default function AdminDashboardClient({ user }: { user: { id?: string; fullName: string; email: string; role: string; slug?: string } }) {
+export default function AdminDashboardClient({ user, defaultTab }: { user: { id?: string; fullName: string; email: string; role: string; slug?: string }; defaultTab?: string }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [reps, setReps] = useState<Rep[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"unassigned" | "all" | "today">("unassigned");
+  const [tab, setTab] = useState<"unassigned" | "all" | "today">((defaultTab as "unassigned" | "all" | "today") || "unassigned");
 
   const load = useCallback(async () => {
     setLoading(true);

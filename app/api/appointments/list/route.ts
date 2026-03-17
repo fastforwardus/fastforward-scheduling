@@ -46,9 +46,10 @@ export async function GET(req: NextRequest) {
     } else if (filter === "mine") {
       filtered = rows.filter(r => r.assignedTo === session.id);
     } else if (session.role === "sales_rep") {
-      // Sales rep solo ve las suyas
+      // Sales rep SOLO ve las suyas siempre
       filtered = rows.filter(r => r.assignedTo === session.id);
     }
+    // admin y sales_manager ven todas por defecto
 
     return NextResponse.json({ appointments: filtered });
   } catch (err) {
