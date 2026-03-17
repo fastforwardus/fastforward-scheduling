@@ -1,101 +1,133 @@
+"use client";
+
 import Image from "next/image";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { ArrowRight, Shield, TrendingUp, Globe, Award } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="min-h-screen bg-white dark:bg-navy-900">
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/10
+                         bg-navy-500/95 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Image
+            src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
+            alt="FastForward ® | FDA Experts"
+            width={180}
+            height={40}
+            className="object-contain"
+            priority
+          />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <a href="/book" className="btn-gold text-sm px-4 py-2">
+              Agendar consulta <ArrowRight className="w-4 h-4" />
+            </a>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+      </header>
+
+      {/* Hero */}
+      <section className="pt-16 bg-gradient-to-br from-navy-900 via-navy-500 to-navy-600
+                          min-h-[92vh] flex items-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-24 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8
+                          bg-gold-400/15 border border-gold-400/30 text-gold-300 text-sm font-medium">
+            ✦ Consulta gratuita · 30 minutos · Experto senior
+          </div>
+
+          <h1 className="text-5xl sm:text-6xl font-bold text-white mb-6 leading-tight"
+              style={{ letterSpacing: "-0.02em" }}>
+            Tu empresa latinoamericana<br />
+            <span className="text-gold-400">merece estar en EE.UU.</span>
+          </h1>
+
+          <p className="text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            FDA compliance, LLC formation y entrada al mercado americano.
+            Más de 300 empresas ya lo lograron con FastForward.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/book" className="btn-gold text-lg px-8 py-4">
+              Agendar consulta gratuita <ArrowRight className="w-5 h-5" />
+            </a>
+            <a href="https://fastfwdus.com" target="_blank"
+               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl
+                          border-2 border-white/20 text-white font-semibold
+                          hover:bg-white/10 transition-all duration-200">
+              Conocer FastForward
+            </a>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-6 mt-20 max-w-2xl mx-auto">
+            {[
+              { n: "300+", label: "Empresas atendidas" },
+              { n: "15+", label: "Países de LATAM" },
+              { n: "98%", label: "Tasa de aprobación FDA" },
+            ].map((stat) => (
+              <div key={stat.n} className="text-center">
+                <div className="text-3xl font-bold text-gold-400">{stat.n}</div>
+                <div className="text-sm text-gray-400 mt-1">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-24 bg-gray-50 dark:bg-navy-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-3xl font-bold text-center mb-12 text-navy-500 dark:text-white">
+            ¿En qué podemos ayudarte?
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: Shield, title: "FDA / FSMA", text: "Cumplimiento total con regulaciones para alimentos, suplementos y cosméticos." },
+              { icon: TrendingUp, title: "LLC Formation", text: "Constituimos tu empresa en EE.UU. con EIN, agente registrado y cuenta bancaria." },
+              { icon: Globe, title: "Market Entry", text: "Estrategia completa para ingresar al mercado americano con tus productos." },
+              { icon: Award, title: "Certificaciones", text: "Orgánico, Kosher, Halal, BRC y más certificaciones internacionales." },
+            ].map((f) => (
+              <div key={f.title} className="card p-6 hover:shadow-md transition-shadow">
+                <f.icon className="w-10 h-10 mb-4 text-gold-400" />
+                <h3 className="font-bold text-lg mb-2 text-navy-500 dark:text-white">{f.title}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{f.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 border-t border-gray-100 dark:border-navy-700 
+                         bg-white dark:bg-navy-900">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row 
+                        items-center justify-between gap-4">
           <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            src="https://fastfwdus.com/wp-content/uploads/2025/05/logoR.png"
+            alt="FastForward ® | FDA Experts"
+            width={140}
+            height={32}
+            className="object-contain dark:hidden"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
           <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+            src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
+            alt="FastForward ® | FDA Experts"
+            width={140}
+            height={32}
+            className="object-contain hidden dark:block"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+          <p className="text-gray-400 text-sm">
+            FastForward ® | FDA Experts · Miami, FL ·{" "}
+            <a href="https://fastfwdus.com" className="hover:text-navy-500 dark:hover:text-gold-400 transition-colors">
+              fastfwdus.com
+            </a>
+          </p>
+        </div>
       </footer>
+
     </div>
   );
 }

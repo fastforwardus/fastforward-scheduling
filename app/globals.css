@@ -3,25 +3,61 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --navy: #27295C;
+  --navy-dark: #1A1C3E;
+  --gold: #C9A84C;
+  --gold-light: #E5BA52;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply text-gray-900 dark:text-gray-100;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl 
+           font-semibold text-white bg-navy-500 hover:bg-navy-600 
+           transition-all duration-200 hover:-translate-y-0.5 
+           hover:shadow-lg hover:shadow-navy-500/25;
+  }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl 
+           font-semibold text-white transition-all duration-200 
+           hover:-translate-y-0.5 hover:shadow-lg hover:shadow-gold-400/30;
+    background: linear-gradient(135deg, #C9A84C 0%, #E5BA52 100%);
+  }
+
+  .card {
+    @apply bg-white dark:bg-navy-800 rounded-2xl border border-gray-100 
+           dark:border-navy-700 shadow-sm;
+  }
+
+  .ff-input {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-navy-600
+           bg-white dark:bg-navy-800 text-gray-900 dark:text-gray-100
+           placeholder-gray-400 dark:placeholder-gray-500
+           focus:outline-none focus:border-navy-500 dark:focus:border-gold-400
+           transition-all duration-200 text-sm;
+  }
+
+  .option-card {
+    @apply relative flex items-center gap-4 px-5 py-4 rounded-xl border-2 
+           border-gray-100 dark:border-navy-700 cursor-pointer 
+           bg-white dark:bg-navy-800
+           transition-all duration-200 hover:-translate-y-0.5;
+  }
+
+  .option-card:hover {
+    border-color: #C9A84C;
+    box-shadow: 0 4px 16px rgba(201, 168, 76, 0.15);
+  }
+
+  .option-card.selected {
+    border-color: #C9A84C;
+    background: rgba(201, 168, 76, 0.06);
+    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.2);
   }
 }
