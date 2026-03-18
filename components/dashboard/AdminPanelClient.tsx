@@ -209,7 +209,7 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
               <p className="text-xs uppercase tracking-widest mb-3 font-semibold" style={{ color: "#9CA3AF" }}>
                 Disponibilidad — horarios de atención (hora Miami)
               </p>
-              <AvailabilityEditor userId={user.id} userName={user.fullName} />
+              <AvailabilityEditor userId={user.id} />
             </div>
           </div>
         </div>
