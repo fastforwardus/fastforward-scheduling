@@ -140,12 +140,19 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   style={{ background: "#25D366", color: "white" }}>
                   💬 WA Recordatorio
                 </button>
-                {appt.platform !== "whatsapp" && (
-                  <a href={window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id)} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                {appt.platform !== "whatsapp" && appt.meetingLink && (
+                  <a href={appt.meetingLink} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all hover:-translate-y-0.5"
                     style={{ background: "#27295C", color: "white" }}>
                     <Video className="w-3 h-3" /> Iniciar reunion
                   </a>
+                )}
+                {appt.platform !== "whatsapp" && !appt.meetingLink && (
+                  <span title="Conectar Google Calendar en Configuracion para generar el link"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium cursor-help"
+                    style={{ background: "#F3F4F6", color: "#9CA3AF" }}>
+                    Sin link aun
+                  </span>
                 )}
                 {appt.platform === "whatsapp" && (
                   <a href={"https://wa.me/" + appt.clientWhatsapp.replace(/\D/g, "")} target="_blank" rel="noreferrer"
