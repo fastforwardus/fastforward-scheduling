@@ -155,8 +155,6 @@ export async function GET(req: NextRequest) {
         .set({ [draftField]: emailBody })
         .where(eq(followUpSequences.id, seq.id));
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-
       const html = `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#F8F9FB;font-family:system-ui,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
@@ -191,7 +189,7 @@ export async function GET(req: NextRequest) {
 
       // Calcular siguiente envio o completar secuencia
       let nextSendAt: Date | null = null;
-      let newStep = seq.currentStep + 1;
+      const newStep = seq.currentStep + 1;
 
       if (newStep === 1) {
         nextSendAt = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // dia 3
