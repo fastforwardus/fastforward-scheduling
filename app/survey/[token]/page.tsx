@@ -26,7 +26,7 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
       if (data.ok) {
         setResult({ showGoogle: data.showGoogleReview, googleUrl: data.googleReviewUrl });
       } else {
-        setError("Error al enviar. Intentá de nuevo.");
+        setError("Error al enviar. Intenta de nuevo.");
       }
     } catch {
       setError("Error de conexion.");
@@ -34,12 +34,15 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
     setSubmitting(false);
   }
 
+  const labels: Record<number, string> = {
+    1: "Muy mala", 2: "Mala", 3: "Regular", 4: "Buena", 5: "Excelente!"
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4"
          style={{ background: "#F8F9FB" }}>
       <div className="w-full max-w-md">
 
-        {/* Logo */}
         <div className="flex justify-center mb-8">
           <Image
             src="https://fastfwdus.com/wp-content/uploads/2025/05/logoR.png"
@@ -48,7 +51,8 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
         </div>
 
         {!result ? (
-          <div className="bg-white rounded-2xl p-8 shadow-sm border" style={{ borderColor: "#E5E7EB" }}>
+          <div className="bg-white rounded-2xl p-8"
+               style={{ boxShadow: "0 4px 24px rgba(39,41,92,0.08)", border: "1px solid #E5E7EB" }}>
             <h1 className="text-xl font-bold mb-2 text-center" style={{ color: "#27295C" }}>
               Como fue tu experiencia?
             </h1>
@@ -56,8 +60,7 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
               Tu opinion nos ayuda a mejorar nuestro servicio
             </p>
 
-            {/* Stars */}
-            <div className="flex justify-center gap-3 mb-8">
+            <div className="flex justify-center gap-3 mb-4">
               {STARS.map(star => (
                 <button
                   key={star}
@@ -66,19 +69,17 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
                   onMouseLeave={() => setHover(0)}
                   className="text-4xl transition-transform hover:scale-110 active:scale-95"
                   style={{ filter: (hover || rating) >= star ? "none" : "grayscale(1) opacity(0.3)" }}>
-                  ⭐
+                  &#11088;
                 </button>
               ))}
             </div>
 
-            {/* Label */}
             {rating > 0 && (
               <p className="text-center text-sm font-semibold mb-6" style={{ color: "#C9A84C" }}>
-                {rating === 1 ? "Muy mala" : rating === 2 ? "Mala" : rating === 3 ? "Regular" : rating === 4 ? "Buena" : "Excelente!"}
+                {labels[rating]}
               </p>
             )}
 
-            {/* Feedback */}
             <div className="mb-6">
               <label className="block text-xs uppercase tracking-widest mb-2" style={{ color: "#9CA3AF" }}>
                 Que fue lo mas valioso? (opcional)
@@ -95,7 +96,7 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
               />
             </div>
 
-            {error && <p className="text-red-500 text-xs mb-4 text-center">{error}</p>}
+            {error && <p className="text-xs mb-4 text-center" style={{ color: "#EF4444" }}>{error}</p>}
 
             <button
               onClick={handleSubmit}
@@ -110,8 +111,9 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl p-8 shadow-sm border text-center" style={{ borderColor: "#E5E7EB" }}>
-            <div className="text-5xl mb-4">🙏</div>
+          <div className="bg-white rounded-2xl p-8 text-center"
+               style={{ boxShadow: "0 4px 24px rgba(39,41,92,0.08)", border: "1px solid #E5E7EB" }}>
+            <div className="text-5xl mb-4">&#128591;</div>
             <h2 className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>Gracias por tu opinion!</h2>
             <p className="text-sm mb-6" style={{ color: "#6B7280" }}>
               Tu feedback nos ayuda a seguir mejorando.
@@ -126,9 +128,9 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
                   href={result.googleUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold text-sm w-full transition-all hover:-translate-y-0.5"
+                  className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold text-sm w-full transition-all"
                   style={{ background: "#4285F4", color: "white" }}>
-                  ⭐ Dejar resena en Google
+                  Dejar resena en Google
                 </a>
                 <p className="text-xs mt-3" style={{ color: "#9CA3AF" }}>
                   Solo toma 1 minuto y ayuda a otras empresas a encontrarnos
@@ -137,7 +139,7 @@ export default function SurveyPage({ params }: { params: { token: string } }) {
             )}
 
             <a href="https://fastfwdus.com"
-               className="inline-block mt-6 text-xs transition-colors"
+               className="inline-block mt-6 text-xs"
                style={{ color: "#9CA3AF" }}>
               Volver a fastfwdus.com
             </a>
