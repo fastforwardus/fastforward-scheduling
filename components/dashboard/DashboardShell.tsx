@@ -13,6 +13,8 @@ interface Appt {
   outcome: string | null; leadScore: string; serviceInterest: string | null;
   repName: string | null; repSlug: string | null; assignedTo: string | null;
   notes: string | null; nextStep: string | null;
+  confirmToken: string | null;
+  meetingLink: string | null;
 }
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string; dot: string }> = {
@@ -130,7 +132,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                     const d = new Date(appt.scheduledAt);
                     const time = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" });
                     const date = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "America/New_York" });
-                    const url = window.location.origin + "/book/confirm/" + appt.id;
+                    const url = window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id);
                     const msg = "Hola " + appt.clientName + ", te recordamos tu reunion con FastForward el " + date + " a las " + time + " (hora Miami).\n\nAccede aqui: " + url + "\n\nEquipo FastForward";
                     window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(msg), "_blank");
                   }}
@@ -139,7 +141,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   💬 WA Recordatorio
                 </button>
                 {appt.platform !== "whatsapp" && (
-                  <a href={window.location.origin + "/book/confirm/" + appt.id} target="_blank" rel="noreferrer"
+                  <a href={window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id)} target="_blank" rel="noreferrer"
                     className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
                     style={{ background: "#27295C", color: "white" }}>
                     <Video className="w-3 h-3" /> Iniciar reunion
@@ -152,7 +154,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                     <Phone className="w-3 h-3" /> Llamar
                   </a>
                 )}
-                <a href={window.location.origin + "/book/confirm/" + appt.id} target="_blank" rel="noreferrer"
+                <a href={window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id)} target="_blank" rel="noreferrer"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
                   style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
                   <ExternalLink className="w-3 h-3" /> Ver cita

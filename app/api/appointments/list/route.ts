@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
         leadScore: appointments.leadScore,
         bookedVia: appointments.bookedVia,
         assignedTo: appointments.assignedTo,
+        confirmToken: appointments.confirmToken,
+        meetingLink: appointments.meetingLink,
         createdAt: appointments.createdAt,
         repName: users.fullName,
         repEmail: users.email,
