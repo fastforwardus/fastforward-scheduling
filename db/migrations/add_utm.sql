@@ -1,0 +1,3 @@
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS utm_source TEXT;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS utm_medium TEXT;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS utm_campaign TEXT;
