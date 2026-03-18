@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { Users, BarChart2, Clock, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, BarChart2, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -39,7 +39,7 @@ const ROLE_COLORS: Record<string, string> = { admin: "#6366F1", sales_manager: "
 
 // ─── Availability Editor ──────────────────────────────────────────────────────
 
-function AvailabilityEditor({ userId, userName }: { userId: string; userName: string }) {
+function AvailabilityEditor({ userId }: { userId: string }) {
   const [rules, setRules] = useState<AvailRule[]>([]);
   const [saving, setSaving] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -171,8 +171,8 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                 ].map(field => (
                   <div key={field.key}>
                     <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{field.label}</label>
-                    <input type={field.type} value={(form as any)[field.key]}
-                      onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                    <input type={field.type} value={form[field.key as keyof typeof form] as string}
+                      onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value } as typeof prev))}
                       className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
                       style={{ borderColor: "#E5E7EB", color: "#27295C" }}
                       onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
@@ -256,7 +256,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
           ].map(field => (
             <div key={field.key}>
               <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>{field.label}</label>
-              <input type={field.type} value={(form as any)[field.key]} placeholder={field.placeholder}
+              <input type={field.type} value={form[field.key as keyof typeof form] as string} placeholder={field.placeholder}
                 onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
                 className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
                 style={{ borderColor: "#E5E7EB", color: "#27295C" }}
@@ -289,7 +289,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 // ─── Metrics View ─────────────────────────────────────────────────────────────
 
 function MetricsView({ metrics }: { metrics: Metrics }) {
-  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, last30 } = metrics;
+  const { summary, byRep, byPlatform, bySource, byScore, daily, last7 } = metrics;
   const maxDaily = Math.max(...daily.map(d => d.count), 1);
 
   return (
