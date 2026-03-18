@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments, users } from "@/db/schema";
+import { appointments, users, surveys } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 
@@ -11,6 +11,12 @@ export async function GET() {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const allSurveys = await db.select({
+    rating: surveys.rating,
+    clientEmail: surveys.clientEmail,
+    appointmentId: surveys.appointmentId,
+  }).from(surveys);
 
   const [allAppts, allUsers] = await Promise.all([
     db.select({
@@ -105,6 +111,14 @@ export async function GET() {
     if (dailyMap[key] !== undefined) dailyMap[key]++;
   });
   const daily = Object.entries(dailyMap).map(([date, count]) => ({ date, count }));
+
+  const totalSurveys = allSurveys.length;
+  const avgSatisfaction = totalSurveys > 0
+    ? (allSurveys.reduce((sum, s) => sum + s.rating, 0) / totalSurveys).toFixed(1)
+    : null;
+  const fiveStars = allSurveys.filter(s => s.rating === 5).length;
+  const fourStars = allSurveys.filter(s => s.rating === 4).length;
+  const lowRating = allSurveys.filter(s => s.rating <= 3).length;
 
   return NextResponse.json({
     summary: { total, assigned, completed, noShow, withOutcome, proposalSent, closed, interested, showRate, conversionRate },

@@ -31,6 +31,7 @@ interface Metrics {
     closed: number; proposal: number; showRate: number; convRate: number;
   }[];
   daily: { date: string; count: number }[];
+  satisfaction: { total: number; avg: string | null; fiveStars: number; fourStars: number; lowRating: number };
 }
 
 const DAYS = ["", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
@@ -289,7 +290,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 // ─── Metrics View ─────────────────────────────────────────────────────────────
 
 function MetricsView({ metrics }: { metrics: Metrics }) {
-  const { summary, byRep, byPlatform, bySource, byScore, daily, last7 } = metrics;
+  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction } = metrics;
   const maxDaily = Math.max(...daily.map(d => d.count), 1);
 
   return (
@@ -301,6 +302,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
           { label: "Show rate", value: `${summary.showRate}%`, sub: `${summary.completed} completadas`, color: "#22C55E" },
           { label: "Conversion", value: `${summary.conversionRate}%`, sub: `${summary.closed} cerradas`, color: "#C9A84C" },
           { label: "No-shows", value: summary.noShow, sub: `${summary.total - summary.noShow - summary.completed} pendientes`, color: "#EF4444" },
+        { label: "Satisfaccion", value: satisfaction.avg ? `${satisfaction.avg}/5 ⭐` : "—", sub: `${satisfaction.total} encuestas`, color: "#F59E0B" },
         ].map(s => (
           <div key={s.label} className="rounded-2xl p-5 border bg-white" style={{ borderColor: "#E5E7EB" }}>
             <p className="text-3xl font-bold mb-1" style={{ color: s.color }}>{s.value}</p>

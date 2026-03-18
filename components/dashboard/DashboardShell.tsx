@@ -159,6 +159,11 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
                   <ExternalLink className="w-3 h-3" /> Ver cita
                 </a>
+                <a href={"/dashboard/clients/" + encodeURIComponent(appt.clientEmail)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
+                  style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
+                  👤 Historial
+                </a>
                 <button onClick={() => setShowNotes(!showNotes)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
                   style={{ borderColor: showNotes ? "#27295C" : "#E5E7EB", color: showNotes ? "#27295C" : "#6B7280" }}>
