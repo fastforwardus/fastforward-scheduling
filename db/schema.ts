@@ -179,3 +179,12 @@ export type Appointment = typeof appointments.$inferSelect;
 export type NewAppointment = typeof appointments.$inferInsert;
 export type AvailabilityRule = typeof availabilityRules.$inferSelect;
 export type ClientProfile = typeof clientProfiles.$inferSelect;
+
+// ── Holidays (dias bloqueados)
+export const holidays = pgTable("holidays", {
+  id:        uuid("id").primaryKey().defaultRandom(),
+  date:      text("date").notNull().unique(),
+  reason:    text("reason"),
+  createdBy: uuid("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
