@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { Users, BarChart2, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Users, BarChart2, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronUp, Clock, Trash2 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -458,11 +458,15 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
 export default function AdminPanelClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string }
 }) {
-  const [tab, setTab] = useState<"users" | "metrics">("users");
+  const [tab, setTab] = useState<"users" | "metrics" | "holidays">("users");
   const [users, setUsers] = useState<User[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadingMetrics, setLoadingMetrics] = useState(false);
+  const [holidays, setHolidays] = useState<{ id: string; date: string; reason: string | null }[]>([]);
+  const [newHolidayDate, setNewHolidayDate] = useState("");
+  const [newHolidayReason, setNewHolidayReason] = useState("");
+  const [savingHoliday, setSavingHoliday] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
 
   const loadUsers = useCallback(async () => {
@@ -482,6 +486,37 @@ export default function AdminPanelClient({ user }: {
   }, []);
 
   useEffect(() => { loadUsers(); }, [loadUsers]);
+
+  const loadHolidays = useCallback(async () => {
+    const res = await fetch("/api/admin/holidays");
+    const data = await res.json();
+    setHolidays(data.holidays || []);
+  }, []);
+
+  useEffect(() => { if (tab === "holidays") loadHolidays(); }, [tab, loadHolidays]);
+
+  async function addHoliday() {
+    if (!newHolidayDate) return;
+    setSavingHoliday(true);
+    await fetch("/api/admin/holidays", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date: newHolidayDate, reason: newHolidayReason }),
+    });
+    setNewHolidayDate("");
+    setNewHolidayReason("");
+    setSavingHoliday(false);
+    loadHolidays();
+  }
+
+  async function deleteHoliday(date: string) {
+    await fetch("/api/admin/holidays", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date }),
+    });
+    loadHolidays();
+  }
   useEffect(() => { if (tab === "metrics" && !metrics) loadMetrics(); }, [tab, metrics, loadMetrics]);
 
   return (
@@ -542,6 +577,80 @@ export default function AdminPanelClient({ user }: {
               ) : (
                 users.map(u => <UserRow key={u.id} user={u} onRefresh={loadUsers} />)
               )}
+            </div>
+          )}
+
+          {/* Holidays tab */}
+          {tab === "holidays" && (
+            <div className="space-y-4">
+              {/* Add holiday */}
+              <div className="rounded-2xl bg-white border p-5" style={{ borderColor: "#E5E7EB" }}>
+                <h3 className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Agregar dia bloqueado</h3>
+                <div className="flex gap-3 flex-wrap">
+                  <div>
+                    <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>Fecha</label>
+                    <input type="date" value={newHolidayDate} onChange={e => setNewHolidayDate(e.target.value)}
+                      className="px-3 py-2.5 rounded-xl border text-sm outline-none"
+                      style={{ borderColor: "#E5E7EB", color: "#27295C" }}
+                      onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                      onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
+                  </div>
+                  <div className="flex-1 min-w-48">
+                    <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>Motivo (opcional)</label>
+                    <input type="text" value={newHolidayReason} onChange={e => setNewHolidayReason(e.target.value)}
+                      placeholder="Ej: Feriado nacional, Evento interno..."
+                      className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none"
+                      style={{ borderColor: "#E5E7EB", color: "#27295C" }}
+                      onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                      onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
+                  </div>
+                  <div className="flex items-end">
+                    <button onClick={addHoliday} disabled={!newHolidayDate || savingHoliday}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                      style={{ background: newHolidayDate ? "#C9A84C" : "#E5E7EB", color: newHolidayDate ? "#1A1C3E" : "#9CA3AF" }}>
+                      {savingHoliday ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Agregar</>}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* List */}
+              <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
+                <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+                  <p className="text-sm font-semibold" style={{ color: "#27295C" }}>
+                    Dias bloqueados ({holidays.length})
+                  </p>
+                </div>
+                {holidays.length === 0 ? (
+                  <div className="text-center py-10">
+                    <p className="text-2xl mb-2">📅</p>
+                    <p className="text-sm" style={{ color: "#9CA3AF" }}>No hay dias bloqueados</p>
+                  </div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: "#F0F0F0" }}>
+                    {holidays.map(h => (
+                      <div key={h.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50">
+                        <div className="flex items-center gap-4">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#FEF9C3" }}>
+                            <Clock className="w-4 h-4" style={{ color: "#EAB308" }} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>
+                              {new Date(h.date + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                            </p>
+                            {h.reason && <p className="text-xs" style={{ color: "#6B7280" }}>{h.reason}</p>}
+                          </div>
+                        </div>
+                        <button onClick={() => deleteHoliday(h.date)}
+                          className="p-2 rounded-lg transition-colors hover:bg-red-50"
+                          style={{ color: "#9CA3AF" }}>
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

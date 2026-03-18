@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
+import { holidays } from "@/db/schema";
 import { appointments } from "@/db/schema";
 import { gte } from "drizzle-orm";
 import { addMinutes, isBefore, addDays, startOfDay } from "date-fns";
