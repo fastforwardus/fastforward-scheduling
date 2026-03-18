@@ -11,7 +11,7 @@ interface Appt {
   notes: string | null; nextStep: string | null;
 }
 
-export default function Dashboard{ Sales }Client({ user, defaultTab }: {
+export default function SalesDashboardClient({ user, defaultTab }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string };
   defaultTab?: string;
 }) {
