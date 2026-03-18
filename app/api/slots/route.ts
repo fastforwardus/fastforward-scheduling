@@ -74,8 +74,7 @@ export async function GET(req: NextRequest) {
     const holidayList = await db.select({ date: holidays.date }).from(holidays);
     const holidayDates = new Set(holidayList.map(h => h.date));
 
-    const filteredSlots = slots.filter(slot => !holidayDates.has(slot.date.split(",")[0].trim()) &&
-      !holidayDates.has(new Date(slot.datetime).toISOString().split("T")[0]));
+    const filteredSlots = slots.filter(slot => !holidayDates.has(slot.utc.split("T")[0]));
 
     const filteredGrouped: Record<string, typeof slots> = {};
     for (const slot of filteredSlots) {
