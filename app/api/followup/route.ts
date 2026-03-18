@@ -128,8 +128,8 @@ export async function GET(req: NextRequest) {
       else if (phone.startsWith("1") && phone.length === 11) lang = "en";
     }
 
-    const nextStep = (seq.currentStep + 1) as 1 | 3 | 7;
-    const stepDay = nextStep === 1 ? 1 : nextStep === 2 ? 3 : 7;
+    const rawStep = seq.currentStep + 1;
+    const stepDay = rawStep === 0 ? 1 : rawStep === 1 ? 3 : 7;
 
     const subjects: Record<string, Record<number, string>> = {
       es: { 1: `Gracias por tu tiempo, ${appt.clientName}`, 3: "Un recurso que puede ayudarte", 7: "Como estas avanzando con tu proyecto?" },
@@ -145,12 +145,12 @@ export async function GET(req: NextRequest) {
         serviceInterest: appt.serviceInterest || "asesoria general",
         scheduledAt: new Date(appt.scheduledAt),
         repName,
-        step: stepDay as 1 | 3 | 7,
+        step: (stepDay as 1 | 3 | 7),
         lang,
       });
 
       // Guardar draft en la secuencia
-      const draftField = stepDay === 1 ? "aiDraftD1" : stepDay === 3 ? "aiDraftD3" : "aiDraftD7";
+      const draftField: "aiDraftD1" | "aiDraftD3" | "aiDraftD7" = stepDay === 1 ? "aiDraftD1" : stepDay === 3 ? "aiDraftD3" : "aiDraftD7";
       await db.update(followUpSequences)
         .set({ [draftField]: emailBody })
         .where(eq(followUpSequences.id, seq.id));
@@ -189,7 +189,7 @@ export async function GET(req: NextRequest) {
 
       // Calcular siguiente envio o completar secuencia
       let nextSendAt: Date | null = null;
-      const newStep = seq.currentStep + 1;
+      const newStep = rawStep;
 
       if (newStep === 1) {
         nextSendAt = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000); // dia 3
