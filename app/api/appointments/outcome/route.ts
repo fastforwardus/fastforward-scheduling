@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   // Enviar encuesta si la cita fue completada
   if (status === "completed" && appt.confirmToken) {
     const { Resend } = await import("resend");
-    const resend = new (Resend as any)(process.env.RESEND_API_KEY);
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
     const surveyUrl = `${appUrl}/survey/${appt.confirmToken}`;
     const lang = appt.clientLanguage || "es";

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { surveys, appointments, users, remindersLog, clientProfiles } from "@/db/schema";
+import { surveys, appointments, remindersLog, clientProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 
