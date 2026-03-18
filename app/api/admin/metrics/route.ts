@@ -113,12 +113,12 @@ export async function GET() {
   const daily = Object.entries(dailyMap).map(([date, count]) => ({ date, count }));
 
   const totalSurveys = allSurveys.length;
-  const avgSatisfaction = totalSurveys > 0
+  const satisfactionAvg = totalSurveys > 0
     ? (allSurveys.reduce((sum, s) => sum + s.rating, 0) / totalSurveys).toFixed(1)
     : null;
-  const fiveStars = allSurveys.filter(s => s.rating === 5).length;
-  const fourStars = allSurveys.filter(s => s.rating === 4).length;
-  const lowRating = allSurveys.filter(s => s.rating <= 3).length;
+  const satisfactionFive = allSurveys.filter(s => s.rating === 5).length;
+  const satisfactionFour = allSurveys.filter(s => s.rating === 4).length;
+  const satisfactionLow  = allSurveys.filter(s => s.rating <= 3).length;
 
   return NextResponse.json({
     summary: { total, assigned, completed, noShow, withOutcome, proposalSent, closed, interested, showRate, conversionRate },
