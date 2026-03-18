@@ -9,6 +9,7 @@ interface Appt {
   outcome: string | null; leadScore: string; serviceInterest: string | null;
   repName: string | null; repSlug: string | null; assignedTo: string | null;
   notes: string | null; nextStep: string | null;
+  confirmToken: string | null; meetingLink: string | null;
 }
 
 export default function SalesDashboardClient({ user }: {
