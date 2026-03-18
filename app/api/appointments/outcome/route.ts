@@ -27,5 +27,31 @@ export async function POST(req: NextRequest) {
     .set({ outcome: outcome || null, nextStep: nextStep || null, notes: notes || null, status: status || "completed", leadScore })
     .where(eq(appointments.id, appointmentId));
 
+  // Crear secuencia de follow-up si el outcome lo amerita
+  const shouldFollowUp = ["interested", "needs_time", "proposal_sent"].includes(outcome);
+  if (shouldFollowUp && status === "completed") {
+    const now = new Date();
+    const nextSendAt = new Date(now.getTime() + 24 * 60 * 60 * 1000); // dia 1 manana
+
+    // Verificar si ya existe una secuencia
+    const { followUpSequences } = await import("@/db/schema");
+    const { eq: eqSeq } = await import("drizzle-orm");
+    const existing = await db.select().from(followUpSequences)
+      .where(eqSeq(followUpSequences.appointmentId, appointmentId)).limit(1);
+
+    if (!existing.length) {
+      await db.insert(followUpSequences).values({
+        appointmentId,
+        currentStep: 0,
+        nextSendAt,
+        isActive: true,
+      });
+    } else {
+      await db.update(followUpSequences)
+        .set({ isActive: true, nextSendAt, currentStep: 0, completedAt: null })
+        .where(eqSeq(followUpSequences.appointmentId, appointmentId));
+    }
+  }
+
   return NextResponse.json({ ok: true });
 }
