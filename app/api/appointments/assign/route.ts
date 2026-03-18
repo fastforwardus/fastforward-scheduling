@@ -17,7 +17,15 @@ export async function POST(req: NextRequest) {
 
   try {
     // Obtener el rep asignado
-    const [rep] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    const [rep] = await db
+      .select({
+        id: users.id,
+        fullName: users.fullName,
+        email: users.email,
+        googleRefreshToken: users.googleRefreshToken,
+        whatsappPhone: users.whatsappPhone,
+      })
+      .from(users).where(eq(users.id, userId)).limit(1);
     if (!rep) return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
 
     // Obtener la cita

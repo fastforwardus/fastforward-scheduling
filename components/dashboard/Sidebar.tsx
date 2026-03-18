@@ -18,7 +18,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard", icon: LayoutDashboard, label: "Inicio", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/appointments", icon: Calendar, label: "Todas las citas", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
-    { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin"] },
+    { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
   ];
 
   const links = allLinks.filter(l => l.roles.includes(user.role));
