@@ -125,5 +125,6 @@ export async function GET() {
     last30: { total: last30.length },
     last7:  { total: last7.length },
     byPlatform, bySource, byScore, byRep, daily,
+    satisfaction: { total: totalSurveys, avg: satisfactionAvg, fiveStars: satisfactionFive, fourStars: satisfactionFour, lowRating: satisfactionLow },
   });
 }
