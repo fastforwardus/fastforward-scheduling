@@ -70,7 +70,20 @@ export async function GET(req: NextRequest) {
       grouped[slot.date].push(slot);
     }
 
-    return NextResponse.json({ slots, grouped, timezone: clientTz });
+    // Filtrar slots en dias feriados
+    const holidayList = await db.select({ date: holidays.date }).from(holidays);
+    const holidayDates = new Set(holidayList.map(h => h.date));
+
+    const filteredSlots = slots.filter(slot => !holidayDates.has(slot.date.split(",")[0].trim()) &&
+      !holidayDates.has(new Date(slot.datetime).toISOString().split("T")[0]));
+
+    const filteredGrouped: Record<string, typeof slots> = {};
+    for (const slot of filteredSlots) {
+      if (!filteredGrouped[slot.date]) filteredGrouped[slot.date] = [];
+      filteredGrouped[slot.date].push(slot);
+    }
+
+    return NextResponse.json({ slots: filteredSlots, grouped: filteredGrouped, timezone: clientTz });
   } catch (err) {
     console.error("Slots error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
