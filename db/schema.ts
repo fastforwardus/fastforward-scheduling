@@ -188,12 +188,3 @@ export const holidays = pgTable("holidays", {
   createdBy: uuid("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
-
-// ── Holidays (dias bloqueados)
-export const holidays = pgTable("holidays", {
-  id:        uuid("id").primaryKey().defaultRandom(),
-  date:      text("date").notNull().unique(),
-  reason:    text("reason"),
-  createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
