@@ -21,6 +21,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
     }
 
+    // Limpiar número — solo dígitos con código de país
+    const cleanPhone = clientWhatsapp.replace(/\D/g, "");
+
+    // Detectar idioma por código de país como fallback
+    const ptCodes = ["55", "351"];
+    const enCodes = ["1"];
+    let detectedLang = clientLanguage || "es";
+    if (!clientLanguage) {
+      if (ptCodes.some(c => cleanPhone.startsWith(c))) detectedLang = "pt";
+      else if (enCodes.some(c => cleanPhone.startsWith(c))) detectedLang = "en";
+    }
+
     // Buscar sales rep
     let assignedTo: string | null = null;
     let assignedName = "";
@@ -43,9 +55,9 @@ export async function POST(req: NextRequest) {
         clientName,
         clientEmail: clientEmail.toLowerCase().trim(),
         clientCompany,
-        clientWhatsapp,
+        clientWhatsapp: cleanPhone,
         clientTimezone: clientTimezone || "America/Argentina/Buenos_Aires",
-        clientLanguage: clientLanguage || "es",
+        clientLanguage: detectedLang as "es" | "en" | "pt",
         serviceInterest,
         exportVolume,
         isB2b: true,
@@ -67,9 +79,9 @@ export async function POST(req: NextRequest) {
         email: clientEmail.toLowerCase().trim(),
         name: clientName,
         company: clientCompany,
-        whatsapp: clientWhatsapp,
+        whatsapp: cleanPhone,
         timezone: clientTimezone,
-        language: clientLanguage || "es",
+        language: detectedLang as "es" | "en" | "pt",
         isB2b: true,
       })
       .onConflictDoUpdate({
