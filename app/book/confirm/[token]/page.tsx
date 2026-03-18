@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { db } from "@/db";
 import { appointments, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -20,6 +22,7 @@ export default async function ConfirmPage({ params }: { params: { token: string 
       status: appointments.status,
       assignedTo: appointments.assignedTo,
       serviceInterest: appointments.serviceInterest,
+      meetingLink: appointments.meetingLink,
     })
     .from(appointments)
     .where(eq(appointments.confirmToken, params.token))
