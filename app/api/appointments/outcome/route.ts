@@ -53,5 +53,41 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Enviar encuesta si la cita fue completada
+  if (status === "completed" && appt.confirmToken) {
+    const { Resend } = await import("resend");
+    const resend = new (Resend as any)(process.env.RESEND_API_KEY);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
+    const surveyUrl = `${appUrl}/survey/${appt.confirmToken}`;
+    const lang = appt.clientLanguage || "es";
+
+    const subjects: Record<string, string> = {
+      es: "Como fue tu consulta con FastForward?",
+      en: "How was your consultation with FastForward?",
+      pt: "Como foi sua consulta com a FastForward?",
+    };
+
+    await resend.emails.send({
+      from: "FastForward FDA Experts <noreply@fastfwdus.com>",
+      to: appt.clientEmail,
+      subject: subjects[lang] || subjects.es,
+      html: `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+  <div style="background:#27295C;border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;">
+    <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="28" alt="FastForward">
+  </div>
+  <div style="background:white;border-radius:12px;padding:24px;border:1px solid #E5E7EB;text-align:center;">
+    <p style="font-size:24px;margin:0 0 12px;">🙏</p>
+    <h2 style="font-size:20px;font-weight:700;color:#27295C;margin:0 0 8px;">${subjects[lang]}</h2>
+    <p style="color:#6B7280;font-size:14px;margin:0 0 24px;">
+      ${lang === "en" ? "Your feedback helps us improve. It only takes 30 seconds." : lang === "pt" ? "Seu feedback nos ajuda a melhorar. Leva apenas 30 segundos." : "Tu opinion nos ayuda a mejorar. Solo toma 30 segundos."}
+    </p>
+    <a href="${surveyUrl}" style="display:inline-block;background:#C9A84C;color:#1A1C3E;padding:14px 32px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;">
+      ${lang === "en" ? "Rate my experience" : lang === "pt" ? "Avaliar minha experiencia" : "Calificar mi experiencia"} →
+    </a>
+  </div>
+</div>`,
+    }).catch(console.error);
+  }
+
   return NextResponse.json({ ok: true });
 }
