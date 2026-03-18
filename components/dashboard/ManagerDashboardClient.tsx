@@ -11,9 +11,8 @@ interface Appt {
   notes: string | null; nextStep: string | null;
 }
 
-export default function ManagerDashboardClient({ user, defaultTab }: {
+export default function ManagerDashboardClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string };
-  defaultTab?: string;
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [loading, setLoading] = useState(true);
