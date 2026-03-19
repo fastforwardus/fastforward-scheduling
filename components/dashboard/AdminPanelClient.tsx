@@ -34,6 +34,21 @@ interface Metrics {
   satisfaction: { total: number; avg: string | null; fiveStars: number; fourStars: number; lowRating: number };
 }
 
+const TIMEZONES = [
+  { value: "America/New_York",    label: "Miami / New York (EST)" },
+  { value: "America/Chicago",     label: "Chicago (CST)" },
+  { value: "America/Los_Angeles", label: "Los Angeles (PST)" },
+  { value: "America/Mexico_City", label: "Mexico / Ciudad de Mexico" },
+  { value: "America/Bogota",      label: "Colombia / Bogota" },
+  { value: "America/Lima",        label: "Peru / Lima" },
+  { value: "America/Santiago",    label: "Chile / Santiago" },
+  { value: "America/Argentina/Buenos_Aires", label: "Argentina / Buenos Aires" },
+  { value: "America/Sao_Paulo",   label: "Brasil / Sao Paulo" },
+  { value: "Europe/Madrid",       label: "Espana / Madrid" },
+  { value: "Europe/Rome",         label: "Italia / Roma" },
+  { value: "Europe/London",       label: "Reino Unido / Londres" },
+];
+
 const DAYS = ["", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
 const ROLES: Record<string, string> = { admin: "Admin", sales_manager: "Manager", sales_rep: "Sales Rep" };
 const ROLE_COLORS: Record<string, string> = { admin: "#6366F1", sales_manager: "#F97316", sales_rep: "#22C55E" };
@@ -109,7 +124,7 @@ function AvailabilityEditor({ userId }: { userId: string }) {
 function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", isActive: user.isActive, password: "" });
+  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", timezone: (user as any).timezone || "America/New_York", isActive: user.isActive, password: "" });
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -222,7 +237,7 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
 // ─── Create User Modal ────────────────────────────────────────────────────────
 
 function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
-  const [form, setForm] = useState({ fullName: "", email: "", role: "sales_rep", slug: "", whatsappPhone: "", password: "FastForward2024!" });
+  const [form, setForm] = useState({ fullName: "", email: "", role: "sales_rep", slug: "", whatsappPhone: "", timezone: "America/New_York", password: "FastForward2024!" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 

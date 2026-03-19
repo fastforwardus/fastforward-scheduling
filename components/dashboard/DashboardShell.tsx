@@ -33,8 +33,8 @@ const OUTCOME_LABELS: Record<string, string> = {
 
 const SCORE_ICONS: Record<string, string> = { hot: "🔥", warm: "🟡", cold: "❄️" };
 
-function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh }: {
-  appt: Appt; canAssign: boolean; currentUserId: string; currentRole: string; onRefresh: () => void;
+function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh, userTimezone }: {
+  appt: Appt; canAssign: boolean; currentUserId: string; currentRole: string; onRefresh: () => void; userTimezone: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showAssign, setShowAssign] = useState(false);
@@ -42,8 +42,10 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   const [showNotes, setShowNotes] = useState(false);
 
   const slotDate = new Date(appt.scheduledAt);
-  const timeStr = slotDate.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" });
-  const isToday = slotDate.toDateString() === new Date().toDateString();
+  const timeStr = slotDate.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: userTimezone });
+  const tzDate = new Date(slotDate.toLocaleString("en-US", { timeZone: userTimezone }));
+  const nowInTz = new Date(new Date().toLocaleString("en-US", { timeZone: userTimezone }));
+  const isToday = tzDate.toDateString() === nowInTz.toDateString();
   const st = STATUS_STYLES[appt.status] || STATUS_STYLES.scheduled;
 
   return (
@@ -197,14 +199,14 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
 }
 
 export function DashboardShell({ user, roleLabel, appointments, loading, onRefresh, canAssign }: {
-  user: { id?: string; fullName: string; email: string; role: string; slug?: string };
+  user: { id?: string; fullName: string; email: string; role: string; slug?: string; timezone?: string };
   roleLabel: string; appointments: Appt[]; loading: boolean; onRefresh: () => void; canAssign: boolean;
 }) {
   const [tab, setTab] = useState<"today" | "unassigned" | "upcoming" | "all">("today");
   const now = new Date();
-  const today = appointments.filter(a => new Date(a.scheduledAt).toDateString() === now.toDateString());
+  const today = appointments.filter(a => new Date(a.scheduledAt).toDateString() === now.toDateString()).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
   const unassigned = appointments.filter(a => !a.assignedTo);
-  const upcoming = appointments.filter(a => new Date(a.scheduledAt) > now);
+  const upcoming = appointments.filter(a => new Date(a.scheduledAt) > now).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
 
   const tabs = [
     { key: "today",      label: "Hoy",        count: today.length,        red: false },
@@ -235,7 +237,7 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{roleLabel}</p>
+              <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{roleLabel} · {(user.timezone || "America/New_York").replace(/_/g, " ")}</p>
               <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Hola, {user.fullName.split(" ")[0]} 👋</h1>
             </div>
             <div className="flex gap-2">
@@ -298,7 +300,8 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
                   )}
                   {appts.map(appt => (
                     <AppointmentRow key={appt.id} appt={appt} canAssign={canAssign}
-                      currentUserId={user.id || ""} currentRole={user.role} onRefresh={onRefresh} />
+                      currentUserId={user.id || ""} currentRole={user.role} onRefresh={onRefresh}
+                      userTimezone={user.timezone || "America/New_York"} />
                   ))}
                 </div>
               ))

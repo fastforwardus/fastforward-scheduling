@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
       fullName: user.fullName,
       role: user.role,
       slug: user.slug,
+      timezone: user.timezone || "America/New_York",
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
