@@ -63,7 +63,6 @@ export async function POST(req: NextRequest) {
       }
     } else if (appt.platform === "zoom") {
       try {
-        const endTime = new Date(new Date(appt.scheduledAt).getTime() + 30 * 60 * 1000);
         const { joinUrl } = await createZoomMeeting({
           title: `Consulta FastForward - ${appt.clientName} (${appt.clientCompany})`,
           startTime: new Date(appt.scheduledAt),
