@@ -124,7 +124,7 @@ function AvailabilityEditor({ userId }: { userId: string }) {
 function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", timezone: (user as any).timezone || "America/New_York", isActive: user.isActive, password: "" });
+  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", timezone: (user as { timezone?: string }).timezone || "America/New_York", isActive: user.isActive, password: "" });
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -203,6 +203,14 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                     <option value="sales_rep">Sales Rep</option>
                     <option value="sales_manager">Sales Manager</option>
                     <option value="admin">Admin</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Zona horaria</label>
+                  <select value={form.timezone} onChange={e => setForm(prev => ({ ...prev, timezone: e.target.value } as typeof prev))}
+                    className="w-full px-3 py-2 rounded-lg border text-sm outline-none bg-white"
+                    style={{ borderColor: "#E5E7EB", color: "#27295C" }}>
+                    {TIMEZONES.map(tz => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
                   </select>
                 </div>
                 <div className="flex items-center gap-2 pt-4">
@@ -288,6 +296,14 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
               <option value="sales_rep">Sales Rep</option>
               <option value="sales_manager">Sales Manager</option>
               <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>Zona horaria</label>
+            <select value={form.timezone} onChange={e => setForm(prev => ({ ...prev, timezone: e.target.value } as typeof prev))}
+              className="w-full px-4 py-3 rounded-xl border text-sm outline-none bg-white"
+              style={{ borderColor: "#E5E7EB", color: "#27295C" }}>
+              {TIMEZONES.map(tz => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
             </select>
           </div>
           {error && <p className="text-xs text-red-500 px-1">{error}</p>}
