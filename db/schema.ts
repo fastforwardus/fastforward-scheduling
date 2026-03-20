@@ -201,5 +201,7 @@ export const partners = pgTable("partners", {
   passwordHash:   text("password_hash").notNull(),
   isActive:       boolean("is_active").default(true),
   commissionRate: numeric("commission_rate", { precision: 5, scale: 2 }).default("0"),
+  termsAccepted: boolean("terms_accepted").default(false),
+  termsAcceptedAt: timestamp("terms_accepted_at"),
   createdAt:      timestamp("created_at").defaultNow().notNull(),
 });

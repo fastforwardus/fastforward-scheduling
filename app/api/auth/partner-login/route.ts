@@ -8,8 +8,11 @@ import { SignJWT } from "jose";
 export async function POST(req: NextRequest) {
   const { slug, password } = await req.json();
 
-  const [partner] = await db.select().from(partners)
-    .where(eq(partners.slug, slug)).limit(1);
+  const [partner] = await db.select({
+    id: partners.id, name: partners.name, email: partners.email,
+    slug: partners.slug, isActive: partners.isActive,
+    passwordHash: partners.passwordHash, termsAccepted: partners.termsAccepted,
+  }).from(partners).where(eq(partners.slug, slug)).limit(1);
 
   if (!partner || !partner.isActive) {
     return NextResponse.json({ error: "Partner no encontrado" }, { status: 404 });
@@ -24,7 +27,7 @@ export async function POST(req: NextRequest) {
     .setExpirationTime("7d")
     .sign(secret);
 
-  const res = NextResponse.json({ ok: true });
+  const res = NextResponse.json({ ok: true, termsAccepted: partner.termsAccepted });
   res.cookies.set("ff-partner-session", token, { httpOnly: true, maxAge: 60 * 60 * 24 * 7, path: "/" });
   return res;
 }
