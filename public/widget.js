@@ -29,7 +29,7 @@
       '#ff-widget-overlay.ff-open{opacity:1;height:auto;inset:0;}',
       '#ff-widget-modal{width:100%;max-width:560px;height:90vh;background:#fff;border-radius:20px 20px 0 0;overflow:hidden;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1);}',
       '#ff-widget-overlay.ff-open #ff-widget-modal{transform:translateY(0);}',
-      '#ff-widget-modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#27295C;}',
+      '#ff-widget-modal-header{display:flex;align-items:center;justify-content:end;padding:16px 20px;background:#27295C;}',
       '#ff-widget-modal-header img{height:28px;object-fit:contain;}',
       '#ff-widget-close{background:rgba(255,255,255,0.15);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1;}',
       '#ff-widget-close:hover{background:rgba(255,255,255,0.25);}',
@@ -72,16 +72,16 @@
     var header = document.createElement('div');
     header.id = 'ff-widget-modal-header';
 
-    var logo = document.createElement('img');
-    logo.src = 'https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png';
-    logo.alt = 'FastForward FDA Experts';
+    //var logo = document.createElement('img');
+    //logo.src = 'https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png';
+    //logo.alt = 'FastForward FDA Experts';
 
     var closeBtn = document.createElement('button');
     closeBtn.id = 'ff-widget-close';
     closeBtn.innerHTML = '&times;';
     closeBtn.addEventListener('click', closeModal);
 
-    header.appendChild(logo);
+    //header.appendChild(logo);
     header.appendChild(closeBtn);
 
     var iframe = document.createElement('iframe');
