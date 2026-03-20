@@ -1,16 +1,10 @@
 "use client";
+import type { Appt } from "@/types/appointments";
 
 import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 
-interface Appt {
-  id: string; clientName: string; clientEmail: string; clientCompany: string;
-  clientWhatsapp: string; platform: string; scheduledAt: string; status: string;
-  outcome: string | null; leadScore: string; serviceInterest: string | null;
-  repName: string | null; repSlug: string | null; assignedTo: string | null;
-  notes: string | null; nextStep: string | null;
-  confirmToken: string | null; meetingLink: string | null;
-}
+
 
 export default function AdminDashboardClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string };

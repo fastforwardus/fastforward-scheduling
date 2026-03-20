@@ -1,4 +1,5 @@
 "use client";
+import type { Appt } from "@/types/appointments";
 
 import { useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
@@ -7,16 +8,7 @@ import { OutcomeModal } from "@/components/dashboard/OutcomeModal";
 import { NotesPanel } from "@/components/dashboard/NotesPanel";
 import { RefreshCw, ChevronDown, ChevronUp, Video, MessageCircle, Phone, ExternalLink } from "lucide-react";
 
-interface Appt {
-  id: string; clientName: string; clientEmail: string; clientCompany: string;
-  clientWhatsapp: string; platform: string; scheduledAt: string; status: string;
-  outcome: string | null; leadScore: string; serviceInterest: string | null;
-  repName: string | null; repSlug: string | null; assignedTo: string | null;
-  notes: string | null; nextStep: string | null;
-  confirmToken: string | null;
-  meetingLink: string | null;
-  clientNotes: string | null;
-}
+
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string; dot: string }> = {
   pending_assignment: { bg: "#FEF9C3", text: "#854D0E", label: "Sin asignar", dot: "#EAB308" },
