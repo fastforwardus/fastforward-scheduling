@@ -31,9 +31,10 @@ export async function POST(req: NextRequest) {
   // Email de bienvenida al partner
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
   await resend.emails.send({
-    from: "FastForward FDA Experts <noreply@fastfwdus.com>",
+    from: "Carlos Bisio — FastForward <info@fastfwdus.com>",
+    replyTo: "info@fastfwdus.com",
     to: email,
-    subject: "Bienvenido al Programa de Partners — FastForward FDA Experts",
+    subject: `Bienvenido al equipo, ${name} — FastForward FDA Experts`,
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;">
   <div style="background:#27295C;border-radius:16px 16px 0 0;padding:32px;text-align:center;">
