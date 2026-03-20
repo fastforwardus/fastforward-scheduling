@@ -67,6 +67,7 @@ export const useWizard = create<WizardStore>((set, get) => ({
   setClientEmail: (clientEmail) => set({ clientEmail }),
   setClientCompany: (clientCompany) => set({ clientCompany }),
   setClientWhatsapp: (clientWhatsapp) => set({ clientWhatsapp }),
+  setClientNotes: (clientNotes) => set({ clientNotes }),
   setClientCountryCode: (clientCountryCode) => set({ clientCountryCode }),
   setSelectedSlot: (selectedSlot) => set({ selectedSlot }),
   setPlatform: (platform) => set({ platform }),
