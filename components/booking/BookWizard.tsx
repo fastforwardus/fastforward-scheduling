@@ -69,7 +69,7 @@ export default function BookWizard({
         name: updates.name || w.clientName,
         company: updates.company || w.clientCompany,
         stepReached: updates.step || w.step,
-        serviceInterest: updates.service || w.serviceInterest,
+        serviceInterest: updates.service || w.serviceType,
         completed: updates.completed || false,
       }),
     }).catch(() => {});
