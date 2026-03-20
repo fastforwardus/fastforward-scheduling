@@ -57,6 +57,23 @@ export default function BookWizard({
   prefilled?: { name?: string; email?: string; company?: string; phone?: string };
 }) {
   const w = useWizard();
+
+  async function trackSession(updates: { email?: string; name?: string; company?: string; step?: number; service?: string; completed?: boolean }) {
+    const email = updates.email || w.clientEmail;
+    if (!email || !email.includes("@")) return;
+    fetch("/api/wizard-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        name: updates.name || w.clientName,
+        company: updates.company || w.clientCompany,
+        stepReached: updates.step || w.step,
+        serviceInterest: updates.service || w.serviceInterest,
+        completed: updates.completed || false,
+      }),
+    }).catch(() => {});
+  }
   const [mounted, setMounted] = useState(false);
   const [timezone, setTimezone] = useState("America/Argentina/Buenos_Aires");
   const [slotsData, setSlotsData] = useState<SlotData | null>(null);
