@@ -489,7 +489,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
 export default function AdminPanelClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string }
 }) {
-  const [tab, setTab] = useState<"users" | "metrics" | "holidays">("users");
+  const [tab, setTab] = useState<"users" | "metrics" | "holidays" | "partners">("users");
   const [users, setUsers] = useState<User[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -499,6 +499,10 @@ export default function AdminPanelClient({ user }: {
   const [newHolidayReason, setNewHolidayReason] = useState("");
   const [savingHoliday, setSavingHoliday] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [partnersList, setPartnersList] = useState<{ id: string; name: string; slug: string; email: string; company: string | null; isActive: boolean; commissionRate: string }[]>([]);
+  const [showCreatePartner, setShowCreatePartner] = useState(false);
+  const [partnerForm, setPartnerForm] = useState({ name: "", slug: "", email: "", company: "", password: "", commissionRate: "0" });
+  const [savingPartner, setSavingPartner] = useState(false);
 
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true);
@@ -677,6 +681,85 @@ export default function AdminPanelClient({ user }: {
                           style={{ color: "#9CA3AF" }}>
                           <Trash2 className="w-4 h-4" />
                         </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Partners tab */}
+          {tab === "partners" && (
+            <div className="space-y-4">
+              <div className="flex justify-end">
+                <button onClick={() => setShowCreatePartner(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                  style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+                  <Plus className="w-4 h-4" /> Nuevo partner
+                </button>
+              </div>
+
+              {showCreatePartner && (
+                <div className="rounded-2xl bg-white border p-5" style={{ borderColor: "#E5E7EB" }}>
+                  <h3 className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Crear partner</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Nombre", key: "name", placeholder: "Nombre del partner" },
+                      { label: "Slug (URL)", key: "slug", placeholder: "acme-foods" },
+                      { label: "Email", key: "email", placeholder: "partner@empresa.com" },
+                      { label: "Empresa", key: "company", placeholder: "Empresa del partner" },
+                      { label: "Contrasena", key: "password", placeholder: "Minimo 8 caracteres" },
+                      { label: "Comision %", key: "commissionRate", placeholder: "0" },
+                    ].map(f => (
+                      <div key={f.key}>
+                        <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{f.label}</label>
+                        <input value={partnerForm[f.key as keyof typeof partnerForm]}
+                          onChange={e => setPartnerForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                          placeholder={f.placeholder}
+                          className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
+                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <button onClick={createPartner} disabled={savingPartner}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
+                      style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+                      {savingPartner ? <Loader2 className="w-4 h-4 animate-spin" /> : "Crear"}
+                    </button>
+                    <button onClick={() => setShowCreatePartner(false)}
+                      className="px-4 py-2.5 rounded-xl text-sm border"
+                      style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>Cancelar</button>
+                  </div>
+                </div>
+              )}
+
+              <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
+                <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+                  <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Partners ({partnersList.length})</p>
+                </div>
+                {partnersList.length === 0 ? (
+                  <div className="text-center py-10">
+                    <p className="text-2xl mb-2">🤝</p>
+                    <p className="text-sm" style={{ color: "#9CA3AF" }}>No hay partners todavia</p>
+                  </div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: "#F0F0F0" }}>
+                    {partnersList.map(partner => (
+                      <div key={partner.id} className="flex items-center justify-between px-5 py-4">
+                        <div>
+                          <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{partner.name}</p>
+                          <p className="text-xs" style={{ color: "#6B7280" }}>{partner.email} · scheduling.fastfwdus.com/partner/{partner.slug}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {partner.commissionRate && parseFloat(partner.commissionRate) > 0 && (
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "#DCFCE7", color: "#166534" }}>
+                              {partner.commissionRate}% comision
+                            </span>
+                          )}
+                          <span className="w-2 h-2 rounded-full" style={{ background: partner.isActive ? "#22C55E" : "#E5E7EB" }} />
+                        </div>
                       </div>
                     ))}
                   </div>

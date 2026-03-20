@@ -66,6 +66,7 @@ export const appointments = pgTable("appointments", {
   leadScore: leadScoreEnum("lead_score").default("warm").notNull(),
   zohoLeadId: text("zoho_lead_id"),
   utmSource: text("utm_source"),
+  partnerSlug: text("partner_slug"),
   confirmToken: text("confirm_token").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
 });
@@ -188,4 +189,17 @@ export const holidays = pgTable("holidays", {
   reason:    text("reason"),
   createdBy: uuid("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ── Partners
+export const partners = pgTable("partners", {
+  id:             uuid("id").primaryKey().defaultRandom(),
+  name:           text("name").notNull(),
+  slug:           text("slug").notNull().unique(),
+  email:          text("email").notNull(),
+  company:        text("company"),
+  passwordHash:   text("password_hash").notNull(),
+  isActive:       boolean("is_active").default(true),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("0"),
+  createdAt:      timestamp("created_at").defaultNow().notNull(),
 });
