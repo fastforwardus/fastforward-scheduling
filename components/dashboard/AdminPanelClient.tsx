@@ -529,6 +529,27 @@ export default function AdminPanelClient({ user }: {
   }, []);
 
   useEffect(() => { if (tab === "holidays") loadHolidays(); }, [tab, loadHolidays]);
+  const loadPartners = useCallback(async () => {
+    const res = await fetch("/api/admin/partners");
+    const data = await res.json();
+    setPartnersList(data.partners || []);
+  }, []);
+
+  useEffect(() => { if (tab === "partners") loadPartners(); }, [tab, loadPartners]);
+
+  async function createPartner() {
+    if (!partnerForm.name || !partnerForm.slug || !partnerForm.email || !partnerForm.password) return;
+    setSavingPartner(true);
+    await fetch("/api/admin/partners", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(partnerForm),
+    });
+    setSavingPartner(false);
+    setShowCreatePartner(false);
+    setPartnerForm({ name: "", slug: "", email: "", company: "", password: "", commissionRate: "0" });
+    loadPartners();
+  }
 
   async function addHoliday() {
     if (!newHolidayDate) return;

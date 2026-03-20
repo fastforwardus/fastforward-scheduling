@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const cookieStore = cookies();
   const token = cookieStore.get("ff-partner-session")?.value;
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
