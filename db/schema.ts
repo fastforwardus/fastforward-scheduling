@@ -200,6 +200,6 @@ export const partners = pgTable("partners", {
   company:        text("company"),
   passwordHash:   text("password_hash").notNull(),
   isActive:       boolean("is_active").default(true),
-  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("0"),
+  commissionRate: numeric("commission_rate", { precision: 5, scale: 2 }).default("0"),
   createdAt:      timestamp("created_at").defaultNow().notNull(),
 });
