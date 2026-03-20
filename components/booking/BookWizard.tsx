@@ -153,6 +153,7 @@ export default function BookWizard({
           platform: w.platform,
           repSlug: repSlug || "general",
           utmSource: w.utmSource,
+          clientNotes: w.clientNotes || undefined,
           scheduledAt: w.selectedSlot,
         }),
       });
@@ -470,6 +471,28 @@ export default function BookWizard({
                   onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
                   onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"}
                 />
+              </div>
+
+              {/* Comentario opcional */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "#6B7280" }}>
+                  {w.language === "en" ? "Comments / Questions" : w.language === "pt" ? "Comentarios / Perguntas" : "Comentario / Consulta"}{" "}
+                  <span style={{ color: "#9CA3AF", textTransform: "none", fontWeight: 400 }}>
+                    ({w.language === "en" ? "optional" : w.language === "pt" ? "opcional" : "opcional"})
+                  </span>
+                </label>
+                <textarea
+                  value={w.clientNotes || ""}
+                  onChange={e => w.setClientNotes && w.setClientNotes(e.target.value)}
+                  placeholder={w.language === "en" ? "Tell us briefly about your product, company or what you want to consult about..." : w.language === "pt" ? "Conte-nos brevemente sobre seu produto, empresa ou o que voce quer consultar..." : "Contanos brevemente sobre tu producto, empresa o lo que queres consultar..."}
+                  rows={3}
+                  maxLength={500}
+                  className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
+                  style={{ border: "1.5px solid #E5E7EB", color: "#111827", background: "white" }}
+                  onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                  onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"}
+                />
+                <p className="text-xs mt-1 text-right" style={{ color: "#9CA3AF" }}>{(w.clientNotes || "").length}/500</p>
               </div>
             </div>
           </div>

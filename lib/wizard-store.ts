@@ -6,6 +6,7 @@ export type ExportVolume = "not_exporting" | "starting_under_100k" | "exporting_
 export type Platform = "meet" | "zoom" | "whatsapp";
 
 export interface WizardState {
+  clientNotes?: string;
   step: 1 | 2 | 3 | 4 | 5;
   serviceType?: ServiceType;
   exportVolume?: ExportVolume;
@@ -32,6 +33,7 @@ interface WizardStore extends WizardState {
   setClientEmail: (v: string) => void;
   setClientCompany: (v: string) => void;
   setClientWhatsapp: (v: string) => void;
+  setClientNotes: (v: string) => void;
   setClientCountryCode: (v: string) => void;
   setSelectedSlot: (v: string) => void;
   setPlatform: (v: Platform) => void;
