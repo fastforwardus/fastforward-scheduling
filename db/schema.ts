@@ -65,6 +65,7 @@ export const appointments = pgTable("appointments", {
   noShowCount: integer("no_show_count").default(0).notNull(),
   leadScore: leadScoreEnum("lead_score").default("warm").notNull(),
   zohoLeadId: text("zoho_lead_id"),
+  clientNotes: text("client_notes"),
   utmSource: text("utm_source"),
   partnerSlug: text("partner_slug"),
   confirmToken: text("confirm_token").unique(),
@@ -204,4 +205,20 @@ export const partners = pgTable("partners", {
   termsAccepted: boolean("terms_accepted").default(false),
   termsAcceptedAt: timestamp("terms_accepted_at"),
   createdAt:      timestamp("created_at").defaultNow().notNull(),
+});
+
+// ── Wizard Sessions (abandonment tracking)
+export const wizardSessions = pgTable("wizard_sessions", {
+  id:              uuid("id").primaryKey().defaultRandom(),
+  email:           text("email").notNull(),
+  name:            text("name"),
+  company:         text("company"),
+  stepReached:     integer("step_reached").default(1),
+  serviceInterest: text("service_interest"),
+  partnerSlug:     text("partner_slug"),
+  utmSource:       text("utm_source"),
+  recovered:       boolean("recovered").default(false),
+  completed:       boolean("completed").default(false),
+  createdAt:       timestamp("created_at").defaultNow().notNull(),
+  updatedAt:       timestamp("updated_at").defaultNow().notNull(),
 });

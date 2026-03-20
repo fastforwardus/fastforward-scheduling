@@ -120,6 +120,7 @@ export default function BookWizard({
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
+      trackSession({ completed: true });
       const res = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

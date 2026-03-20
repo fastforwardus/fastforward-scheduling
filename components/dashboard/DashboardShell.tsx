@@ -15,6 +15,7 @@ interface Appt {
   notes: string | null; nextStep: string | null;
   confirmToken: string | null;
   meetingLink: string | null;
+  clientNotes: string | null;
 }
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; label: string; dot: string }> = {

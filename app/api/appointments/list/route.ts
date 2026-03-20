@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
         assignedTo: appointments.assignedTo,
         confirmToken: appointments.confirmToken,
         meetingLink: appointments.meetingLink,
+        clientNotes: appointments.clientNotes,
         createdAt: appointments.createdAt,
         repName: users.fullName,
         repEmail: users.email,
