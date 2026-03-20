@@ -13,8 +13,8 @@ export async function GET(req: NextRequest) {
   }
 
   const now = new Date();
-  const tenMinutesAgo  = new Date(now.getTime() - 10 * 60 * 1000);
-  const sixtyMinutesAgo = new Date(now.getTime() - 60 * 60 * 1000);
+  const tenMinutesAgo  = new Date(now.getTime() - 45 * 60 * 1000);
+  const sixtyMinutesAgo = new Date(now.getTime() - 120 * 60 * 1000);
 
   const missed = await db.select({
     id: appointments.id,
