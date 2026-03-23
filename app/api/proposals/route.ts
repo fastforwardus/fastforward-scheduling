@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
 
   // Update appointment outcome to proposal_sent
   await db.update(appointments)
-    .set({ outcome: "proposal_sent", nextStep: "follow_up" })
+    .set({ outcome: "proposal_sent", nextStep: "send_proposal" })
     .where(eq(appointments.id, appointmentId));
 
   // Sync to Zoho CRM with note
