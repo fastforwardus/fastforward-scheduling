@@ -102,21 +102,6 @@ function wrapText(text: string, font: { widthOfTextAtSize: (s: string, size: num
   return lines;
 }
 
-function drawWrappedText(
-  page: ReturnType<PDFDocument["addPage"]>,
-  text: string,
-  x: number, startY: number,
-  maxWidth: number, size: number,
-  font: { widthOfTextAtSize: (s: string, size: number) => number },
-  color: ReturnType<typeof rgb>,
-  lineHeight = 11
-): number {
-  const lines = wrapText(text, font, size, maxWidth);
-  lines.forEach((line, i) => {
-    page.drawText(line, { x, y: startY - i * lineHeight, size, font: font as never, color });
-  });
-  return startY - lines.length * lineHeight;
-}
 
 export async function generateProposalPDF(data: ProposalData): Promise<Buffer> {
   const lang = data.lang || "es";
