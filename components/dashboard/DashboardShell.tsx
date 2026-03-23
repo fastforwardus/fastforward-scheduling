@@ -124,6 +124,11 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", color: "#92400E" }}>
                   📋 Outcome
                 </button>
+                <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, repSlug: appt.repSlug || "book" })}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                  style={{ background: "rgba(201,168,76,0.1)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }}>
+                  📄 Propuesta
+                </button>
                 <button onClick={() => {
                     const phone = appt.clientWhatsapp.replace(/\D/g, "");
                     const d = new Date(appt.scheduledAt);
