@@ -338,8 +338,7 @@ export default function BookWizard({
                 }}>
                 <span className="text-2xl">{
                   s === "fda_fsma" ? "📋" :
-                  s === "register_company" ? "🏢" :
-                  s === "market_entry" ? "🚀" : "❓"
+                  s === "register_company" ? "🏢" : "❓"
                 }</span>
                 <span className="font-medium text-sm" style={{ color: "#27295C" }}>{tr.services[s]}</span>
                 {w.serviceType === s && <Check className="w-4 h-4 ml-auto" style={{ color: "#C9A84C" }} />}
