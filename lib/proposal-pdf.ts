@@ -96,8 +96,7 @@ export async function generateProposalPDF(data: ProposalData): Promise<Buffer> {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
 
-    const navy = hexToRgb(NAVY);
-    const gold = hexToRgb(GOLD);
+
 
     function drawHeader() {
       doc.rect(0, 0, W, 76).fill(NAVY);
