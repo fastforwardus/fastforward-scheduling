@@ -184,13 +184,6 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
         <AssignModal appointment={appt} onClose={() => setShowAssign(false)}
           onAssigned={() => { setShowAssign(false); onRefresh(); }} />
       )}
-      {showOutcome && (
-        <OutcomeModal appointment={appt} onClose={() => setShowOutcome(false)}
-          onSaved={() => { setShowOutcome(false); onRefresh(); }} />
-      )}
-    </>
-  return (
-    <>
       {proposalAppt && (
         <ProposalModal
           appointmentId={proposalAppt.id}
@@ -201,8 +194,11 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
           onSuccess={() => { setProposalAppt(null); onRefresh(); }}
         />
       )}
+      {showOutcome && (
+        <OutcomeModal appointment={appt} onClose={() => setShowOutcome(false)}
+          onSaved={() => { setShowOutcome(false); onRefresh(); }} />
+      )}
     </>
-  );
 }
 
 export function DashboardShell({ user, roleLabel, appointments, loading, onRefresh, canAssign }: {
