@@ -1,4 +1,5 @@
 "use client";
+import ProposalModal from "@/components/dashboard/ProposalModal";
 import type { Appt } from "@/types/appointments";
 
 import { useState } from "react";
@@ -186,6 +187,19 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
       {showOutcome && (
         <OutcomeModal appointment={appt} onClose={() => setShowOutcome(false)}
           onSaved={() => { setShowOutcome(false); onRefresh(); }} />
+      )}
+    </>
+  return (
+    <>
+      {proposalAppt && (
+        <ProposalModal
+          appointmentId={proposalAppt.id}
+          clientName={proposalAppt.clientName}
+          clientCompany={proposalAppt.clientCompany}
+          repSlug={proposalAppt.repSlug}
+          onClose={() => setProposalAppt(null)}
+          onSuccess={() => { setProposalAppt(null); onRefresh(); }}
+        />
       )}
     </>
   );
