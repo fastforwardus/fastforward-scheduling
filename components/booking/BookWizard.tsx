@@ -255,7 +255,7 @@ export default function BookWizard({
                 <div className="flex items-center gap-2 mt-2">
                   <span className="px-2 py-0.5 rounded-full text-xs font-medium capitalize"
                         style={{ background: "rgba(39,41,92,0.08)", color: "#27295C" }}>
-                    {w.platform === "meet" ? "🎥 Google Meet" : w.platform === "zoom" ? "📹 Zoom" : "💬 WhatsApp"}
+                    {w.platform === "meet" ? "🎥 Google Meet" : "💬 WhatsApp"}
                   </span>
                   <span className="text-xs text-gray-400">30 min</span>
                 </div>
