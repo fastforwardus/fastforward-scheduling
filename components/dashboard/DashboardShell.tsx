@@ -207,6 +207,7 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
   roleLabel: string; appointments: Appt[]; loading: boolean; onRefresh: () => void; canAssign: boolean;
 }) {
   const [tab, setTab] = useState<"today" | "unassigned" | "upcoming" | "all">("today");
+  const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; repSlug: string } | null>(null);
   const now = new Date();
   const today = appointments.filter(a => new Date(a.scheduledAt).toDateString() === now.toDateString()).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
   const unassigned = appointments.filter(a => !a.assignedTo);
