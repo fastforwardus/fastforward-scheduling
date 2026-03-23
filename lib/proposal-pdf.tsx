@@ -121,7 +121,6 @@ export function ProposalDocument({ data }: { data: ProposalData }) {
         <Image
           style={styles.logo}
           src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
-          alt="FastForward"
         />
         <View style={styles.headerRight} fixed>
           <Text style={styles.headerTitle}>PROPUESTA COMERCIAL</Text>
