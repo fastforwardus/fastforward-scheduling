@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { appointments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";
+import { createOrUpdateZohoLead } from "@/lib/zoho";
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -88,6 +89,19 @@ export async function POST(req: NextRequest) {
 </div>`,
     }).catch(console.error);
   }
+
+  // Sync outcome to Zoho CRM
+  createOrUpdateZohoLead({
+    clientName: appt.clientName,
+    clientEmail: appt.clientEmail,
+    clientCompany: appt.clientCompany,
+    clientWhatsapp: appt.clientWhatsapp,
+    clientLanguage: appt.clientLanguage,
+    serviceInterest: appt.serviceInterest || undefined,
+    outcome,
+    appointmentId: appt.id,
+    scheduledAt: String(appt.scheduledAt),
+  }).catch(err => console.error("Zoho outcome sync error:", err));
 
   return NextResponse.json({ ok: true });
 }
