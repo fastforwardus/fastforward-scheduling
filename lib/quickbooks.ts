@@ -69,7 +69,7 @@ export async function getQBCustomersWithServices(): Promise<QBCustomer[]> {
     }
 
     // Add services from this invoice
-    const lines = inv.Line?.filter((l: any) => l.DetailType === "SalesItemLineDetail") || [];
+    const lines = inv.Line?.filter((l: { DetailType: string; Description?: string; SalesItemLineDetail?: { ItemRef?: { name?: string } } }) => l.DetailType === "SalesItemLineDetail") || [];
     for (const line of lines) {
       const svc = line.Description || line.SalesItemLineDetail?.ItemRef?.name || "";
       if (svc && svc !== "General Services:Discount" && !svc.includes("Discount")) {
