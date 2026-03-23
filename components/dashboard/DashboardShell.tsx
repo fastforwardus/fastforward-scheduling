@@ -190,6 +190,15 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
         <OutcomeModal appointment={appt} onClose={() => setShowOutcome(false)}
           onSaved={() => { setShowOutcome(false); onRefresh(); }} />
       )}
+      {proposalAppt && (
+        <ProposalModal
+          appointmentId={proposalAppt.id}
+          clientName={proposalAppt.clientName}
+          clientCompany={proposalAppt.clientCompany}
+          onClose={() => setProposalAppt(null)}
+          onSuccess={() => { setProposalAppt(null); onRefresh(); }}
+        />
+      )}
     </>
   );
 }
