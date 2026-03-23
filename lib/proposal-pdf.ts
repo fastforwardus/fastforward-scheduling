@@ -142,7 +142,8 @@ export async function generateProposalPDF(data: ProposalData): Promise<Buffer> {
   page.drawRectangle({ x: 0, y: H - 79, width: W, height: 3, color: GOLD });
 
   if (logoImage) {
-    page.drawImage(logoImage, { x: ML, y: H - 64, width: 150, height: 40 });
+    const logoDims = logoImage.scale(0.18);
+    page.drawImage(logoImage, { x: ML, y: H - 60, width: logoDims.width, height: logoDims.height });
   } else {
     page.drawText(">> FASTFORWARD", { x: ML, y: H - 42, size: 16, font: bold, color: WHITE });
     page.drawText("FDA Experts  |  Miami, Florida", { x: ML, y: H - 58, size: 9, font: regular, color: GOLD });
