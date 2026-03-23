@@ -46,14 +46,29 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [selected, setSelected] = useState<SelectedService[]>([]);
   const [discount, setDiscount] = useState(0);
-  const [introText, setIntroText] = useState(
-    `Estimado/a ${clientName.split(" ")[0]}, es un placer presentarle esta propuesta para acompanarle en el proceso de ingreso al mercado estadounidense. Nuestro equipo ha preparado una solucion personalizada basada en los requerimientos de ${clientCompany || "su empresa"}.`
-  );
-  const [emailText, setEmailText] = useState(
-    `Adjunto encontrara la propuesta comercial personalizada que preparamos para ${clientCompany || "su empresa"}. La misma incluye todos los servicios acordados. La propuesta es valida por 15 dias. Para confirmarla y dar inicio a los tramites, simplemente responda este email.`
-  );
-  const [tab, setTab] = useState<"services" | "email" | "preview">("services");
   const [lang, setLang] = useState<"es" | "en" | "pt">("es");
+  const [tab, setTab] = useState<"services" | "email" | "preview">("services");
+
+  const DEFAULT_INTRO: Record<string, string> = {
+    es: `Estimado/a ${clientName.split(" ")[0]}, es un placer presentarle esta propuesta para acompañarle en el proceso de ingreso al mercado estadounidense. Nuestro equipo ha preparado una solución personalizada basada en los requerimientos de ${clientCompany || "su empresa"}.`,
+    en: `Dear ${clientName.split(" ")[0]}, it is our pleasure to present this proposal to accompany you in the process of entering the US market. Our team has prepared a personalized solution based on the requirements of ${clientCompany || "your company"}.`,
+    pt: `Prezado/a ${clientName.split(" ")[0]}, é um prazer apresentar-lhe esta proposta para acompanhá-lo no processo de entrada no mercado americano. Nossa equipe preparou uma solução personalizada com base nos requisitos de ${clientCompany || "sua empresa"}.`,
+  };
+
+  const DEFAULT_EMAIL: Record<string, string> = {
+    es: `Adjunto encontrará la propuesta comercial personalizada que preparamos para ${clientCompany || "su empresa"}. La misma incluye todos los servicios acordados. La propuesta es válida por 15 días. Para confirmarla y dar inicio a los trámites, simplemente responda este email.`,
+    en: `Please find attached the personalized commercial proposal we prepared for ${clientCompany || "your company"}. It includes all agreed services. The proposal is valid for 15 days. To confirm it and start the process, simply reply to this email.`,
+    pt: `Em anexo encontrará a proposta comercial personalizada que preparamos para ${clientCompany || "sua empresa"}. Ela inclui todos os serviços acordados. A proposta é válida por 15 dias. Para confirmá-la e iniciar os trâmites, basta responder a este email.`,
+  };
+
+  const [introText, setIntroText] = useState(DEFAULT_INTRO.es);
+  const [emailText, setEmailText] = useState(DEFAULT_EMAIL.es);
+
+  function handleLangChange(l: "es" | "en" | "pt") {
+    setLang(l);
+    setIntroText(DEFAULT_INTRO[l]);
+    setEmailText(DEFAULT_EMAIL[l]);
+  }
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
@@ -169,7 +184,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                 {/* Language selector */}
                 <div className="flex gap-1.5 mb-4">
                   {([["es","Español"],["en","English"],["pt","Português"]] as const).map(([l, label]) => (
-                    <button key={l} onClick={() => setLang(l)}
+                    <button key={l} onClick={() => handleLangChange(l)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                       style={{ background: lang === l ? "#27295C" : "#F3F4F6", color: lang === l ? "white" : "#6B7280" }}>
                       {label}
