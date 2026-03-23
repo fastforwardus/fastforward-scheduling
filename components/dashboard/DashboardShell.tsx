@@ -31,6 +31,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   appt: Appt; canAssign: boolean; currentUserId: string; currentRole: string; onRefresh: () => void; userTimezone: string;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; repSlug: string } | null>(null);
   const [showAssign, setShowAssign] = useState(false);
   const [showOutcome, setShowOutcome] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -184,16 +185,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
         <AssignModal appointment={appt} onClose={() => setShowAssign(false)}
           onAssigned={() => { setShowAssign(false); onRefresh(); }} />
       )}
-      {proposalAppt && (
-        <ProposalModal
-          appointmentId={proposalAppt.id}
-          clientName={proposalAppt.clientName}
-          clientCompany={proposalAppt.clientCompany}
-          repSlug={proposalAppt.repSlug}
-          onClose={() => setProposalAppt(null)}
-          onSuccess={() => { setProposalAppt(null); onRefresh(); }}
-        />
-      )}
+
       {showOutcome && (
         <OutcomeModal appointment={appt} onClose={() => setShowOutcome(false)}
           onSaved={() => { setShowOutcome(false); onRefresh(); }} />
@@ -207,7 +199,6 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
   roleLabel: string; appointments: Appt[]; loading: boolean; onRefresh: () => void; canAssign: boolean;
 }) {
   const [tab, setTab] = useState<"today" | "unassigned" | "upcoming" | "all">("today");
-  const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; repSlug: string } | null>(null);
   const now = new Date();
   const today = appointments.filter(a => new Date(a.scheduledAt).toDateString() === now.toDateString()).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
   const unassigned = appointments.filter(a => !a.assignedTo);
