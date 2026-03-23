@@ -10,7 +10,6 @@ const GREEN = rgb(22/255, 101/255, 52/255);
 const GREEN_BG = rgb(220/255, 252/255, 231/255);
 const INDIGO = rgb(238/255, 242/255, 255/255);
 const WHITE = rgb(1, 1, 1);
-const RED_GOLD = rgb(146/255, 64/255, 14/255);
 
 const TRANSLATIONS = {
   es: {
