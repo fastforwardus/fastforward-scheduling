@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
     repName: rep.fullName,
     appointmentId: appt.id,
     scheduledAt: String(appt.scheduledAt),
-    clientNotes: `Propuesta ${proposalNum} enviada. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
+    clientNotes: `Propuesta ${proposalNum} enviada. Idioma: ${lang === 'en' ? 'English' : lang === 'pt' ? 'Portugu\u00eas' : 'Espa\u00f1ol'}. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
   }).catch(console.error);
 
   return NextResponse.json({ ok: true, proposalNum, total });

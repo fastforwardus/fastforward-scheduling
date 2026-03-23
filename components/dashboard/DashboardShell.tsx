@@ -1,5 +1,6 @@
 "use client";
 import ProposalModal from "@/components/dashboard/ProposalModal";
+import RescheduleModal from "@/components/dashboard/RescheduleModal";
 import type { Appt } from "@/types/appointments";
 
 import { useState } from "react";
@@ -32,6 +33,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
 }) {
   const [expanded, setExpanded] = useState(false);
   const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; repSlug: string } | null>(null);
+  const [rescheduleAppt, setRescheduleAppt] = useState<{ id: string; clientName: string; scheduledAt: string } | null>(null);
   const [showAssign, setShowAssign] = useState(false);
   const [showOutcome, setShowOutcome] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -135,6 +137,11 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                       style={{ background: "rgba(201,168,76,0.1)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }}>
                       📄 Propuesta
                     </button>
+                    <button onClick={() => setRescheduleAppt({ id: appt.id, clientName: appt.clientName, scheduledAt: appt.scheduledAt })}
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                      style={{ background: "rgba(59,130,246,0.08)", color: "#1D4ED8", border: "1px solid rgba(59,130,246,0.2)" }}>
+                      📅 Reagendar
+                    </button>
                   </div>
                 </div>
 
@@ -216,6 +223,15 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
       {showOutcome && (
         <OutcomeModal appointment={appt} onClose={() => setShowOutcome(false)}
           onSaved={() => { setShowOutcome(false); onRefresh(); }} />
+      )}
+      {rescheduleAppt && (
+        <RescheduleModal
+          appointmentId={rescheduleAppt.id}
+          clientName={rescheduleAppt.clientName}
+          currentScheduledAt={rescheduleAppt.scheduledAt}
+          onClose={() => setRescheduleAppt(null)}
+          onSuccess={() => { setRescheduleAppt(null); onRefresh(); }}
+        />
       )}
       {proposalAppt && (
         <ProposalModal
