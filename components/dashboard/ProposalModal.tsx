@@ -53,6 +53,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
     `Adjunto encontrara la propuesta comercial personalizada que preparamos para ${clientCompany || "su empresa"}. La misma incluye todos los servicios acordados. La propuesta es valida por 15 dias. Para confirmarla y dar inicio a los tramites, simplemente responda este email.`
   );
   const [tab, setTab] = useState<"services" | "email" | "preview">("services");
+  const [lang, setLang] = useState<"es" | "en" | "pt">("es");
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
@@ -92,6 +93,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           discount,
           introText,
           emailText,
+          lang,
         }),
       });
       const data = await res.json();
@@ -164,7 +166,17 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                   style={{ borderColor: "#E5E7EB", color: "#27295C" }}
                 />
 
-                {/* Category filter */}
+                {/* Language selector */}
+                <div className="flex gap-1.5 mb-4">
+                  {([["es","Español"],["en","English"],["pt","Português"]] as const).map(([l, label]) => (
+                    <button key={l} onClick={() => setLang(l)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                      style={{ background: lang === l ? "#27295C" : "#F3F4F6", color: lang === l ? "white" : "#6B7280" }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+        {/* Category filter */}
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   <button onClick={() => setSelectedCat(null)}
                     className="px-3 py-1 rounded-full text-xs font-semibold"

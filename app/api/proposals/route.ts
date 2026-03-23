@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     discount = 0,
     introText,
     emailText,
+    lang = "es",
   } = await req.json();
 
   if (!appointmentId || !services?.length) {
@@ -64,6 +65,7 @@ export async function POST(req: NextRequest) {
     proposalNum,
     dateStr: formatDate(now),
     validUntil: formatDate(validUntil),
+    lang: lang as "es" | "en" | "pt",
     introText: introText || `Estimado/a ${firstName}, es un placer presentarle esta propuesta para acompanarle en el proceso de ingreso al mercado estadounidense. Nuestro equipo ha preparado una solucion personalizada basada en los requerimientos de su empresa.`,
     services,
     discount,
@@ -105,7 +107,11 @@ export async function POST(req: NextRequest) {
     from: `${rep.fullName} — FastForward <info@fastfwdus.com>`,
     replyTo: rep.email,
     to: appt.clientEmail,
-    subject: `Propuesta comercial para ${appt.clientCompany || appt.clientName} — FastForward`,
+    subject: lang === "en"
+      ? `Commercial proposal for ${appt.clientCompany || appt.clientName} — FastForward`
+      : lang === "pt"
+      ? `Proposta comercial para ${appt.clientCompany || appt.clientName} — FastForward`
+      : `Propuesta comercial para ${appt.clientCompany || appt.clientName} — FastForward`,
     html: emailHtml,
     attachments: [{
       filename: `Propuesta-FastForward-${proposalNum}.pdf`,

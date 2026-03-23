@@ -130,6 +130,12 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   style={{ background: "rgba(201,168,76,0.1)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }}>
                   📄 Propuesta
                 </button>
+                  </div>
+                </div>
+                {/* Grupo 2: Comunicacion */}
+                <div>
+                  <p className="text-xs uppercase tracking-widest mb-1.5 font-semibold" style={{ color: "#9CA3AF" }}>Comunicación</p>
+                  <div className="flex flex-wrap gap-1.5">
                 <button onClick={() => {
                     const phone = appt.clientWhatsapp.replace(/\D/g, "");
                     const d = new Date(appt.scheduledAt);
@@ -164,6 +170,12 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                     <Phone className="w-3 h-3" /> Llamar
                   </a>
                 )}
+                  </div>
+                </div>
+                {/* Grupo 3: Info */}
+                <div>
+                  <p className="text-xs uppercase tracking-widest mb-1.5 font-semibold" style={{ color: "#9CA3AF" }}>Info</p>
+                  <div className="flex flex-wrap gap-1.5">
                 <a href={window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id)} target="_blank" rel="noreferrer"
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
                   style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
@@ -179,6 +191,8 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   style={{ borderColor: showNotes ? "#27295C" : "#E5E7EB", color: showNotes ? "#27295C" : "#6B7280" }}>
                   📝 Notas
                 </button>
+                  </div>
+                </div>
               </div>
               {showNotes && (
                 <NotesPanel appointmentId={appt.id} currentUserId={currentUserId} currentRole={currentRole} />
