@@ -608,7 +608,7 @@ export default function BookWizard({
                   borderColor: w.platform === p ? "#C9A84C" : "#E5E7EB",
                   background: w.platform === p ? "rgba(201,168,76,0.05)" : "white",
                 }}>
-                <span className="text-2xl">{p === "meet" ? "🎥" : p === "zoom" ? "📹" : "💬"}</span>
+                <span className="text-2xl">{p === "meet" ? "🎥" : "💬"}</span>
                 <div>
                   <p className="font-semibold text-sm" style={{ color: "#27295C" }}>{tr.platforms[p]}</p>
                   <p className="text-xs text-gray-400">{tr.platformSub[p]}</p>
