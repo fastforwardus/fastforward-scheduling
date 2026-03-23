@@ -116,7 +116,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
         setSent(true);
         setTimeout(() => { onSuccess(); onClose(); }, 2000);
       }
-    } catch {}
+    } catch (err) { console.error("Proposal error:", err); alert("Error: " + String(err)); }
     setSending(false);
   }
 
