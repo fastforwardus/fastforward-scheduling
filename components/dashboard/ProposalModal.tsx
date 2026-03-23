@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, FileText, Send, Plus, Minus, ChevronDown, ChevronUp, Loader2, Check } from "lucide-react";
+import { useState } from "react";
+import { X, FileText, Send, Plus, Minus, Loader2, Check } from "lucide-react";
 
 interface Service {
   name: string;
@@ -37,7 +37,7 @@ interface ProposalModalProps {
   appointmentId: string;
   clientName: string;
   clientCompany: string;
-  repSlug: string;
+  repSlug?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
