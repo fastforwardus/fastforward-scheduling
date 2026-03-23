@@ -199,6 +199,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
           onSaved={() => { setShowOutcome(false); onRefresh(); }} />
       )}
     </>
+  );
 }
 
 export function DashboardShell({ user, roleLabel, appointments, loading, onRefresh, canAssign }: {
