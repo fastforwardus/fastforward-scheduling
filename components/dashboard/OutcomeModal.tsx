@@ -63,7 +63,18 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
           </div>
           <button onClick={onClose} style={{ color: "rgba(255,255,255,0.4)" }}><X className="w-4 h-4" /></button>
         </div>
-        <div className="p-6 space-y-5">
+        {/* Boton guardar fijo arriba */}
+        {!saved && (
+          <div className="px-6 py-3 border-b flex items-center justify-between gap-3" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+            <p className="text-xs" style={{ color: "#9CA3AF" }}>Completá el resultado de la llamada</p>
+            <button onClick={handleSave} disabled={saving || (status === "completed" && !outcome)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all flex-shrink-0"
+              style={{ background: (saving || (status === "completed" && !outcome)) ? "#E5E7EB" : "#C9A84C", color: (saving || (status === "completed" && !outcome)) ? "#9CA3AF" : "#1A1C3E" }}>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar →"}
+            </button>
+          </div>
+        )}
+        <div className="p-6 space-y-5 overflow-y-auto" style={{ maxHeight: "60vh" }}>
           {saved ? (
             <div className="text-center py-6">
               <CheckCircle className="w-12 h-12 mx-auto mb-3" style={{ color: "#22C55E" }} />
@@ -123,11 +134,7 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
                   onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
                 <p className="text-xs mt-1 text-right" style={{ color: "#9CA3AF" }}>{notes.length}/500</p>
               </div>
-              <button onClick={handleSave} disabled={saving || (status === "completed" && !outcome)}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm transition-all"
-                style={{ background: (saving || (status === "completed" && !outcome)) ? "#E5E7EB" : "#C9A84C", color: (saving || (status === "completed" && !outcome)) ? "#9CA3AF" : "#1A1C3E" }}>
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar outcome →"}
-              </button>
+
             </>
           )}
         </div>
