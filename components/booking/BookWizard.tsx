@@ -328,8 +328,8 @@ export default function BookWizard({
         <div>
           <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{tr.step1Title}</h2>
           <div className="space-y-3">
-            {(["fda_fsma","register_company","market_entry","not_sure"] as ServiceType[]).map((s) => (
-              <button key={s} onClick={() => { w.setServiceType(s); w.next(); }}
+            {(["fda_fsma","register_company","not_sure"] as ServiceType[]).map((s) => (
+              <button key={s} onClick={() => { w.setServiceType(s); w.setStep(3); }}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all duration-150 hover:-translate-y-0.5"
                 style={{
                   borderColor: w.serviceType === s ? "#C9A84C" : "#E5E7EB",
@@ -602,7 +602,7 @@ export default function BookWizard({
         <div>
           <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{tr.step5Title}</h2>
           <div className="space-y-3 mb-8">
-            {(["meet","zoom","whatsapp"] as Platform[]).map((p) => (
+            {(["meet","whatsapp"] as Platform[]).map((p) => (
               <button key={p} onClick={() => w.setPlatform(p)}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all hover:-translate-y-0.5"
                 style={{
