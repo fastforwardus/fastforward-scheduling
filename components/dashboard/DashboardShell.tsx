@@ -57,6 +57,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-semibold" style={{ color: "#111827" }}>{appt.clientName}</span>
+              <span className="text-xs" style={{ color: "#9CA3AF" }}>{appt.clientEmail}</span>
               {appt.outcome && (
                 <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "#F3F4F6", color: "#374151" }}>
                   {OUTCOME_LABELS[appt.outcome]}
