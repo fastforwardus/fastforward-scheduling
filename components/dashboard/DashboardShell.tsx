@@ -37,6 +37,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   const [showAssign, setShowAssign] = useState(false);
   const [showOutcome, setShowOutcome] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   const slotDate = new Date(appt.scheduledAt);
   const timeStr = slotDate.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: userTimezone });
@@ -112,104 +113,104 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   </div>
                 ))}
               </div>
-              <div className="flex flex-wrap gap-4 mt-1">
+              <div className="flex items-center gap-2 mt-3 flex-wrap">
 
-                {/* Gestión */}
-                <div>
-                  <p className="text-xs uppercase tracking-widest mb-1.5 font-semibold" style={{ color: "#9CA3AF" }}>Gestión</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {appt.status === "pending_assignment" && canAssign && (
-                      <button onClick={() => setShowAssign(true)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                        style={{ background: "#EAB308", color: "white" }}>
-                        Asignar →
+                {/* Siempre visibles */}
+                <button onClick={() => setShowOutcome(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                  style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", color: "#92400E" }}>
+                  📋 Outcome
+                </button>
+
+                <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, repSlug: appt.repSlug || "book" })}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                  style={{ background: "rgba(201,168,76,0.1)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }}>
+                  📄 Propuesta
+                </button>
+
+                {appt.platform !== "whatsapp" && appt.meetingLink && (
+                  <a href={appt.meetingLink} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                    style={{ background: "#27295C", color: "white" }}>
+                    <Video className="w-3 h-3" /> Iniciar reunion
+                  </a>
+                )}
+                {appt.platform !== "whatsapp" && !appt.meetingLink && (
+                  <span className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium cursor-help"
+                    style={{ background: "#F3F4F6", color: "#9CA3AF" }}>
+                    Sin link aun
+                  </span>
+                )}
+                {appt.platform === "whatsapp" && (
+                  <a href={"https://wa.me/" + appt.clientWhatsapp.replace(/\D/g, "")} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                    style={{ background: "#25D366", color: "white" }}>
+                    <Phone className="w-3 h-3" /> Llamar
+                  </a>
+                )}
+                <button onClick={() => {
+                    const phone = appt.clientWhatsapp.replace(/\D/g, "");
+                    const d = new Date(appt.scheduledAt);
+                    const time = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" });
+                    const date = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "America/New_York" });
+                    const url = window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id);
+                    const msg = "Hola " + appt.clientName + ", te recordamos tu reunion con FastForward el " + date + " a las " + time + " (hora Miami).\n\nAccede aqui: " + url + "\n\nEquipo FastForward";
+                    window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(msg), "_blank");
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
+                  style={{ background: "#25D366", color: "white" }}>
+                  💬 WA
+                </button>
+
+                {/* Menu "..." */}
+                <div className="relative" ref={el => { if (el) el.setAttribute("data-menu", appt.id); }}>
+                  <button
+                    onClick={() => setOpenMenuId(openMenuId === appt.id ? null : appt.id)}
+                    className="flex items-center justify-center w-8 h-8 rounded-lg border text-sm font-bold"
+                    style={{ borderColor: "#E5E7EB", color: "#6B7280", background: "white" }}>
+                    ···
+                  </button>
+                  {openMenuId === appt.id && (
+                    <div className="absolute left-0 top-10 z-50 bg-white rounded-xl shadow-xl border py-1 min-w-[160px]"
+                         style={{ borderColor: "#E5E7EB" }}>
+                      {appt.status === "pending_assignment" && canAssign && (
+                        <button onClick={() => { setShowAssign(true); setOpenMenuId(null); }}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50 text-left"
+                          style={{ color: "#374151" }}>
+                          📌 Asignar
+                        </button>
+                      )}
+                      {canAssign && appt.assignedTo && (
+                        <button onClick={() => { setShowAssign(true); setOpenMenuId(null); }}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50 text-left"
+                          style={{ color: "#374151" }}>
+                          🔄 Reasignar
+                        </button>
+                      )}
+                      <button onClick={() => { setRescheduleAppt({ id: appt.id, clientName: appt.clientName, scheduledAt: appt.scheduledAt }); setOpenMenuId(null); }}
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50 text-left"
+                        style={{ color: "#374151" }}>
+                        📅 Reagendar
                       </button>
-                    )}
-                    {canAssign && appt.assignedTo && (
-                      <button onClick={() => setShowAssign(true)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
-                        style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
-                        Reasignar
+                      <a href={window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id)} target="_blank" rel="noreferrer"
+                        onClick={() => setOpenMenuId(null)}
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50"
+                        style={{ color: "#374151" }}>
+                        <ExternalLink className="w-3 h-3" /> Ver cita
+                      </a>
+                      <a href={"/dashboard/clients/" + encodeURIComponent(appt.clientEmail)}
+                        onClick={() => setOpenMenuId(null)}
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50"
+                        style={{ color: "#374151" }}>
+                        👤 Historial
+                      </a>
+                      <button onClick={() => { setShowNotes(!showNotes); setOpenMenuId(null); }}
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50 text-left"
+                        style={{ color: "#374151" }}>
+                        📝 Notas
                       </button>
-                    )}
-                    <button onClick={() => setShowOutcome(true)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                      style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", color: "#92400E" }}>
-                      📋 Outcome
-                    </button>
-                    <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, repSlug: appt.repSlug || "book" })}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                      style={{ background: "rgba(201,168,76,0.1)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }}>
-                      📄 Propuesta
-                    </button>
-                    <button onClick={() => setRescheduleAppt({ id: appt.id, clientName: appt.clientName, scheduledAt: appt.scheduledAt })}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                      style={{ background: "rgba(59,130,246,0.08)", color: "#1D4ED8", border: "1px solid rgba(59,130,246,0.2)" }}>
-                      📅 Reagendar
-                    </button>
-                  </div>
-                </div>
-
-                {/* Comunicación */}
-                <div>
-                  <p className="text-xs uppercase tracking-widest mb-1.5 font-semibold" style={{ color: "#9CA3AF" }}>Comunicación</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <button onClick={() => {
-                        const phone = appt.clientWhatsapp.replace(/\D/g, "");
-                        const d = new Date(appt.scheduledAt);
-                        const time = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" });
-                        const date = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", timeZone: "America/New_York" });
-                        const url = window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id);
-                        const msg = "Hola " + appt.clientName + ", te recordamos tu reunion con FastForward el " + date + " a las " + time + " (hora Miami).\n\nAccede aqui: " + url + "\n\nEquipo FastForward";
-                        window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(msg), "_blank");
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                      style={{ background: "#25D366", color: "white" }}>
-                      💬 WA Recordatorio
-                    </button>
-                    {appt.platform !== "whatsapp" && appt.meetingLink && (
-                      <a href={appt.meetingLink} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                        style={{ background: "#27295C", color: "white" }}>
-                        <Video className="w-3 h-3" /> Iniciar reunion
-                      </a>
-                    )}
-                    {appt.platform !== "whatsapp" && !appt.meetingLink && (
-                      <span className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium cursor-help"
-                        style={{ background: "#F3F4F6", color: "#9CA3AF" }}>
-                        Sin link aun
-                      </span>
-                    )}
-                    {appt.platform === "whatsapp" && (
-                      <a href={"https://wa.me/" + appt.clientWhatsapp.replace(/\D/g, "")} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                        style={{ background: "#25D366", color: "white" }}>
-                        <Phone className="w-3 h-3" /> Llamar
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Info */}
-                <div>
-                  <p className="text-xs uppercase tracking-widest mb-1.5 font-semibold" style={{ color: "#9CA3AF" }}>Info</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <a href={window.location.origin + "/book/confirm/" + (appt.confirmToken || appt.id)} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
-                      style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
-                      <ExternalLink className="w-3 h-3" /> Ver cita
-                    </a>
-                    <a href={"/dashboard/clients/" + encodeURIComponent(appt.clientEmail)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
-                      style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
-                      👤 Historial
-                    </a>
-                    <button onClick={() => setShowNotes(!showNotes)}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
-                      style={{ borderColor: showNotes ? "#27295C" : "#E5E7EB", color: showNotes ? "#27295C" : "#6B7280" }}>
-                      📝 Notas
-                    </button>
-                  </div>
+                    </div>
+                  )}
                 </div>
 
               </div>
