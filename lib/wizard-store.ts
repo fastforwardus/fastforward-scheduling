@@ -6,6 +6,7 @@ export type ExportVolume = "not_exporting" | "starting_under_100k" | "exporting_
 export type Platform = "meet" | "whatsapp";
 
 export interface WizardState {
+  partnerSlug?: string;
   clientNotes?: string;
   step: 1 | 2 | 3 | 4 | 5;
   serviceType?: ServiceType;
@@ -21,6 +22,8 @@ export interface WizardState {
   language: Lang;
   repSlug?: string;
   utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
   personalEmailWarning: boolean;
 }
 
@@ -34,12 +37,15 @@ interface WizardStore extends WizardState {
   setClientCompany: (v: string) => void;
   setClientWhatsapp: (v: string) => void;
   setClientNotes: (v: string) => void;
+  setPartnerSlug: (v: string) => void;
   setClientCountryCode: (v: string) => void;
   setSelectedSlot: (v: string) => void;
   setPlatform: (v: Platform) => void;
   setLanguage: (v: Lang) => void;
   setRepSlug: (v: string | undefined) => void;
   setUtmSource: (v: string | undefined) => void;
+  setUtmMedium: (v: string | undefined) => void;
+  setUtmCampaign: (v: string | undefined) => void;
   setPersonalEmailWarning: (v: boolean) => void;
   next: () => void;
   prev: () => void;
@@ -68,12 +74,15 @@ export const useWizard = create<WizardStore>((set, get) => ({
   setClientCompany: (clientCompany) => set({ clientCompany }),
   setClientWhatsapp: (clientWhatsapp) => set({ clientWhatsapp }),
   setClientNotes: (clientNotes) => set({ clientNotes }),
+  setPartnerSlug: (partnerSlug) => set({ partnerSlug }),
   setClientCountryCode: (clientCountryCode) => set({ clientCountryCode }),
   setSelectedSlot: (selectedSlot) => set({ selectedSlot }),
   setPlatform: (platform) => set({ platform }),
   setLanguage: (language) => set({ language }),
   setRepSlug: (repSlug) => set({ repSlug }),
   setUtmSource: (utmSource) => set({ utmSource }),
+  setUtmMedium: (utmMedium) => set({ utmMedium }),
+  setUtmCampaign: (utmCampaign) => set({ utmCampaign }),
   setPersonalEmailWarning: (personalEmailWarning) => set({ personalEmailWarning }),
   next: () => { const s = get().step; if (s < 5) set({ step: (s + 1) as WizardState["step"] }); },
   prev: () => { const s = get().step; if (s > 1) set({ step: (s - 1) as WizardState["step"] }); },

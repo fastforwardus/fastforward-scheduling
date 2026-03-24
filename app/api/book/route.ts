@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const {
       clientName, clientEmail, clientCompany, clientWhatsapp,
       clientTimezone, clientLanguage, serviceInterest, exportVolume,
-      platform, repSlug, utmSource, scheduledAt,
+      platform, repSlug, utmSource, scheduledAt, partnerSlug, clientNotes,
     } = body;
 
     if (!clientName || !clientEmail || !clientCompany || !clientWhatsapp || !scheduledAt || !platform) {
@@ -71,8 +71,51 @@ export async function POST(req: NextRequest) {
         confirmToken,
         leadScore: "warm",
         utmSource,
+        partnerSlug: partnerSlug || null,
+        clientNotes: clientNotes || null,
       })
       .returning();
+
+    // Notify partner if referral
+    if (partnerSlug) {
+      try {
+        const { partners } = await import("@/db/schema");
+        const { eq: eqP } = await import("drizzle-orm");
+        const [partner] = await db.select({ name: partners.name, email: partners.email })
+          .from(partners).where(eqP(partners.slug, partnerSlug)).limit(1);
+        if (partner) {
+          await resend.emails.send({
+            from: "FastForward <info@fastfwdus.com>",
+            replyTo: "info@fastfwdus.com",
+            to: partner.email,
+            subject: `Nuevo referido: ${clientName} (${clientCompany})`,
+            html: `
+<div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+    <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
+  </div>
+  <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
+    <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 8px;">Hola, ${partner.name} 👋</p>
+    <p style="color:#6B7280;font-size:14px;margin:0 0 20px;">¡Uno de tus referidos acaba de agendar una consulta con FastForward!</p>
+    <div style="background:#F8F9FB;border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid #E5E7EB;">
+      <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;">Cliente</p>
+      <p style="font-size:15px;font-weight:700;color:#27295C;margin:0 0 2px;">${clientName}</p>
+      <p style="font-size:13px;color:#6B7280;margin:0 0 12px;">${clientCompany}</p>
+      <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;">Email</p>
+      <p style="font-size:13px;color:#374151;margin:0 0 12px;">${clientEmail}</p>
+      <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;">WhatsApp</p>
+      <p style="font-size:13px;color:#374151;margin:0;">${clientWhatsapp}</p>
+    </div>
+    <p style="font-size:13px;color:#6B7280;margin:0;">Podés seguir el estado de tus referidos en tu portal de partner.</p>
+    <div style="border-top:1px solid #F0F0F0;padding-top:20px;margin-top:20px;text-align:center;">
+      <p style="font-size:12px;color:#9CA3AF;">FastForward Trading Company LLC · Miami, FL</p>
+    </div>
+  </div>
+</div>`,
+          });
+        }
+      } catch (err) { console.error("Partner notify error:", err); }
+    }
 
     // Upsert client profile
     await db

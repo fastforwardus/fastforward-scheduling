@@ -69,6 +69,11 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="text-xs" style={{ color: "#6B7280" }}>{appt.clientCompany}</span>
               {appt.serviceInterest && <span className="text-xs" style={{ color: "#9CA3AF" }}>· {appt.serviceInterest.replace(/_/g," ")}</span>}
+              {appt.partnerSlug && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "rgba(201,168,76,0.12)", color: "#92400E", border: "1px solid rgba(201,168,76,0.3)" }}>
+                  🤝 {appt.partnerSlug}
+                </span>
+              )}
             </div>
           </div>
           {appt.repName && (

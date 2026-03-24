@@ -6,4 +6,5 @@ export interface Appt {
   notes: string | null; nextStep: string | null;
   confirmToken: string | null; meetingLink: string | null;
   clientNotes: string | null;
+  partnerSlug: string | null;
 }

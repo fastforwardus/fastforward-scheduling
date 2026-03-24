@@ -87,6 +87,16 @@ export default function BookWizard({
 
   useEffect(() => {
     setMounted(true);
+    // Read URL params
+    const params = new URLSearchParams(window.location.search);
+    const partnerSlug = params.get("partner");
+    const utmSource = params.get("utm_source");
+    const utmMedium = params.get("utm_medium");
+    const utmCampaign = params.get("utm_campaign");
+    if (partnerSlug) w.setPartnerSlug(partnerSlug);
+    if (utmSource) w.setUtmSource(utmSource);
+    if (utmMedium) w.setUtmMedium(utmMedium);
+    if (utmCampaign) w.setUtmCampaign(utmCampaign);
     // Detect language
     const bl = navigator.language.toLowerCase();
     if (bl.startsWith("pt")) w.setLanguage("pt");
@@ -153,6 +163,7 @@ export default function BookWizard({
           platform: w.platform,
           repSlug: repSlug || "general",
           utmSource: w.utmSource,
+          partnerSlug: w.partnerSlug || undefined,
           clientNotes: w.clientNotes || undefined,
           scheduledAt: w.selectedSlot,
         }),

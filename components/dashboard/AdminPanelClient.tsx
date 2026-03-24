@@ -499,6 +499,9 @@ export default function AdminPanelClient({ user }: {
   const [newHolidayReason, setNewHolidayReason] = useState("");
   const [savingHoliday, setSavingHoliday] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<string | null>(null);
+  const [partnerReferrals, setPartnerReferrals] = useState<{id:string;clientName:string;clientCompany:string;scheduledAt:string;status:string;outcome:string|null}[]>([]);
+  const [loadingReferrals, setLoadingReferrals] = useState(false);
   const [partnersList, setPartnersList] = useState<{ id: string; name: string; slug: string; email: string; company: string | null; isActive: boolean; commissionRate: string }[]>([]);
   const [showCreatePartner, setShowCreatePartner] = useState(false);
   const [partnerForm, setPartnerForm] = useState({ name: "", slug: "", email: "", company: "", password: "", commissionRate: "0" });
@@ -536,6 +539,15 @@ export default function AdminPanelClient({ user }: {
   }, []);
 
   useEffect(() => { if (tab === "partners") loadPartners(); }, [tab, loadPartners]);
+
+  async function loadPartnerReferrals(slug: string) {
+    setLoadingReferrals(true);
+    setSelectedPartner(slug);
+    const res = await fetch(`/api/admin/partners/${slug}/referrals`);
+    const data = await res.json();
+    setPartnerReferrals(data.appointments || []);
+    setLoadingReferrals(false);
+  }
 
   async function createPartner() {
     if (!partnerForm.name || !partnerForm.slug || !partnerForm.email || !partnerForm.password) return;
@@ -770,7 +782,7 @@ export default function AdminPanelClient({ user }: {
                 ) : (
                   <div className="divide-y" style={{ borderColor: "#F0F0F0" }}>
                     {partnersList.map(partner => (
-                      <div key={partner.id} className="flex items-center justify-between px-5 py-4">
+                      <div key={partner.id} className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => loadPartnerReferrals(partner.slug)}>
                         <div>
                           <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{partner.name}</p>
                           <p className="text-xs" style={{ color: "#6B7280" }}>{partner.email} · scheduling.fastfwdus.com/partner/{partner.slug}</p>
@@ -788,6 +800,40 @@ export default function AdminPanelClient({ user }: {
                   </div>
                 )}
               </div>
+
+              {selectedPartner && (
+                <div className="rounded-2xl bg-white border overflow-hidden mt-4" style={{ borderColor: "#E5E7EB" }}>
+                  <div className="px-5 py-3.5 border-b flex items-center justify-between" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+                    <p className="text-sm font-semibold" style={{ color: "#27295C" }}>
+                      Referidos de: <span style={{ color: "#C9A84C" }}>{selectedPartner}</span>
+                    </p>
+                    <button onClick={() => { setSelectedPartner(null); setPartnerReferrals([]); }}
+                      className="text-xs px-3 py-1 rounded-lg border" style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
+                      Cerrar
+                    </button>
+                  </div>
+                  {loadingReferrals ? (
+                    <div className="text-center py-8 text-sm" style={{ color: "#9CA3AF" }}>Cargando...</div>
+                  ) : partnerReferrals.length === 0 ? (
+                    <div className="text-center py-8 text-sm" style={{ color: "#9CA3AF" }}>Sin referidos aún</div>
+                  ) : (
+                    <div className="divide-y" style={{ borderColor: "#F0F0F0" }}>
+                      {partnerReferrals.map(appt => (
+                        <div key={appt.id} className="flex items-center justify-between px-5 py-3">
+                          <div>
+                            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{appt.clientName}</p>
+                            <p className="text-xs" style={{ color: "#6B7280" }}>{appt.clientCompany} · {new Date(appt.scheduledAt).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {appt.outcome && <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: "#F3F4F6", color: "#374151" }}>{appt.outcome.replace(/_/g," ")}</span>}
+                            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: "#DBEAFE", color: "#1E40AF" }}>{appt.status}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
