@@ -2,12 +2,12 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments, users } from "@/db/schema";
+import { appointments, users, proposals } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { randomBytes } from "crypto";
 import { getSession } from "@/lib/session";
 import { Resend } from "resend";
 import { generateProposalPDF, ProposalData } from "@/lib/proposal-pdf";
-import { proposals } from "@/db/schema";
 import { randomUUID } from "crypto";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
@@ -74,11 +74,32 @@ export async function POST(req: NextRequest) {
     emailText,
   };
 
+  // Calculate total
+  const total = services.reduce((s: number, svc: { price: number }) => s + svc.price, 0) - discount;
+
+  // Generate confirm token
+  const confirmToken = randomBytes(32).toString("hex");
+
+  // Save proposal to DB
+  await db.insert(proposals).values({
+    appointmentId,
+    clientName: appt.clientName,
+    clientEmail: appt.clientEmail,
+    repName: rep.fullName,
+    proposalNum,
+    total,
+    signToken: confirmToken,
+    confirmToken,
+    services: JSON.stringify(services),
+    discount,
+    lang: lang as string,
+    status: "pending",
+  });
+
   // Generate PDF
   const pdfBuffer = await generateProposalPDF(proposalData);
   const pdfBase64 = pdfBuffer.toString("base64");
 
-  const total = services.reduce((s: number, svc: { price: number }) => s + svc.price, 0) - discount;
 
   // Send email to client
   const emailHtml = `

@@ -224,19 +224,28 @@ export const wizardSessions = pgTable("wizard_sessions", {
   updatedAt:       timestamp("updated_at").defaultNow().notNull(),
 });
 
+
+
 // ── Proposals
 export const proposals = pgTable("proposals", {
-  id:           uuid("id").primaryKey().defaultRandom(),
+  id:            uuid("id").primaryKey().defaultRandom(),
   appointmentId: text("appointment_id").notNull(),
-  clientName:   text("client_name").notNull(),
-  clientEmail:  text("client_email").notNull(),
-  repName:      text("rep_name").notNull(),
-  proposalNum:  text("proposal_num").notNull(),
-  total:        integer("total").notNull(),
-  signToken:    text("sign_token").notNull().unique(),
-  signedAt:     timestamp("signed_at"),
-  signedIp:     text("signed_ip"),
-  pdfBase64:    text("pdf_base64"),
-  lang:         text("lang").default("es"),
-  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  clientName:    text("client_name").notNull(),
+  clientEmail:   text("client_email").notNull(),
+  repName:       text("rep_name").notNull(),
+  proposalNum:   text("proposal_num").notNull(),
+  total:         integer("total").notNull(),
+  signToken:     text("sign_token").notNull().unique(),
+  signedAt:      timestamp("signed_at"),
+  signedIp:      text("signed_ip"),
+  pdfBase64:     text("pdf_base64"),
+  lang:          text("lang").default("es"),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+  confirmToken:  text("confirm_token"),
+  services:      text("services"),
+  discount:      integer("discount").default(0),
+  status:        text("status").default("pending"),
+  acceptedAt:    timestamp("accepted_at"),
+  qbInvoiceId:   text("qb_invoice_id"),
+  qbCustomerId:  text("qb_customer_id"),
 });
