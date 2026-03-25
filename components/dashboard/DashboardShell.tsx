@@ -38,6 +38,10 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   const [showOutcome, setShowOutcome] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const now = new Date();
+  const apptTime = new Date(appt.scheduledAt);
+  const minutesPast = (now.getTime() - apptTime.getTime()) / 60000;
+  const needsOutcome = minutesPast > 15 && minutesPast < 180 && !appt.outcome && appt.status !== "no_show" && appt.status !== "cancelled" && !!appt.assignedTo;
 
   const slotDate = new Date(appt.scheduledAt);
   const timeStr = slotDate.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: userTimezone });
@@ -117,9 +121,9 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
 
                 {/* Siempre visibles */}
                 <button onClick={() => setShowOutcome(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
-                  style={{ background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)", color: "#92400E" }}>
-                  📋 Outcome
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold${needsOutcome ? " animate-pulse" : ""}`}
+                  style={{ background: needsOutcome ? "rgba(239,68,68,0.1)" : "rgba(201,168,76,0.1)", border: `1px solid ${needsOutcome ? "rgba(239,68,68,0.4)" : "rgba(201,168,76,0.3)"}`, color: needsOutcome ? "#DC2626" : "#92400E" }}>
+                  {needsOutcome ? "🔴" : "📋"} Outcome
                 </button>
 
                 <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, repSlug: appt.repSlug || "book" })}
@@ -171,15 +175,9 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                     ···
                   </button>
                   {openMenuId === appt.id && (
-                    <div className="absolute left-0 top-10 z-50 bg-white rounded-xl shadow-xl border py-1 min-w-[160px]"
-                         style={{ borderColor: "#E5E7EB" }}>
-                      {appt.status === "pending_assignment" && canAssign && (
-                        <button onClick={() => { setShowAssign(true); setOpenMenuId(null); }}
-                          className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50 text-left"
-                          style={{ color: "#374151" }}>
-                          📌 Asignar
-                        </button>
-                      )}
+                    <div className="absolute right-0 bottom-10 z-50 bg-white rounded-xl shadow-xl border py-1 min-w-[160px]"
+                         style={{ borderColor: "#E5E7EB", boxShadow: "0 -4px 24px rgba(0,0,0,0.12)" }}>
+
                       {canAssign && appt.assignedTo && (
                         <button onClick={() => { setShowAssign(true); setOpenMenuId(null); }}
                           className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50 text-left"
