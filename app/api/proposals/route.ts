@@ -167,20 +167,7 @@ export async function POST(req: NextRequest) {
       : lang === "pt"
       ? `Proposta comercial para ${appt.clientCompany || appt.clientName} — FastForward`
       : `Propuesta comercial para ${appt.clientCompany || appt.clientName} — FastForward`,
-    html: emailHtml.replace(
-      '</div>
-</div>',
-      `<div style="margin-top:16px;padding:14px;background:#F8F9FB;border-radius:10px;border:1px solid #E5E7EB;text-align:center;">
-        <p style="font-size:12px;color:#6B7280;margin:0 0 8px;">${lang === "en" ? "Sign this proposal digitally" : lang === "pt" ? "Assinar esta proposta digitalmente" : "Firmá esta propuesta digitalmente"}</p>
-        <a href="${signUrl}" style="display:inline-block;background:#27295C;color:white;padding:10px 20px;border-radius:8px;font-weight:700;text-decoration:none;font-size:13px;">✍️ ${lang === "en" ? "Sign proposal" : lang === "pt" ? "Assinar proposta" : "Firmar propuesta"}</a>
-      </div>
-    </div>
-  </div>`
-    ),
-    attachments: [{
-      filename: `Propuesta-FastForward-${proposalNum}.pdf`,
-      content: pdfBase64,
-    }],
+    html: emailHtml,
   });
 
   return NextResponse.json({ ok: true, proposalNum, total, signUrl });
