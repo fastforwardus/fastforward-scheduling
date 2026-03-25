@@ -26,7 +26,7 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
     clientCompany: appointments.clientCompany,
     clientEmail: appointments.clientEmail,
     assignedTo: appointments.assignedTo,
-  }).from(appointments).where(eq(appointments.id, proposal.appointmentId)).limit(1);
+  }).from(appointments).where(eq(appointments.id, proposal.appointmentId as string)).limit(1);
 
   let repName = "FastForward FDA Experts";
   if (appt?.assignedTo) {
@@ -35,7 +35,7 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
     if (rep) repName = rep.fullName;
   }
 
-  const services = JSON.parse(proposal.services as string) as { name: string; description: string; price: number }[];
+  const services = JSON.parse((proposal.services as string) || "[]") as { name: string; description: string; price: number }[];
 
   return (
     <ProposalConfirmClient

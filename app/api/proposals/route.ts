@@ -169,18 +169,7 @@ export async function POST(req: NextRequest) {
     clientNotes: `Propuesta ${proposalNum} enviada. Idioma: ${lang === 'en' ? 'English' : lang === 'pt' ? 'Portugu\u00eas' : 'Espa\u00f1ol'}. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
   }).catch(console.error);
 
-  // Second email removed - merged into first
-  await resend.emails.send({
-    from: `${rep.fullName} — FastForward <info@fastfwdus.com>`,
-    replyTo: rep.email,
-    to: appt.clientEmail,
-    subject: lang === "en"
-      ? `Commercial proposal for ${appt.clientCompany || appt.clientName} — FastForward`
-      : lang === "pt"
-      ? `Proposta comercial para ${appt.clientCompany || appt.clientName} — FastForward`
-      : `Propuesta comercial para ${appt.clientCompany || appt.clientName} — FastForward`,
-    html: emailHtml,
-  });
+
 
   return NextResponse.json({ ok: true, proposalNum, total, confirmUrl: `${appUrl}/proposal/confirm/${confirmToken}` });
   } catch (err) {
