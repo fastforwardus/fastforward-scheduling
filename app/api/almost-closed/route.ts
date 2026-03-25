@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments, users, followUpSequences } from "@/db/schema";
+import { appointments } from "@/db/schema";
 import { and, eq, lte, isNull, or } from "drizzle-orm";
 import { Resend } from "resend";
 import Anthropic from "@anthropic-ai/sdk";
