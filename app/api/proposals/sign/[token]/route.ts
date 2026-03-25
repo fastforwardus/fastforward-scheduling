@@ -33,7 +33,6 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
     .set({ signedAt: new Date(), signedIp: ip })
     .where(eq(proposals.signToken, params.token));
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
 
   // Notify rep + Carlos
   await resend.emails.send({

@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, users } from "@/db/schema";
-import { eq, and, lte, inArray } from "drizzle-orm";
+import { eq, and, lte } from "drizzle-orm";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
