@@ -79,6 +79,8 @@ export async function POST(req: NextRequest) {
 
   // Generate confirm token
   const confirmToken = randomBytes(32).toString("hex");
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
+  const signUrl = `${appUrl}/proposal/confirm/${confirmToken}`;
 
   // Save proposal to DB
   await db.insert(proposals).values({
@@ -114,6 +116,11 @@ export async function POST(req: NextRequest) {
     <div style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:24px;">
       ${emailText || `Adjunto encontrara la propuesta comercial personalizada que preparamos para ${appt.clientCompany || "su empresa"}. La misma incluye todos los servicios acordados con un total de <strong>USD $${total.toLocaleString("en-US")}</strong>.<br><br>La propuesta es valida por 15 dias. Para confirmarla y dar inicio a los tramites, simplemente responda este email.`}
     </div>
+    <a href="${appUrl}/proposal/confirm/${confirmToken}"
+       style="display:block;text-align:center;background:#22C55E;color:white;padding:16px;border-radius:12px;font-weight:700;text-decoration:none;font-size:16px;margin-bottom:16px;">
+      ✅ ${lang === "en" ? "Accept proposal" : lang === "pt" ? "Aceitar proposta" : "Aceptar propuesta"} →
+    </a>
+    <p style="text-align:center;font-size:11px;color:#9CA3AF;margin:-8px 0 20px;">Al hacer click confirmás los servicios y el total indicado en el PDF adjunto.</p>
     <div style="background:#F8F9FB;border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid #E5E7EB;">
       <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Total de la propuesta</p>
       <p style="font-size:24px;font-weight:700;color:#C9A84C;margin:0;">USD $${total.toLocaleString("en-US")}</p>
@@ -163,10 +170,7 @@ export async function POST(req: NextRequest) {
     clientNotes: `Propuesta ${proposalNum} enviada. Idioma: ${lang === 'en' ? 'English' : lang === 'pt' ? 'Portugu\u00eas' : 'Espa\u00f1ol'}. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
   }).catch(console.error);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-  const signUrl = `${appUrl}/proposal/confirm/${confirmToken}`;
-
-  // Resend email with sign link
+  // Second email removed - merged into first
   await resend.emails.send({
     from: `${rep.fullName} — FastForward <info@fastfwdus.com>`,
     replyTo: rep.email,
@@ -179,7 +183,7 @@ export async function POST(req: NextRequest) {
     html: emailHtml,
   });
 
-  return NextResponse.json({ ok: true, proposalNum, total, signUrl });
+  return NextResponse.json({ ok: true, proposalNum, total, signUrl: `${appUrl}/proposal/confirm/${confirmToken}` });
   } catch (err) {
     console.error("PROPOSALS ERROR:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
