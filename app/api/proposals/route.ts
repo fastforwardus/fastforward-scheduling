@@ -7,6 +7,8 @@ import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { Resend } from "resend";
 import { generateProposalPDF, ProposalData } from "@/lib/proposal-pdf";
+import { proposals } from "@/db/schema";
+import { randomUUID } from "crypto";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -138,5 +140,48 @@ export async function POST(req: NextRequest) {
     clientNotes: `Propuesta ${proposalNum} enviada. Idioma: ${lang === 'en' ? 'English' : lang === 'pt' ? 'Portugu\u00eas' : 'Espa\u00f1ol'}. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
   }).catch(console.error);
 
-  return NextResponse.json({ ok: true, proposalNum, total });
+  // Save proposal to DB for signing
+  const signToken = randomUUID();
+  await db.insert(proposals).values({
+    appointmentId,
+    clientName: appt.clientName,
+    clientEmail: appt.clientEmail,
+    repName: rep.fullName,
+    proposalNum,
+    total,
+    signToken,
+    lang: lang as string,
+    pdfBase64,
+  }).catch(console.error);
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
+  const signUrl = `${appUrl}/sign/${signToken}`;
+
+  // Resend email with sign link
+  await resend.emails.send({
+    from: `${rep.fullName} — FastForward <info@fastfwdus.com>`,
+    replyTo: rep.email,
+    to: appt.clientEmail,
+    subject: lang === "en"
+      ? `Commercial proposal for ${appt.clientCompany || appt.clientName} — FastForward`
+      : lang === "pt"
+      ? `Proposta comercial para ${appt.clientCompany || appt.clientName} — FastForward`
+      : `Propuesta comercial para ${appt.clientCompany || appt.clientName} — FastForward`,
+    html: emailHtml.replace(
+      '</div>
+</div>',
+      `<div style="margin-top:16px;padding:14px;background:#F8F9FB;border-radius:10px;border:1px solid #E5E7EB;text-align:center;">
+        <p style="font-size:12px;color:#6B7280;margin:0 0 8px;">${lang === "en" ? "Sign this proposal digitally" : lang === "pt" ? "Assinar esta proposta digitalmente" : "Firmá esta propuesta digitalmente"}</p>
+        <a href="${signUrl}" style="display:inline-block;background:#27295C;color:white;padding:10px 20px;border-radius:8px;font-weight:700;text-decoration:none;font-size:13px;">✍️ ${lang === "en" ? "Sign proposal" : lang === "pt" ? "Assinar proposta" : "Firmar propuesta"}</a>
+      </div>
+    </div>
+  </div>`
+    ),
+    attachments: [{
+      filename: `Propuesta-FastForward-${proposalNum}.pdf`,
+      content: pdfBase64,
+    }],
+  });
+
+  return NextResponse.json({ ok: true, proposalNum, total, signUrl });
 }

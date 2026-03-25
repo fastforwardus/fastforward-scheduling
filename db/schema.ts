@@ -68,6 +68,7 @@ export const appointments = pgTable("appointments", {
   clientNotes: text("client_notes"),
   utmSource: text("utm_source"),
   partnerSlug: text("partner_slug"),
+  almostClosedSentAt: timestamp("almost_closed_sent_at"),
   confirmToken: text("confirm_token").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
 });
@@ -221,4 +222,21 @@ export const wizardSessions = pgTable("wizard_sessions", {
   completed:       boolean("completed").default(false),
   createdAt:       timestamp("created_at").defaultNow().notNull(),
   updatedAt:       timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ── Proposals
+export const proposals = pgTable("proposals", {
+  id:           uuid("id").primaryKey().defaultRandom(),
+  appointmentId: text("appointment_id").notNull(),
+  clientName:   text("client_name").notNull(),
+  clientEmail:  text("client_email").notNull(),
+  repName:      text("rep_name").notNull(),
+  proposalNum:  text("proposal_num").notNull(),
+  total:        integer("total").notNull(),
+  signToken:    text("sign_token").notNull().unique(),
+  signedAt:     timestamp("signed_at"),
+  signedIp:     text("signed_ip"),
+  pdfBase64:    text("pdf_base64"),
+  lang:         text("lang").default("es"),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
 });
