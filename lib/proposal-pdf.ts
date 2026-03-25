@@ -1,5 +1,4 @@
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-import fontkit from "@pdf-lib/fontkit";
 
 const NAVY  = rgb(39/255,  41/255,  92/255);
 const GOLD  = rgb(201/255, 168/255, 76/255);
@@ -110,22 +109,9 @@ export async function generateProposalPDF(data: ProposalData): Promise<Buffer> {
   const total = subtotal - (data.discount || 0);
 
   const pdfDoc = await PDFDocument.create();
-  pdfDoc.registerFontkit(fontkit);
-
-  // Fetch + embed Noto Sans (supports all special chars) from jsDelivr
-  let bold: Awaited<ReturnType<typeof pdfDoc.embedFont>>;
-  let regular: Awaited<ReturnType<typeof pdfDoc.embedFont>>;
-  try {
-    const [boldBytes, regularBytes] = await Promise.all([
-      fetch("https://fonts.gstatic.com/s/notosans/v36/o-0NIpQlx3QUlC5A4PNjXhFlY9aA5W43_CT5invnDg.ttf").then(r => r.arrayBuffer()),
-      fetch("https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr4ARARUM.ttf").then(r => r.arrayBuffer()),
-    ]);
-    bold    = await pdfDoc.embedFont(boldBytes);
-    regular = await pdfDoc.embedFont(regularBytes);
-  } catch {
-    bold    = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  }
+  // Use standard fonts (Helvetica supports Latin chars including accented)
+  const bold    = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
   // Fetch logo
   let logoImage: Awaited<ReturnType<typeof pdfDoc.embedPng>> | null = null;
