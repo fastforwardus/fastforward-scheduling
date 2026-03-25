@@ -97,7 +97,13 @@ export async function POST(req: NextRequest) {
   });
 
   // Generate PDF
-  const pdfBuffer = await generateProposalPDF(proposalData);
+  let pdfBuffer: Buffer;
+  try {
+    pdfBuffer = await generateProposalPDF(proposalData);
+  } catch (pdfErr) {
+    console.error("PDF generation error:", pdfErr);
+    return NextResponse.json({ error: "PDF generation failed", detail: String(pdfErr) }, { status: 500 });
+  }
   const pdfBase64 = pdfBuffer.toString("base64");
 
 
