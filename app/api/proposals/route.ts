@@ -8,7 +8,6 @@ import { randomBytes } from "crypto";
 import { getSession } from "@/lib/session";
 import { Resend } from "resend";
 import { generateProposalPDF, ProposalData } from "@/lib/proposal-pdf";
-import { randomUUID } from "crypto";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -25,6 +24,7 @@ function formatDate(date: Date): string {
 }
 
 export async function POST(req: NextRequest) {
+  try {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
   }).catch(console.error);
 
   // Save proposal to DB for signing
-  const signToken = randomUUID();
+  const signToken = randomBytes(16).toString("hex");
   await db.insert(proposals).values({
     appointmentId,
     clientName: appt.clientName,
@@ -198,4 +198,8 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ ok: true, proposalNum, total, signUrl });
+  } catch (err) {
+    console.error("PROPOSALS ERROR:", err);
+    return NextResponse.json({ error: String(err) }, { status: 500 });
+  }
 }
