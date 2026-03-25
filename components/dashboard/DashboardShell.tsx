@@ -109,7 +109,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   { label: "Email", value: appt.clientEmail },
                   { label: "WhatsApp", value: appt.clientWhatsapp },
                   { label: "Plataforma", value: appt.platform === "meet" ? "Google Meet" : appt.platform === "zoom" ? "Zoom" : "WhatsApp" },
-                  { label: "Experto", value: appt.repName || "Sin asignar" },
+                  { label: "Plataforma", value: appt.platform === "meet" ? "Google Meet" : "WhatsApp" },
                 ].map(item => (
                   <div key={item.label}>
                     <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{item.label}</p>
