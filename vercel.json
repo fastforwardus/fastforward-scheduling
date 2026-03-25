@@ -5,10 +5,6 @@
       "schedule": "0 * * * *"
     },
     {
-      "path": "/api/noshow",
-      "schedule": "*/10 * * * *"
-    },
-    {
       "path": "/api/followup",
       "schedule": "0 13 * * *"
     },
