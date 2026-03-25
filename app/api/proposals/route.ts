@@ -83,12 +83,8 @@ export async function POST(req: NextRequest) {
   // Save proposal to DB
   await db.insert(proposals).values({
     appointmentId,
-    clientName: appt.clientName,
-    clientEmail: appt.clientEmail,
-    repName: rep.fullName,
     proposalNum,
     total,
-    signToken: confirmToken,
     confirmToken,
     services: JSON.stringify(services),
     discount,
