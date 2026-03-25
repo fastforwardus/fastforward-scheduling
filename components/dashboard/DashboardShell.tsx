@@ -116,6 +116,20 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                     <p className="text-xs font-medium truncate" style={{ color: "#374151" }}>{item.value}</p>
                   </div>
                 ))}
+                <div>
+                  <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Experto</p>
+                  {appt.repName ? (
+                    <p className="text-xs font-medium" style={{ color: "#374151" }}>{appt.repName}</p>
+                  ) : canAssign ? (
+                    <button onClick={() => setShowAssign(true)}
+                      className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold mt-0.5"
+                      style={{ background: "#EAB308", color: "white" }}>
+                      Asignar →
+                    </button>
+                  ) : (
+                    <p className="text-xs font-medium" style={{ color: "#9CA3AF" }}>Sin asignar</p>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2 mt-3 flex-wrap">
 
