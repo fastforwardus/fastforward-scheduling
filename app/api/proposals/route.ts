@@ -167,22 +167,8 @@ export async function POST(req: NextRequest) {
     clientNotes: `Propuesta ${proposalNum} enviada. Idioma: ${lang === 'en' ? 'English' : lang === 'pt' ? 'Portugu\u00eas' : 'Espa\u00f1ol'}. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
   }).catch(console.error);
 
-  // Save proposal to DB for signing
-  const signToken = randomBytes(16).toString("hex");
-  await db.insert(proposals).values({
-    appointmentId,
-    clientName: appt.clientName,
-    clientEmail: appt.clientEmail,
-    repName: rep.fullName,
-    proposalNum,
-    total,
-    signToken,
-    lang: lang as string,
-    pdfBase64,
-  }).catch(console.error);
-
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-  const signUrl = `${appUrl}/sign/${signToken}`;
+  const signUrl = `${appUrl}/proposal/confirm/${confirmToken}`;
 
   // Resend email with sign link
   await resend.emails.send({
