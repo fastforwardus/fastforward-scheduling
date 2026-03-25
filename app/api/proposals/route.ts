@@ -80,7 +80,6 @@ export async function POST(req: NextRequest) {
   // Generate confirm token
   const confirmToken = randomBytes(32).toString("hex");
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-  const signUrl = `${appUrl}/proposal/confirm/${confirmToken}`;
 
   // Save proposal to DB
   await db.insert(proposals).values({
@@ -183,7 +182,7 @@ export async function POST(req: NextRequest) {
     html: emailHtml,
   });
 
-  return NextResponse.json({ ok: true, proposalNum, total, signUrl: `${appUrl}/proposal/confirm/${confirmToken}` });
+  return NextResponse.json({ ok: true, proposalNum, total, confirmUrl: `${appUrl}/proposal/confirm/${confirmToken}` });
   } catch (err) {
     console.error("PROPOSALS ERROR:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
