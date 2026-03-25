@@ -35,7 +35,7 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
     if (rep) repName = rep.fullName;
   }
 
-  const services = JSON.parse((proposal.services as string) || "[]") as { name: string; description: string; price: number }[];
+  const services = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; description: string; price: number }[];
 
   return (
     <ProposalConfirmClient

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
   if (!appt) return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
 
-  const services = JSON.parse(proposal.services as string) as { name: string; price: number }[];
+  const services = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
 
   // ── QuickBooks: Find or create customer ─────────────────────────
   let qbCustomerId = "";
