@@ -48,8 +48,6 @@ export async function POST(req: NextRequest) {
 
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
   const firstName = appt.clientName.split(" ")[0];
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-
   const LABELS = {
     es: { subject: `Tu factura — ${appt.clientCompany} — FastForward`, greeting: `Hola, ${firstName}`, body: `Adjunto tu factura por los servicios contratados con FastForward FDA Experts. Por favor realizá el pago para dar inicio a tus trámites.`, invoiceLabel: "Factura", totalLabel: "Total", dueDateLabel: "Vencimiento", payBtn: "Ver y pagar factura", thanks: "Gracias por confiar en FastForward." },
     en: { subject: `Your invoice — ${appt.clientCompany} — FastForward`, greeting: `Hi, ${firstName}`, body: `Please find your invoice for the services contracted with FastForward FDA Experts. Please proceed with payment to initiate your registration process.`, invoiceLabel: "Invoice", totalLabel: "Total", dueDateLabel: "Due date", payBtn: "View and pay invoice", thanks: "Thank you for trusting FastForward." },

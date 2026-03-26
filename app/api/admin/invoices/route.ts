@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { proposals } from "@/db/schema";
-import { eq, isNotNull, isNull } from "drizzle-orm";
+import { isNotNull } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { getQBToken } from "@/lib/quickbooks";
 
