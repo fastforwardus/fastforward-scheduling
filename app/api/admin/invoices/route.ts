@@ -6,6 +6,7 @@ import { getSession } from "@/lib/session";
 import { getQBToken } from "@/lib/quickbooks";
 
 export async function GET() {
+  try {
   const session = await getSession();
   if (!session || session.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
@@ -51,4 +52,8 @@ export async function GET() {
   }
 
   return NextResponse.json({ invoices: results });
+  } catch (err) {
+    console.error("Invoices API error:", err);
+    return NextResponse.json({ error: String(err), invoices: [] }, { status: 500 });
+  }
 }
