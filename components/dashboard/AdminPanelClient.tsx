@@ -864,8 +864,23 @@ export default function AdminPanelClient({ user }: {
           {/* Finanzas tab */}
           {tab === "finanzas" && (
             <div className="space-y-4">
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: "#E5E7EB" }}>
+                  <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Facturado</p>
+                  <p className="text-2xl font-bold" style={{ color: "#27295C" }}>
+                    USD ${invoices.reduce((s, inv) => s + (inv.totalAmt || inv.total || 0), 0).toLocaleString("en-US")}
+                  </p>
+                </div>
+                <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: "#E5E7EB" }}>
+                  <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Pago recibido</p>
+                  <p className="text-2xl font-bold" style={{ color: "#22C55E" }}>
+                    USD ${invoices.reduce((s, inv) => s + ((inv.totalAmt || inv.total || 0) - (inv.balance || 0)), 0).toLocaleString("en-US")}
+                  </p>
+                </div>
+              </div>
               <div className="flex items-center justify-between">
-                <p className="text-sm" style={{ color: "#6B7280" }}>Invoices creados en QuickBooks — pendientes de envío al cliente</p>
+                <p className="text-sm" style={{ color: "#6B7280" }}>Invoices en QuickBooks</p>
                 <button onClick={loadInvoices} className="px-3 py-1.5 rounded-lg text-xs border" style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>↻ Actualizar</button>
               </div>
               <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
