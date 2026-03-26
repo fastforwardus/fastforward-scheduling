@@ -59,11 +59,28 @@ export async function POST(req: NextRequest) {
 
   const services = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
 
+  // Fetch QB invoice PDF
+  let pdfAttachment: { filename: string; content: string } | null = null;
+  try {
+    const pdfRes = await fetch(
+      `https://quickbooks.api.intuit.com/v3/company/${realmId}/invoice/${proposal.qbInvoiceId}/pdf?minorversion=65`,
+      { headers: { Authorization: `Bearer ${token}`, Accept: "application/pdf" } }
+    );
+    if (pdfRes.ok) {
+      const pdfBuffer = await pdfRes.arrayBuffer();
+      pdfAttachment = {
+        filename: `Factura-FastForward-${proposal.proposalNum}.pdf`,
+        content: Buffer.from(pdfBuffer).toString("base64"),
+      };
+    }
+  } catch (err) { console.error("QB PDF error:", err); }
+
   await resend.emails.send({
     from: `${repName} — FastForward <info@fastfwdus.com>`,
     replyTo: repEmail,
     to: appt.clientEmail,
     subject: L.subject,
+    ...(pdfAttachment ? { attachments: [{ filename: pdfAttachment.filename, content: pdfAttachment.content }] } : {}),
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;">
   <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
