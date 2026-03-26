@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
           method: "POST",
           headers: { Authorization: `Bearer ${qbToken}`, Accept: "application/json", "Content-Type": "application/json" },
           body: JSON.stringify({
-            DisplayName: `${appt.clientCompany} — ${appt.clientName}`,
+            DisplayName: `${appt.clientCompany} — ${appt.clientName} (${new Date().getFullYear()})`,
             GivenName: nameParts[0],
             FamilyName: nameParts.slice(1).join(" ") || "-",
             CompanyName: appt.clientCompany,
@@ -69,8 +69,19 @@ export async function POST(req: NextRequest) {
         }
       );
       const createData = await createRes.json();
-      qbCustomerId = createData.Customer?.Id || "";
-      console.log("QB Customer created:", qbCustomerId);
+      if (createData.Customer?.Id) {
+        qbCustomerId = createData.Customer.Id;
+        console.log("QB Customer created:", qbCustomerId);
+      } else if (createData.Fault) {
+        // Try searching by company name
+        const searchRes2 = await fetch(
+          `https://quickbooks.api.intuit.com/v3/company/${realmId}/query?query=SELECT * FROM Customer WHERE CompanyName = '${appt.clientCompany.replace(/'/g, "\'")}'&minorversion=65`,
+          { headers: { Authorization: `Bearer ${qbToken}`, Accept: "application/json" } }
+        );
+        const searchData2 = await searchRes2.json();
+        qbCustomerId = searchData2.QueryResponse?.Customer?.[0]?.Id || "";
+        console.log("QB Customer found by name:", qbCustomerId);
+      }
     }
 
     // Create invoice
