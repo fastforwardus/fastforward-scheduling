@@ -489,7 +489,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
 export default function AdminPanelClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string }
 }) {
-  const [tab, setTab] = useState<"users" | "metrics" | "holidays" | "partners">("users");
+  const [tab, setTab] = useState<"users" | "metrics" | "holidays" | "partners" | "finanzas">("users");
   const [users, setUsers] = useState<User[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -504,6 +504,9 @@ export default function AdminPanelClient({ user }: {
   const [loadingReferrals, setLoadingReferrals] = useState(false);
   const [partnersList, setPartnersList] = useState<{ id: string; name: string; slug: string; email: string; company: string | null; isActive: boolean; commissionRate: string }[]>([]);
   const [showCreatePartner, setShowCreatePartner] = useState(false);
+  const [invoices, setInvoices] = useState<{id:string;proposalNum:string;total:number;qbInvoiceId:string|null;customerName?:string;dueDate?:string;balance?:number;totalAmt?:number;invoiceSentAt:Date|null;appointmentId:string;lang:string|null}[]>([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(false);
+  const [sendingInvoice, setSendingInvoice] = useState<string|null>(null);
   const [partnerForm, setPartnerForm] = useState({ name: "", slug: "", email: "", company: "", password: "", commissionRate: "0" });
   const [savingPartner, setSavingPartner] = useState(false);
 
@@ -547,6 +550,27 @@ export default function AdminPanelClient({ user }: {
     const data = await res.json();
     setPartnerReferrals(data.appointments || []);
     setLoadingReferrals(false);
+  }
+
+  const loadInvoices = useCallback(async () => {
+    setLoadingInvoices(true);
+    const res = await fetch("/api/admin/invoices");
+    const data = await res.json();
+    setInvoices(data.invoices || []);
+    setLoadingInvoices(false);
+  }, []);
+
+  useEffect(() => { if (tab === "finanzas") loadInvoices(); }, [tab, loadInvoices]);
+
+  async function sendInvoice(proposalId: string) {
+    setSendingInvoice(proposalId);
+    await fetch("/api/admin/invoices/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ proposalId }),
+    });
+    setSendingInvoice(null);
+    loadInvoices();
   }
 
   async function createPartner() {
@@ -834,6 +858,52 @@ export default function AdminPanelClient({ user }: {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Finanzas tab */}
+          {tab === "finanzas" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm" style={{ color: "#6B7280" }}>Invoices creados en QuickBooks — pendientes de envío al cliente</p>
+                <button onClick={loadInvoices} className="px-3 py-1.5 rounded-lg text-xs border" style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>↻ Actualizar</button>
+              </div>
+              <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
+                <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+                  <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Invoices ({invoices.length})</p>
+                </div>
+                {loadingInvoices ? (
+                  <div className="text-center py-10"><Loader2 className="w-5 h-5 animate-spin mx-auto" style={{ color: "#C9A84C" }} /></div>
+                ) : invoices.length === 0 ? (
+                  <div className="text-center py-10"><p className="text-sm" style={{ color: "#9CA3AF" }}>No hay invoices pendientes</p></div>
+                ) : (
+                  <div className="divide-y" style={{ borderColor: "#F0F0F0" }}>
+                    {invoices.map(inv => (
+                      <div key={inv.id} className="flex items-center justify-between px-5 py-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{inv.customerName || inv.proposalNum}</p>
+                            <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: inv.invoiceSentAt ? "#DCFCE7" : "#FEF9C3", color: inv.invoiceSentAt ? "#166534" : "#854D0E" }}>
+                              {inv.invoiceSentAt ? "✅ Enviado" : "⏳ Pendiente"}
+                            </span>
+                          </div>
+                          <p className="text-xs" style={{ color: "#9CA3AF" }}>
+                            {inv.proposalNum} · USD ${inv.total.toLocaleString("en-US")}
+                            {inv.dueDate ? ` · Vence: ${inv.dueDate}` : ""}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => sendInvoice(inv.id)}
+                          disabled={sendingInvoice === inv.id}
+                          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
+                          style={{ background: inv.invoiceSentAt ? "#F3F4F6" : "#C9A84C", color: inv.invoiceSentAt ? "#6B7280" : "#1A1C3E" }}>
+                          {sendingInvoice === inv.id ? <Loader2 className="w-3 h-3 animate-spin" /> : inv.invoiceSentAt ? "↻ Reenviar" : "📧 Enviar factura"}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

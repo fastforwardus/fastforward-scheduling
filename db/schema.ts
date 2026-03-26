@@ -241,4 +241,5 @@ export const proposals = pgTable("proposals", {
   qbCustomerId:  text("qb_customer_id"),
   confirmToken:  text("confirm_token"),
   createdAt:     timestamp("created_at").defaultNow().notNull(),
+  invoiceSentAt: timestamp("invoice_sent_at"),
 });
