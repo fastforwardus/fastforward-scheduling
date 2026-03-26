@@ -645,7 +645,8 @@ export default function AdminPanelClient({ user }: {
               { key: "users",   label: "Usuarios y disponibilidad", icon: Users },
               { key: "metrics", label: "Metricas",                  icon: BarChart2 },
               { key: "holidays", label: "Feriados",                   icon: Clock },
-              { key: "partners", label: "Partners",                   icon: Users },
+              { key: "partners",  label: "Partners",  icon: Users },
+              { key: "finanzas", label: "Finanzas",  icon: BarChart2 },
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
                 className="flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-all"
