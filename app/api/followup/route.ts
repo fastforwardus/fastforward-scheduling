@@ -59,8 +59,10 @@ Profissional, caloroso, maximo 100 palavras, um CTA para reagendar em https://sc
     messages: [{ role: "user", content: prompts[lang] || prompts.es }],
   });
 
-  const text = message.content[0].type === "text" ? message.content[0].text : "";
-  return text.trim();
+  const raw = message.content[0].type === "text" ? message.content[0].text : "";
+  // Strip markdown code fences if AI wraps in ```html ... ```
+  const text = raw.replace(/^```(?:html)?\n?/i, "").replace(/\n?```$/i, "").trim();
+  return text;
 }
 
 export async function GET(req: NextRequest) {

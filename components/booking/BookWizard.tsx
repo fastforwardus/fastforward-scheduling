@@ -189,7 +189,14 @@ export default function BookWizard({
     }
   };
 
+  const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+
   const handleSubmit = async () => {
+    // Validate email before submitting
+    if (!isValidEmail(w.clientEmail)) {
+      alert(w.language === "en" ? "Please enter a valid email address." : w.language === "pt" ? "Por favor insira um email válido." : "Por favor ingresá un email válido.");
+      return;
+    }
     setSubmitting(true);
     try {
       trackSession({ completed: true });
@@ -512,13 +519,28 @@ export default function BookWizard({
                 {tr.fields.whatsapp}
               </label>
               <div className="flex gap-2">
-                <select value={w.clientCountryCode} onChange={e => w.setClientCountryCode(e.target.value)}
+                <select value={COUNTRIES.some(c => c.code === w.clientCountryCode) && w.clientCountryCode !== "__other__" ? w.clientCountryCode : "__other__"}
+                  onChange={e => {
+                    if (e.target.value === "__other__") {
+                      w.setClientCountryCode("");
+                    } else {
+                      w.setClientCountryCode(e.target.value);
+                    }
+                  }}
                   className="px-3 py-3 rounded-xl border-2 text-sm outline-none bg-white"
-                  style={{ borderColor: "#E5E7EB", color: "#111827", minWidth: "90px" }}>
-                  {COUNTRIES.map(c => (
-                    <option key={c.code} value={c.code}>{c.flag} {c.code}</option>
+                  style={{ borderColor: "#E5E7EB", color: "#111827", minWidth: "110px" }}>
+                  {COUNTRIES.map((c, i) => (
+                    <option key={`${c.code}-${i}`} value={c.code}>{c.flag} {c.code}</option>
                   ))}
+                  <option value="__other__">🌍 Otro</option>
                 </select>
+                {(!COUNTRIES.some(c => c.code === w.clientCountryCode) || w.clientCountryCode === "") && (
+                  <input type="text" value={w.clientCountryCode} onChange={e => w.setClientCountryCode(e.target.value)}
+                    placeholder="+39"
+                    className="w-20 px-3 py-3 rounded-xl border-2 text-sm outline-none"
+                    style={{ borderColor: "#27295C", color: "#111827" }}
+                  />
+                )}
                 <input type="tel" value={w.clientWhatsapp} onChange={e => w.setClientWhatsapp(e.target.value)}
                   placeholder={tr.placeholders.whatsapp}
                   className="flex-1 px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all"
