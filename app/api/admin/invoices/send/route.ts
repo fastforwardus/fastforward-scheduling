@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { proposals, appointments, users } from "@/db/schema";
+import { proposals, appointments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { getQBToken } from "@/lib/quickbooks";
@@ -49,8 +49,6 @@ export async function POST(req: NextRequest) {
     } catch {}
   }
 
-  const lang = (proposal.lang || "es") as "es" | "en" | "pt";
-  const firstName = appt.clientName.split(" ")[0];
 
 
   // Send via QB email first to get proper payment link
