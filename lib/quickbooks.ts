@@ -1,5 +1,34 @@
 const QB_BASE = `https://quickbooks.api.intuit.com/v3/company/${process.env.QB_REALM_ID}`;
 
+async function saveNewRefreshToken(newToken: string) {
+  // Update QB_REFRESH_TOKEN in Vercel automatically
+  try {
+    const projectId = process.env.VERCEL_PROJECT_ID || "fastforward-scheduling";
+    const teamId = process.env.VERCEL_TEAM_ID || "";
+    const vercelToken = process.env.VERCEL_TOKEN;
+    if (!vercelToken) { console.log("No VERCEL_TOKEN — cannot auto-update QB_REFRESH_TOKEN"); return; }
+
+    const url = `https://api.vercel.com/v10/projects/${projectId}/env${teamId ? `?teamId=${teamId}` : ""}`;
+    // Get existing env vars to find the ID of QB_REFRESH_TOKEN
+    const listRes = await fetch(url, {
+      headers: { Authorization: `Bearer ${vercelToken}` }
+    });
+    const listData = await listRes.json();
+    const envVar = listData.envs?.find((e: { key: string }) => e.key === "QB_REFRESH_TOKEN");
+
+    if (envVar?.id) {
+      await fetch(`https://api.vercel.com/v10/projects/${projectId}/env/${envVar.id}${teamId ? `?teamId=${teamId}` : ""}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${vercelToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ value: newToken }),
+      });
+      console.log("QB_REFRESH_TOKEN auto-updated in Vercel");
+    }
+  } catch (err) {
+    console.error("Failed to auto-update QB_REFRESH_TOKEN:", err);
+  }
+}
+
 export async function getQBToken(): Promise<string> {
   const credentials = Buffer.from(
     `${process.env.QB_CLIENT_ID}:${process.env.QB_CLIENT_SECRET}`
@@ -13,9 +42,10 @@ export async function getQBToken(): Promise<string> {
   const data = await res.json();
   if (!data.access_token) throw new Error(`QB auth failed: ${JSON.stringify(data)}`);
 
-  // Save new refresh token if rotated
+  // Auto-save new refresh token if rotated
   if (data.refresh_token && data.refresh_token !== process.env.QB_REFRESH_TOKEN) {
-    console.log("QB refresh token rotated — update QB_REFRESH_TOKEN in env");
+    process.env.QB_REFRESH_TOKEN = data.refresh_token;
+    await saveNewRefreshToken(data.refresh_token);
   }
 
   return data.access_token;
@@ -33,7 +63,6 @@ export interface QBCustomer {
 export async function getQBCustomersWithServices(): Promise<QBCustomer[]> {
   const token = await getQBToken();
 
-  // Get all paid invoices
   const res = await fetch(
     `${QB_BASE}/query?query=SELECT * FROM Invoice MAXRESULTS 1000&minorversion=65`,
     { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }
@@ -41,7 +70,6 @@ export async function getQBCustomersWithServices(): Promise<QBCustomer[]> {
   const data = await res.json();
   const invoices = data.QueryResponse?.Invoice || [];
 
-  // Group by customer
   const customerMap: Record<string, QBCustomer> = {};
 
   for (const inv of invoices) {
@@ -50,7 +78,6 @@ export async function getQBCustomersWithServices(): Promise<QBCustomer[]> {
     if (!custId || !custName) continue;
 
     if (!customerMap[custId]) {
-      // Get customer email
       const custRes = await fetch(
         `${QB_BASE}/customer/${custId}?minorversion=65`,
         { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }
@@ -68,7 +95,6 @@ export async function getQBCustomersWithServices(): Promise<QBCustomer[]> {
       };
     }
 
-    // Add services from this invoice
     const lines = inv.Line?.filter((l: { DetailType: string; Description?: string; SalesItemLineDetail?: { ItemRef?: { name?: string } } }) => l.DetailType === "SalesItemLineDetail") || [];
     for (const line of lines) {
       const svc = line.Description || line.SalesItemLineDetail?.ItemRef?.name || "";
@@ -79,7 +105,6 @@ export async function getQBCustomersWithServices(): Promise<QBCustomer[]> {
       }
     }
 
-    // Track paid amounts
     if (inv.Balance === 0) {
       customerMap[custId].totalPaid += inv.TotalAmt || 0;
     } else {
