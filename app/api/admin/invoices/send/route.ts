@@ -46,7 +46,18 @@ export async function POST(req: NextRequest) {
   const data = await res.json();
   const inv = data.Invoice;
   // QB payment link
-  const qbPaymentUrl = inv?.InvoiceLink || `https://app.qbo.intuit.com/app/customerinvoice?txnId=${proposal.qbInvoiceId}`;
+  // Re-fetch invoice to get InvoiceLink after send
+  let qbPaymentUrl = inv?.InvoiceLink || "";
+  if (!qbPaymentUrl) {
+    try {
+      const invRes2 = await fetch(
+        `https://quickbooks.api.intuit.com/v3/company/${realmId}/invoice/${proposal.qbInvoiceId}?minorversion=65`,
+        { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }
+      );
+      const invData2 = await invRes2.json();
+      qbPaymentUrl = invData2.Invoice?.InvoiceLink || "";
+    } catch {}
+  }
 
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
   const firstName = appt.clientName.split(" ")[0];
@@ -58,6 +69,15 @@ export async function POST(req: NextRequest) {
   const L = LABELS[lang];
 
   const services = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
+
+  // Send via QB email first to get proper payment link
+  try {
+    await fetch(
+      `https://quickbooks.api.intuit.com/v3/company/${realmId}/invoice/${proposal.qbInvoiceId}/send?sendTo=${encodeURIComponent(appt.clientEmail)}&minorversion=65`,
+      { method: "POST", headers: { Authorization: `Bearer ${token}`, Accept: "application/json", "Content-Type": "application/octet-stream" } }
+    );
+    console.log("QB email sent for invoice", proposal.qbInvoiceId);
+  } catch (err) { console.error("QB send error:", err); }
 
   // Fetch QB invoice PDF
   let pdfAttachment: { filename: string; content: string } | null = null;
