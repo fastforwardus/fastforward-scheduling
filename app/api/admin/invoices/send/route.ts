@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   const data = await res.json();
   const inv = data.Invoice;
   // QB payment link
-  const qbPaymentUrl = inv?.InvoiceLink || `https://app.qbo.intuit.com/app/invoice?txnId=${proposal.qbInvoiceId}`;
+  const qbPaymentUrl = inv?.InvoiceLink || `https://app.qbo.intuit.com/app/customerinvoice?txnId=${proposal.qbInvoiceId}`;
 
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
   const firstName = appt.clientName.split(" ")[0];
