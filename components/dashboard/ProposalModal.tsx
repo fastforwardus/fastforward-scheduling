@@ -176,6 +176,17 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           </button>
         </div>
 
+        {/* Email del cliente editable */}
+        <div className="px-6 py-3 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+          <div className="flex items-center gap-3">
+            <label className="text-xs font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: "#9CA3AF" }}>Email</label>
+            <input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)}
+              className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
+              style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
+              placeholder="email@empresa.com" />
+          </div>
+        </div>
+
         {/* Tabs */}
         <div className="flex border-b px-6" style={{ borderColor: "#E5E7EB" }}>
           {[
