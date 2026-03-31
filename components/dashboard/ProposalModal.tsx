@@ -42,12 +42,13 @@ interface ProposalModalProps {
   appointmentId: string;
   clientName: string;
   clientCompany: string;
+  clientEmail?: string;
   repSlug?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function ProposalModal({ appointmentId, clientName, clientCompany, onClose, onSuccess }: ProposalModalProps) {
+export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", repSlug, onClose, onSuccess }: ProposalModalProps) {
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [selected, setSelected] = useState<SelectedService[]>([]);
   const [discount, setDiscount] = useState(0);
@@ -70,6 +71,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
   const [emailText, setEmailText] = useState(DEFAULT_EMAIL.es);
 
   const [sending, setSending] = useState(false);
+  const [clientEmail, setClientEmail] = useState(initialClientEmail || "");
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
 
@@ -130,6 +132,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           introText,
           emailText,
           lang,
+          clientEmail: clientEmail || undefined,
         }),
       });
       const data = await res.json();

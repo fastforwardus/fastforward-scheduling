@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
     introText,
     emailText,
     lang = "es",
+    clientEmail: clientEmailOverride,
   } = await req.json();
 
   if (!appointmentId || !services?.length) {
@@ -137,7 +138,8 @@ export async function POST(req: NextRequest) {
   await resend.emails.send({
     from: `${rep.fullName} — FastForward <info@fastfwdus.com>`,
     replyTo: rep.email,
-    to: appt.clientEmail,
+    to: clientEmailOverride || appt.clientEmail,
+    cc: rep.email !== "info@fastfwdus.com" ? [rep.email] : undefined,
     subject: lang === "en"
       ? `Commercial proposal for ${appt.clientCompany || appt.clientName} — FastForward`
       : lang === "pt"

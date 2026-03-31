@@ -32,7 +32,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   appt: Appt; canAssign: boolean; currentUserId: string; currentRole: string; onRefresh: () => void; userTimezone: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; repSlug: string } | null>(null);
+  const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; clientEmail?: string; repSlug: string } | null>(null);
   const [rescheduleAppt, setRescheduleAppt] = useState<{ id: string; clientName: string; scheduledAt: string } | null>(null);
   const [showAssign, setShowAssign] = useState(false);
   const [showOutcome, setShowOutcome] = useState(false);
@@ -139,7 +139,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   {needsOutcome ? "🔴" : "📋"} Outcome
                 </button>
 
-                <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, repSlug: appt.repSlug || "book" })}
+                <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, clientEmail: appt.clientEmail, repSlug: appt.repSlug || "book" })}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold"
                   style={{ background: "rgba(201,168,76,0.1)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)" }}>
                   📄 Propuesta
@@ -220,6 +220,18 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                         style={{ color: "#374151" }}>
                         📝 Notas
                       </button>
+                      {(currentRole === "admin" || currentRole === "sales_manager") && (
+                        <button onClick={async () => {
+                          if (!confirm("¿Cancelar esta cita?")) return;
+                          await fetch("/api/appointments/cancel", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ appointmentId: appt.id }) });
+                          setOpenMenuId(null);
+                          onRefresh();
+                        }}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-red-50 text-left border-t"
+                          style={{ color: "#EF4444", borderColor: "#F0F0F0" }}>
+                          🗑️ Cancelar cita
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
