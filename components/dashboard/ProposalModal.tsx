@@ -48,7 +48,7 @@ interface ProposalModalProps {
   onSuccess: () => void;
 }
 
-export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", repSlug, onClose, onSuccess }: ProposalModalProps) {
+export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", onClose, onSuccess }: ProposalModalProps) {
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [selected, setSelected] = useState<SelectedService[]>([]);
   const [discount, setDiscount] = useState(0);
