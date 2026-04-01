@@ -229,7 +229,7 @@ export const wizardSessions = pgTable("wizard_sessions", {
 // ── Proposals
 export const proposals = pgTable("proposals", {
   id:            uuid("id").primaryKey().defaultRandom(),
-  appointmentId: uuid("appointment_id").notNull(),
+  appointmentId: text("appointment_id").notNull(),
   proposalNum:   text("proposal_num").notNull(),
   services:      text("services").notNull(),
   discount:      integer("discount").default(0),

@@ -46,6 +46,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [emailText, setEmailText] = useState("");
 
   const subtotal = selected.reduce((s, svc) => s + svc.price * svc.qty, 0);
   const total = subtotal - discount;
@@ -65,7 +66,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
       const res = await fetch("/api/proposals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ services: selected.map(s => ({ name: s.name, description: s.description, price: s.price * s.qty })), discount, lang, directClientName: clientName, directClientCompany: clientCompany || clientName, directClientEmail: clientEmail }),
+        body: JSON.stringify({ services: selected.map(s => ({ name: s.name, description: s.description, price: s.price * s.qty })), discount, lang, directClientName: clientName, directClientCompany: clientCompany || clientName, directClientEmail: clientEmail, emailText: emailText || undefined }),
       });
       const data = await res.json();
       if (data.ok) setSent(true);
@@ -148,6 +149,15 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Email body */}
+            <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: "#E5E7EB" }}>
+              <p className="text-sm font-semibold mb-2" style={{ color: "#27295C" }}>Mensaje del email <span className="font-normal text-xs" style={{ color: "#9CA3AF" }}>(opcional)</span></p>
+              <textarea value={emailText} onChange={e => setEmailText(e.target.value)} rows={4}
+                className="w-full px-4 py-3 rounded-xl border text-sm outline-none resize-none"
+                style={{ borderColor: "#E5E7EB", color: "#27295C" }}
+                placeholder="Texto personalizado para el cuerpo del email. Si se deja en blanco se usa el texto por defecto." />
             </div>
 
             {/* Catalog */}
