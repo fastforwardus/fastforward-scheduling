@@ -36,15 +36,37 @@ export async function POST(req: NextRequest) {
     emailText,
     lang = "es",
     clientEmail: clientEmailOverride,
+    // Direct client fields (for proposals without appointment)
+    directClientName,
+    directClientCompany,
+    directClientEmail,
   } = await req.json();
 
-  if (!appointmentId || !services?.length) {
+  if (!services?.length) {
     return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
+  }
+  if (!appointmentId && (!directClientName || !directClientEmail)) {
+    return NextResponse.json({ error: "Faltan datos del cliente" }, { status: 400 });
   }
 
   // Get appointment + rep
-  const [appt] = await db.select().from(appointments).where(eq(appointments.id, appointmentId)).limit(1);
-  if (!appt) return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
+  let appt: { clientName: string; clientEmail: string; clientCompany: string; clientWhatsapp: string; id: string; assignedTo: string | null; serviceInterest: string | null; scheduledAt?: Date } | null = null;
+  if (appointmentId) {
+    const [a] = await db.select().from(appointments).where(eq(appointments.id, appointmentId)).limit(1);
+    if (!a) return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
+    appt = a;
+  } else {
+    appt = {
+      id: "direct",
+      clientName: directClientName,
+      clientEmail: directClientEmail,
+      clientCompany: directClientCompany || directClientName,
+      clientWhatsapp: "",
+      assignedTo: session.id,
+      serviceInterest: null,
+      scheduledAt: new Date(),
+    };
+  }
 
   const [rep] = await db.select({
     id: users.id, fullName: users.fullName, email: users.email, slug: users.slug,
@@ -54,14 +76,14 @@ export async function POST(req: NextRequest) {
   const validUntil = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
   const proposalNum = generateProposalNumber();
 
-  const nameParts = appt.clientName.split(" ");
+  const nameParts = appt!.clientName.split(" ");
   const firstName = nameParts[0];
 
   const proposalData: ProposalData = {
-    clientName: appt.clientCompany || appt.clientName,
-    contactName: appt.clientName,
-    contactEmail: appt.clientEmail,
-    contactPhone: appt.clientWhatsapp || "",
+    clientName: appt!.clientCompany || appt.clientName,
+    contactName: appt!.clientName,
+    contactEmail: appt!.clientEmail,
+    contactPhone: appt!.clientWhatsapp || "",
     repName: rep.fullName,
     repEmail: rep.email,
     repSlug: rep.slug || "book",
@@ -84,7 +106,7 @@ export async function POST(req: NextRequest) {
 
   // Save proposal to DB
   await db.insert(proposals).values({
-    appointmentId,
+    appointmentId: appointmentId || "direct-" + randomBytes(8).toString("hex"),
     proposalNum,
     total,
     confirmToken,
@@ -152,13 +174,15 @@ export async function POST(req: NextRequest) {
     }],
   });
 
-  // Update appointment outcome to proposal_sent
-  await db.update(appointments)
-    .set({ outcome: "proposal_sent", nextStep: "send_proposal" })
-    .where(eq(appointments.id, appointmentId));
+  // Update appointment outcome to proposal_sent (only if real appointment)
+  if (appointmentId && appointmentId !== "direct") {
+    await db.update(appointments)
+      .set({ outcome: "proposal_sent", nextStep: "send_proposal" })
+      .where(eq(appointments.id, appointmentId));
+  }
 
-  // Sync to Zoho CRM with note
-  createOrUpdateZohoLead({
+  // Sync to Zoho CRM with note (only for appointment-based proposals)
+  if (appointmentId) createOrUpdateZohoLead({
     clientName: appt.clientName,
     clientEmail: appt.clientEmail,
     clientCompany: appt.clientCompany,
@@ -167,7 +191,7 @@ export async function POST(req: NextRequest) {
     outcome: "proposal_sent",
     repName: rep.fullName,
     appointmentId: appt.id,
-    scheduledAt: String(appt.scheduledAt),
+    scheduledAt: appt.scheduledAt ? String(appt.scheduledAt) : new Date().toISOString(),
     clientNotes: `Propuesta ${proposalNum} enviada. Idioma: ${lang === 'en' ? 'English' : lang === 'pt' ? 'Portugu\u00eas' : 'Espa\u00f1ol'}. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
   }).catch(console.error);
 
