@@ -29,6 +29,18 @@ async function saveNewRefreshToken(newToken: string) {
   }
 }
 
+async function getStoredRefreshToken(): Promise<string> {
+  try {
+    const { db } = await import("@/db");
+    const { systemConfig } = await import("@/db/schema");
+    const { eq } = await import("drizzle-orm");
+    const [row] = await db.select().from(systemConfig).where(eq(systemConfig.key, "QB_REFRESH_TOKEN")).limit(1);
+    return row?.value || process.env.QB_REFRESH_TOKEN || "";
+  } catch {
+    return process.env.QB_REFRESH_TOKEN || "";
+  }
+}
+
 export async function getQBToken(): Promise<string> {
   const credentials = Buffer.from(
     `${process.env.QB_CLIENT_ID}:${process.env.QB_CLIENT_SECRET}`
@@ -37,7 +49,7 @@ export async function getQBToken(): Promise<string> {
   const res = await fetch("https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer", {
     method: "POST",
     headers: { "Authorization": `Basic ${credentials}`, "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: process.env.QB_REFRESH_TOKEN! }),
+    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: await getStoredRefreshToken() }),
   });
   const data = await res.json();
   if (!data.access_token) throw new Error(`QB auth failed: ${JSON.stringify(data)}`);
