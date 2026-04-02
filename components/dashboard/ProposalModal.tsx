@@ -42,12 +42,13 @@ interface ProposalModalProps {
   appointmentId: string;
   clientName: string;
   clientCompany: string;
+  clientEmail?: string;
   repSlug?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function ProposalModal({ appointmentId, clientName, clientCompany, onClose, onSuccess }: ProposalModalProps) {
+export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", onClose, onSuccess }: ProposalModalProps) {
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [selected, setSelected] = useState<SelectedService[]>([]);
   const [discount, setDiscount] = useState(0);
@@ -70,6 +71,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
   const [emailText, setEmailText] = useState(DEFAULT_EMAIL.es);
 
   const [sending, setSending] = useState(false);
+  const [clientEmail, setClientEmail] = useState(initialClientEmail || "");
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
 
@@ -130,6 +132,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           introText,
           emailText,
           lang,
+          clientEmail: clientEmail || undefined,
         }),
       });
       const data = await res.json();
@@ -171,6 +174,17 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100">
             <X className="w-4 h-4" style={{ color: "#6B7280" }} />
           </button>
+        </div>
+
+        {/* Email del cliente editable */}
+        <div className="px-6 py-3 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+          <div className="flex items-center gap-3">
+            <label className="text-xs font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: "#9CA3AF" }}>Email</label>
+            <input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)}
+              className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
+              style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
+              placeholder="email@empresa.com" />
+          </div>
         </div>
 
         {/* Tabs */}
