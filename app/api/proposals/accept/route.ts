@@ -118,8 +118,8 @@ export async function POST(req: NextRequest) {
     console.log("QB Invoice created:", qbInvoiceId);
 
   } catch (err) {
-    console.error("QB error:", err);
-    // Continue even if QB fails
+    console.error("QB FULL ERROR:", JSON.stringify(err), String(err));
+    qbCustomerId = "ERROR";
   }
 
   // ── Update proposal status ───────────────────────────────────────
