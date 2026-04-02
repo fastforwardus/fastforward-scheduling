@@ -76,7 +76,7 @@ const T = {
 
 export interface ProposalService { name: string; description: string; price: number; }
 export interface ProposalData {
-  clientName: string; contactName: string; contactEmail: string; contactPhone: string;
+  clientName: string; contactName: string; contactEmail: string; contactPhone: string; contactAddress?: string;
   repName: string; repEmail: string; repSlug: string;
   proposalNum: string; dateStr: string; validUntil: string;
   introText: string; services: ProposalService[]; discount: number;
@@ -164,7 +164,9 @@ export async function generateProposalPDF(data: ProposalData): Promise<Buffer> {
     });
   };
 
-  drawCol(t.cli, [data.clientName, data.contactName, data.contactEmail, data.contactPhone], ML);
+  const clientLines = [data.clientName, data.contactName, data.contactEmail, data.contactPhone];
+  if (data.contactAddress) clientLines.push(data.contactAddress);
+  drawCol(t.cli, clientLines, ML);
   page.drawLine({ start: { x: ML + col, y: y - 4 }, end: { x: ML + col, y: y - BOX_H + 4 }, thickness: 0.5, color: BORD });
   drawCol(t.exp, [data.repName, t.rep, data.repEmail, "FastForward FDA Experts"], ML + col);
   page.drawLine({ start: { x: ML + col * 2, y: y - 4 }, end: { x: ML + col * 2, y: y - BOX_H + 4 }, thickness: 0.5, color: BORD });

@@ -65,6 +65,9 @@ export async function POST(req: NextRequest) {
             CompanyName: appt.clientCompany,
             PrimaryEmailAddr: { Address: appt.clientEmail },
             PrimaryPhone: { FreeFormNumber: appt.clientWhatsapp },
+            ...(proposal.clientAddress ? {
+              BillAddr: { Line1: proposal.clientAddress }
+            } : {}),
           }),
         }
       );

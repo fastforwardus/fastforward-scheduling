@@ -72,6 +72,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
 
   const [sending, setSending] = useState(false);
   const [clientEmail, setClientEmail] = useState(initialClientEmail || "");
+  const [clientAddress, setClientAddress] = useState("");
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
 
@@ -133,6 +134,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           emailText,
           lang,
           clientEmail: clientEmail || undefined,
+          clientAddress: clientAddress || undefined,
         }),
       });
       const data = await res.json();

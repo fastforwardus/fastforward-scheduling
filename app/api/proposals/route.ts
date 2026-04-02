@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     emailText,
     lang = "es",
     clientEmail: clientEmailOverride,
+    clientAddress,
     // Direct client fields (for proposals without appointment)
     directClientName,
     directClientCompany,
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
     contactName: appt!.clientName,
     contactEmail: appt!.clientEmail,
     contactPhone: appt!.clientWhatsapp || "",
+    contactAddress: clientAddress || undefined,
     repName: rep.fullName,
     repEmail: rep.email,
     repSlug: rep.slug || "book",
@@ -114,6 +116,7 @@ export async function POST(req: NextRequest) {
     discount,
     lang: lang as string,
     status: "pending",
+    clientAddress: clientAddress || null,
   });
 
   // Generate PDF
