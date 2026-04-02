@@ -187,6 +187,13 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
               style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
               placeholder="email@empresa.com" />
           </div>
+          <div className="flex items-center gap-3 mt-2">
+            <label className="text-xs font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: "#9CA3AF" }}>Dirección</label>
+            <input type="text" value={clientAddress} onChange={e => setClientAddress(e.target.value)}
+              className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
+              style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
+              placeholder="Calle 123, Ciudad, País (opcional)" />
+          </div>
         </div>
 
         {/* Tabs */}
