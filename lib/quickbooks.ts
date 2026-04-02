@@ -1,3 +1,7 @@
+import { db } from "@/db";
+import { systemConfig } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
 const QB_BASE = `https://quickbooks.api.intuit.com/v3/company/${process.env.QB_REALM_ID}`;
 
 async function saveNewRefreshToken(newToken: string) {
@@ -31,14 +35,12 @@ async function saveNewRefreshToken(newToken: string) {
 
 async function getStoredRefreshToken(): Promise<string> {
   try {
-    const { db } = await import("@/db");
-    const { systemConfig } = await import("@/db/schema");
-    const { eq } = await import("drizzle-orm");
     const [row] = await db.select().from(systemConfig).where(eq(systemConfig.key, "QB_REFRESH_TOKEN")).limit(1);
-    return row?.value || process.env.QB_REFRESH_TOKEN || "";
-  } catch {
-    return process.env.QB_REFRESH_TOKEN || "";
+    if (row?.value) return row.value;
+  } catch (e) {
+    console.error("getStoredRefreshToken error:", e);
   }
+  return process.env.QB_REFRESH_TOKEN || "";
 }
 
 export async function getQBToken(): Promise<string> {
