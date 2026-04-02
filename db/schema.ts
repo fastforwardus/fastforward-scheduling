@@ -243,3 +243,10 @@ export const proposals = pgTable("proposals", {
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   invoiceSentAt: timestamp("invoice_sent_at"),
 });
+
+// ── System Config
+export const systemConfig = pgTable("system_config", {
+  key:       text("key").primaryKey(),
+  value:     text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

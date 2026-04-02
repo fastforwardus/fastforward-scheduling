@@ -1,5 +1,6 @@
 const QB_BASE = `https://quickbooks.api.intuit.com/v3/company/${process.env.QB_REALM_ID}`;
 
+
 export async function getQBToken(): Promise<string> {
   const credentials = Buffer.from(
     `${process.env.QB_CLIENT_ID}:${process.env.QB_CLIENT_SECRET}`
@@ -8,7 +9,7 @@ export async function getQBToken(): Promise<string> {
   const res = await fetch("https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer", {
     method: "POST",
     headers: { "Authorization": `Basic ${credentials}`, "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: process.env.QB_REFRESH_TOKEN! }),
+    body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: await getStoredRefreshToken() }),
   });
   const data = await res.json();
   if (!data.access_token) throw new Error(`QB auth failed: ${JSON.stringify(data)}`);
