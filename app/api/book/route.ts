@@ -298,7 +298,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Zoho CRM sync
-    createOrUpdateZohoLead({
+    await createOrUpdateZohoLead({
       clientName,
       clientEmail: clientEmail.toLowerCase().trim(),
       clientCompany,
