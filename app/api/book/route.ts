@@ -308,6 +308,8 @@ export async function POST(req: NextRequest) {
         serviceInterest,
         exportVolume,
         clientNotes,
+        repName: assignedName || undefined,
+        repEmail: repSlug && repSlug !== "general" ? (await db.select({ email: users.email }).from(users).where(eq(users.slug, repSlug)).limit(1))[0]?.email : undefined,
         noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
       });
       console.log("ZOHO OK:", clientEmail);
