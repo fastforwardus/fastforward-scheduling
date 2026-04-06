@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments, users, clientProfiles } from "@/db/schema";
+import { appointments, users, clientProfiles, systemConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
@@ -298,17 +298,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Zoho CRM sync
-    await createOrUpdateZohoLead({
-      clientName,
-      clientEmail: clientEmail.toLowerCase().trim(),
-      clientCompany,
-      clientWhatsapp,
-      clientLanguage,
-      serviceInterest,
-      exportVolume,
-      clientNotes,
-      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
-    }).catch(e => console.error("Zoho error:", e));
+    try {
+      await createOrUpdateZohoLead({
+        clientName,
+        clientEmail: clientEmail.toLowerCase().trim(),
+        clientCompany,
+        clientWhatsapp,
+        clientLanguage,
+        serviceInterest,
+        exportVolume,
+        clientNotes,
+        noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
+      });
+      console.log("ZOHO OK:", clientEmail);
+    } catch (zohoErr) {
+      console.error("ZOHO FAIL:", String(zohoErr));
+      // Save error to DB for debugging
+      await db.insert(systemConfig).values({ key: "ZOHO_LAST_ERROR", value: String(zohoErr) })
+        .onConflictDoUpdate({ target: systemConfig.key, set: { value: String(zohoErr), updatedAt: new Date() } })
+        .catch(() => {});
+    }
 
     return NextResponse.json({
       ok: true,
