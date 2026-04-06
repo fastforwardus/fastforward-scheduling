@@ -21,7 +21,20 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!clientName || !clientEmail || !clientCompany || !clientWhatsapp || !scheduledAt || !platform) {
-      return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
+      // Sync to Zoho (after everything else)
+    createOrUpdateZohoLead({
+      clientName,
+      clientEmail: clientEmail.toLowerCase().trim(),
+      clientCompany,
+      clientWhatsapp,
+      clientLanguage,
+      serviceInterest,
+      exportVolume,
+      clientNotes,
+      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
+    }).catch(e => console.error("Zoho error:", e));
+
+    return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
     }
 
     // Limpiar número — solo dígitos con código de país
@@ -311,6 +324,19 @@ export async function POST(req: NextRequest) {
       console.error("Email error (non-fatal):", emailErr);
     }
 
+    // Sync to Zoho (after everything else)
+    createOrUpdateZohoLead({
+      clientName,
+      clientEmail: clientEmail.toLowerCase().trim(),
+      clientCompany,
+      clientWhatsapp,
+      clientLanguage,
+      serviceInterest,
+      exportVolume,
+      clientNotes,
+      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
+    }).catch(e => console.error("Zoho error:", e));
+
     return NextResponse.json({
       ok: true,
       appointmentId: appointment.id,
@@ -321,6 +347,19 @@ export async function POST(req: NextRequest) {
 
   } catch (err) {
     console.error("Book error:", err);
+    // Sync to Zoho (after everything else)
+    createOrUpdateZohoLead({
+      clientName,
+      clientEmail: clientEmail.toLowerCase().trim(),
+      clientCompany,
+      clientWhatsapp,
+      clientLanguage,
+      serviceInterest,
+      exportVolume,
+      clientNotes,
+      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
+    }).catch(e => console.error("Zoho error:", e));
+
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
