@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getQBToken } from "@/lib/quickbooks";
 import { db } from "@/db";
 import { systemConfig } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
