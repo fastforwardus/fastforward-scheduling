@@ -486,6 +486,41 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
 
 // ─── Main AdminPanel ──────────────────────────────────────────────────────────
 
+function QBTokenUpdater() {
+  const [token, setToken] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  async function handleSave() {
+    if (!token.startsWith("RT1-")) { alert("Token inválido — debe empezar con RT1-"); return; }
+    setSaving(true);
+    const res = await fetch("/api/admin/qb-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: token }),
+    });
+    setSaving(false);
+    if (res.ok) { setSaved(true); setToken(""); setTimeout(() => setSaved(false), 3000); }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border p-5 mb-2" style={{ borderColor: "#FED7AA" }}>
+      <p className="text-sm font-semibold mb-1" style={{ color: "#C2410C" }}>🔑 Token de QuickBooks</p>
+      <p className="text-xs mb-3" style={{ color: "#9CA3AF" }}>Si los invoices dejan de crearse, pegá el nuevo Refresh Token aquí.</p>
+      <div className="flex gap-2">
+        <input value={token} onChange={e => setToken(e.target.value)} placeholder="RT1-xxx-..."
+          className="flex-1 px-3 py-2 rounded-xl border text-xs outline-none font-mono"
+          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+        <button onClick={handleSave} disabled={saving || !token}
+          className="px-4 py-2 rounded-xl text-xs font-semibold"
+          style={{ background: saved ? "#22C55E" : "#C9A84C", color: "white" }}>
+          {saved ? "✅ Guardado" : saving ? "..." : "Guardar"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPanelClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string }
 }) {
@@ -880,6 +915,9 @@ export default function AdminPanelClient({ user }: {
                   </p>
                 </div>
               </div>
+              {/* QB Token updater */}
+              <QBTokenUpdater />
+
               <div className="flex items-center justify-between">
                 <p className="text-sm" style={{ color: "#6B7280" }}>Invoices en QuickBooks</p>
                 <button onClick={loadInvoices} className="px-3 py-1.5 rounded-lg text-xs border" style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>↻ Actualizar</button>
