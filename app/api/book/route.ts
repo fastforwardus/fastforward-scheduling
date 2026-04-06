@@ -119,7 +119,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Create/update Zoho lead
-    await createOrUpdateZohoLead({
+    try { console.log("ZOHO START", clientEmail);
+    const zohoResult = await createOrUpdateZohoLead({
       clientName,
       clientEmail: clientEmail.toLowerCase().trim(),
       clientCompany,
@@ -129,7 +130,7 @@ export async function POST(req: NextRequest) {
       exportVolume,
       clientNotes,
       noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform} — Slot: ${new Date(scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York" })}`,
-    }).catch(e => console.error("Zoho error:", e));
+    }); console.log("ZOHO OK", JSON.stringify(zohoResult)); } catch(e) { console.error("ZOHO FAIL:", String(e)); }
 
     // Upsert client profile
     await db
