@@ -25,7 +25,9 @@ async function getZohoUserId(token: string, email: string): Promise<string | nul
     const res = await fetch(`${ZOHO_BASE}/users?type=AllUsers`, {
       headers: { Authorization: `Zoho-oauthtoken ${token}` }
     });
-    const data = await res.json();
+    const text = await res.text();
+    if (!text) return null;
+    const data = JSON.parse(text);
     const user = data.users?.find((u: { email: string; id: string }) => u.email === email);
     return user?.id || null;
   } catch { return null; }
@@ -162,7 +164,8 @@ export async function createOrUpdateZohoLead(params: {
       headers: { Authorization: `Zoho-oauthtoken ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ data: [leadData] }),
     });
-    const createData = await createRes.json();
+    const createText = await createRes.text();
+    const createData = createText ? JSON.parse(createText) : {};
     leadId = createData.data?.[0]?.details?.id;
     console.log("Zoho lead created:", leadId);
   }
