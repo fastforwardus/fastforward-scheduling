@@ -16,6 +16,18 @@ async function getZohoToken(): Promise<string> {
   return data.access_token;
 }
 
+// Get Zoho user ID by email (to assign lead owner)
+async function getZohoUserId(token: string, email: string): Promise<string | null> {
+  try {
+    const res = await fetch(`${ZOHO_BASE}/users?type=AllUsers`, {
+      headers: { Authorization: `Zoho-oauthtoken ${token}` }
+    });
+    const data = await res.json();
+    const user = data.users?.find((u: { email: string; id: string }) => u.email === email);
+    return user?.id || null;
+  } catch { return null; }
+}
+
 const SERVICE_TO_INDUSTRY: Record<string, string> = {
   fda_fsma:         "Food & Beverage",
   register_company: "Finance",
@@ -29,7 +41,47 @@ const OUTCOME_TO_STATUS: Record<string, string> = {
   proposal_sent: "Lost Lead",
   closed:        "Pre-Qualified",
   not_qualified: "Not Qualified",
+  no_show:       "Not Contacted",
 };
+
+export async function addZohoNote(leadId: string, note: string): Promise<void> {
+  try {
+    const token = await getZohoToken();
+    await fetch(`${ZOHO_BASE}/Leads/${leadId}/Notes`, {
+      method: "POST",
+      headers: { Authorization: `Zoho-oauthtoken ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ data: [{ Note_Title: "FastForward System", Note_Content: note }] }),
+    });
+  } catch (err) { console.error("Zoho note error:", err); }
+}
+
+export async function logZohoEmail(leadId: string, params: {
+  subject: string;
+  body: string;
+  fromEmail: string;
+  fromName: string;
+  toEmail: string;
+  toName: string;
+}): Promise<void> {
+  try {
+    const token = await getZohoToken();
+    await fetch(`${ZOHO_BASE}/Leads/${leadId}/Emails`, {
+      method: "POST",
+      headers: { Authorization: `Zoho-oauthtoken ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        data: [{
+          from: { email: params.fromEmail, user_name: params.fromName },
+          to: [{ email: params.toEmail, user_name: params.toName }],
+          subject: params.subject,
+          content: params.body,
+          mail_format: "html",
+          date_time: new Date().toISOString(),
+          sent_by_system: true,
+        }]
+      }),
+    });
+  } catch (err) { console.error("Zoho email log error:", err); }
+}
 
 export async function createOrUpdateZohoLead(params: {
   clientName: string;
@@ -42,8 +94,10 @@ export async function createOrUpdateZohoLead(params: {
   clientNotes?: string;
   outcome?: string;
   repName?: string;
+  repEmail?: string;
   appointmentId?: string;
   scheduledAt?: string;
+  noteToAdd?: string;
 }) {
   const token = await getZohoToken();
 
@@ -53,7 +107,7 @@ export async function createOrUpdateZohoLead(params: {
 
   const langLabels: Record<string, string> = { es: "Español", en: "English", pt: "Português" };
 
-  const leadData: Record<string, string> = {
+  const leadData: Record<string, unknown> = {
     First_Name: firstName,
     Last_Name: lastName,
     Email: params.clientEmail,
@@ -70,14 +124,16 @@ export async function createOrUpdateZohoLead(params: {
     ].filter(Boolean).join("\n"),
   };
 
-  if (params.serviceInterest) {
-    leadData.Industry = SERVICE_TO_INDUSTRY[params.serviceInterest] || "Other";
-  }
-  if (params.clientLanguage) {
-    leadData["Idioma_Language"] = langLabels[params.clientLanguage] || "Español";
+  if (params.serviceInterest) leadData.Industry = SERVICE_TO_INDUSTRY[params.serviceInterest] || "Other";
+  if (params.clientLanguage) leadData["Idioma_Language"] = langLabels[params.clientLanguage] || "Español";
+
+  // Assign lead owner to rep
+  if (params.repEmail) {
+    const ownerId = await getZohoUserId(token, params.repEmail);
+    if (ownerId) leadData.Owner = { id: ownerId };
   }
 
-  // Search if lead already exists by email
+  // Search existing lead
   const searchRes = await fetch(
     `${ZOHO_BASE}/Leads/search?email=${encodeURIComponent(params.clientEmail)}`,
     { headers: { Authorization: `Zoho-oauthtoken ${token}` } }
@@ -85,26 +141,31 @@ export async function createOrUpdateZohoLead(params: {
   const searchData = await searchRes.json();
   const existingId = searchData.data?.[0]?.id;
 
+  let leadId: string;
+
   if (existingId) {
-    // Update existing lead
-    const updateRes = await fetch(`${ZOHO_BASE}/Leads/${existingId}`, {
+    await fetch(`${ZOHO_BASE}/Leads/${existingId}`, {
       method: "PUT",
       headers: { Authorization: `Zoho-oauthtoken ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ data: [leadData] }),
     });
-    const updateData = await updateRes.json();
-    console.log("Zoho lead updated:", existingId, updateData.data?.[0]?.status);
-    return { id: existingId, action: "updated" };
+    leadId = existingId;
+    console.log("Zoho lead updated:", leadId);
   } else {
-    // Create new lead
     const createRes = await fetch(`${ZOHO_BASE}/Leads`, {
       method: "POST",
       headers: { Authorization: `Zoho-oauthtoken ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify({ data: [leadData] }),
     });
     const createData = await createRes.json();
-    const newId = createData.data?.[0]?.details?.id;
-    console.log("Zoho lead created:", newId);
-    return { id: newId, action: "created" };
+    leadId = createData.data?.[0]?.details?.id;
+    console.log("Zoho lead created:", leadId);
   }
+
+  // Add note if provided
+  if (params.noteToAdd && leadId) {
+    await addZohoNote(leadId, params.noteToAdd);
+  }
+
+  return { id: leadId, action: existingId ? "updated" : "created" };
 }

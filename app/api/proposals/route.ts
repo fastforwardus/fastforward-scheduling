@@ -193,8 +193,10 @@ export async function POST(req: NextRequest) {
     serviceInterest: appt.serviceInterest || undefined,
     outcome: "proposal_sent",
     repName: rep.fullName,
+    repEmail: rep.email,
     appointmentId: appt.id,
     scheduledAt: appt.scheduledAt ? String(appt.scheduledAt) : new Date().toISOString(),
+    noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Propuesta ${proposalNum} enviada — Total: USD $${total.toLocaleString("en-US")}`,
     clientNotes: `Propuesta ${proposalNum} enviada. Idioma: ${lang === 'en' ? 'English' : lang === 'pt' ? 'Portugu\u00eas' : 'Espa\u00f1ol'}. Total: USD $${total.toLocaleString("en-US")}. Servicios: ${services.map((s: { name: string }) => s.name).join(", ")}`,
   }).catch(console.error);
 

@@ -6,6 +6,7 @@ import { proposals, appointments, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { getQBToken } from "@/lib/quickbooks";
+import { addZohoNote, createOrUpdateZohoLead } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -132,6 +133,19 @@ export async function POST(req: NextRequest) {
     qbCustomerId: qbCustomerId || null,
     qbInvoiceId: qbInvoiceId || null,
   }).where(eq(proposals.id, proposal.id));
+
+  // ── Zoho note on acceptance
+  try {
+    const zohoRes = await createOrUpdateZohoLead({
+      clientName: appt.clientName,
+      clientEmail: appt.clientEmail,
+      clientCompany: appt.clientCompany,
+      clientWhatsapp: appt.clientWhatsapp || "",
+      outcome: "closed",
+      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Propuesta aceptada — Invoice QB: ${qbInvoiceId || "pendiente"} — Total: USD $${proposal.total.toLocaleString("en-US")}`,
+    });
+    console.log("Zoho updated on acceptance:", zohoRes);
+  } catch (err) { console.error("Zoho accept error:", err); }
 
   // ── Update appointment outcome ───────────────────────────────────
   await db.update(appointments).set({
