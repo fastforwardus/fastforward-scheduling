@@ -11,7 +11,10 @@ async function getZohoToken(): Promise<string> {
       refresh_token: process.env.ZOHO_REFRESH_TOKEN!,
     }),
   });
-  const data = await res.json();
+  const text = await res.text();
+  if (!text) throw new Error("Zoho auth returned empty response");
+  let data: { access_token?: string; error?: string };
+  try { data = JSON.parse(text); } catch { throw new Error(`Zoho auth invalid JSON: ${text.substring(0, 100)}`); }
   if (!data.access_token) throw new Error(`Zoho auth failed: ${JSON.stringify(data)}`);
   return data.access_token;
 }
@@ -138,8 +141,10 @@ export async function createOrUpdateZohoLead(params: {
     `${ZOHO_BASE}/Leads/search?email=${encodeURIComponent(params.clientEmail)}`,
     { headers: { Authorization: `Zoho-oauthtoken ${token}` } }
   );
-  const searchData = await searchRes.json();
-  const existingId = searchData.data?.[0]?.id;
+  const searchText = await searchRes.text();
+  let searchData: { data?: Array<{ id: string }> } = {};
+  try { if (searchText) searchData = JSON.parse(searchText); } catch { searchData = {}; }
+  const existingId = searchData?.data?.[0]?.id;
 
   let leadId: string;
 
