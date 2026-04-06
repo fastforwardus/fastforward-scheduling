@@ -118,19 +118,6 @@ export async function POST(req: NextRequest) {
       } catch (err) { console.error("Partner notify error:", err); }
     }
 
-    // Create/update Zoho lead
-    await createOrUpdateZohoLead({
-      clientName,
-      clientEmail: clientEmail.toLowerCase().trim(),
-      clientCompany,
-      clientWhatsapp,
-      clientLanguage,
-      serviceInterest,
-      exportVolume,
-      clientNotes,
-      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform} — Slot: ${new Date(scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York" })}`,
-    }).catch(e => console.error("Zoho error:", e));
-
     // Upsert client profile
     await db
       .insert(clientProfiles)
