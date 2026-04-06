@@ -347,19 +347,6 @@ export async function POST(req: NextRequest) {
 
   } catch (err) {
     console.error("Book error:", err);
-    // Sync to Zoho (after everything else)
-    createOrUpdateZohoLead({
-      clientName,
-      clientEmail: clientEmail.toLowerCase().trim(),
-      clientCompany,
-      clientWhatsapp,
-      clientLanguage,
-      serviceInterest,
-      exportVolume,
-      clientNotes,
-      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
-    }).catch(e => console.error("Zoho error:", e));
-
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }
