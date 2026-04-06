@@ -21,20 +21,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     if (!clientName || !clientEmail || !clientCompany || !clientWhatsapp || !scheduledAt || !platform) {
-      // Sync to Zoho (after everything else)
-    createOrUpdateZohoLead({
-      clientName,
-      clientEmail: clientEmail.toLowerCase().trim(),
-      clientCompany,
-      clientWhatsapp,
-      clientLanguage,
-      serviceInterest,
-      exportVolume,
-      clientNotes,
-      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
-    }).catch(e => console.error("Zoho error:", e));
-
-    return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
+      return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
     }
 
     // Limpiar número — solo dígitos con código de país
@@ -132,8 +119,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create/update Zoho lead
-    try { console.log("ZOHO START", clientEmail);
-    const zohoResult = await createOrUpdateZohoLead({
+    await createOrUpdateZohoLead({
       clientName,
       clientEmail: clientEmail.toLowerCase().trim(),
       clientCompany,
@@ -143,7 +129,7 @@ export async function POST(req: NextRequest) {
       exportVolume,
       clientNotes,
       noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform} — Slot: ${new Date(scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York" })}`,
-    }); console.log("ZOHO OK", JSON.stringify(zohoResult)); } catch(e) { console.error("ZOHO FAIL:", String(e)); }
+    }).catch(e => console.error("Zoho error:", e));
 
     // Upsert client profile
     await db
@@ -324,7 +310,7 @@ export async function POST(req: NextRequest) {
       console.error("Email error (non-fatal):", emailErr);
     }
 
-    // Sync to Zoho (after everything else)
+    // Zoho CRM sync
     createOrUpdateZohoLead({
       clientName,
       clientEmail: clientEmail.toLowerCase().trim(),
