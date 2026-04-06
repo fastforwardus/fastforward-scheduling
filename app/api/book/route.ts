@@ -6,6 +6,7 @@ import { appointments, users, clientProfiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
+import { createOrUpdateZohoLead } from "@/lib/zoho";
 import { formatInTimeZone } from "date-fns-tz";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -116,6 +117,19 @@ export async function POST(req: NextRequest) {
         }
       } catch (err) { console.error("Partner notify error:", err); }
     }
+
+    // Create/update Zoho lead
+    createOrUpdateZohoLead({
+      clientName,
+      clientEmail: clientEmail.toLowerCase().trim(),
+      clientCompany,
+      clientWhatsapp,
+      clientLanguage,
+      serviceInterest,
+      exportVolume,
+      clientNotes,
+      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform} — Slot: ${new Date(scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York" })}`,
+    }).catch(console.error);
 
     // Upsert client profile
     await db
