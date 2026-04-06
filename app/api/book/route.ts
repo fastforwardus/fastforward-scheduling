@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
 
     // Buscar sales rep
     let assignedTo: string | null = null;
+    let assignedEmail: string | null = null;
     let assignedName = "";
     let status: "scheduled" | "pending_assignment" = "pending_assignment";
 
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
       if (rep) {
         assignedTo = rep.id;
         assignedName = rep.fullName;
+        assignedEmail = rep.email;
         status = "scheduled";
       }
     }
@@ -313,6 +315,57 @@ export async function POST(req: NextRequest) {
         noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
       });
       console.log("ZOHO OK:", clientEmail);
+      // Notify rep of new lead
+      if (assignedEmail && assignedName) {
+        const apptDate = new Date(scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+        const serviceLabel: Record<string, string> = { fda_fsma: "Registro FDA / FSMA", register_company: "Apertura de Empresa", market_entry: "Ingreso al Mercado", not_sure: "Sin definir" };
+        await resend.emails.send({
+          from: "FastForward Sistema <info@fastfwdus.com>",
+          to: assignedEmail,
+          subject: `🎯 Nuevo lead asignado — ${clientName}`,
+          html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;background:#F8F9FB;margin:0;padding:0}*{box-sizing:border-box}</style></head><body>
+<div style="max-width:580px;margin:0 auto;padding:24px">
+  <div style="background:linear-gradient(135deg,#27295C,#1e2150);border-radius:20px;padding:32px;text-align:center;margin-bottom:20px">
+    <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="36" style="margin-bottom:16px" />
+    <p style="color:rgba(201,168,76,0.9);font-size:13px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:2px">Nuevo Lead Asignado</p>
+    <h1 style="color:white;font-size:26px;font-weight:800;margin:0">${clientName}</h1>
+    <p style="color:rgba(255,255,255,0.6);font-size:14px;margin:8px 0 0">${clientCompany}</p>
+  </div>
+
+  <div style="background:white;border-radius:16px;padding:24px;margin-bottom:16px;border:1px solid #E5E7EB">
+    <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9CA3AF;margin:0 0 16px">Datos del Lead</p>
+    <table style="width:100%;border-collapse:collapse">
+      <tr><td style="padding:8px 0;color:#6B7280;font-size:13px;width:130px">Nombre</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${clientName}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Empresa</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${clientCompany}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Email</td><td style="padding:8px 0;font-size:13px"><a href="mailto:${clientEmail}" style="color:#C9A84C">${clientEmail}</a></td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">WhatsApp</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${clientWhatsapp}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Servicio</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${serviceLabel[serviceInterest] || serviceInterest || "Sin definir"}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Cita</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${apptDate} (EST)</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Plataforma</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${platform === "meet" ? "Google Meet" : "WhatsApp"}</td></tr>
+      ${clientNotes ? `<tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Notas</td><td style="padding:8px 0;color:#27295C;font-size:13px">${clientNotes}</td></tr>` : ""}
+    </table>
+  </div>
+
+  <div style="background:#EEF2FF;border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #C7D2FE">
+    <p style="font-size:13px;font-weight:700;color:#27295C;margin:0 0 8px">📋 Cómo dar seguimiento en Zoho CRM</p>
+    <p style="font-size:13px;color:#374151;margin:0 0 8px">Este lead ya está registrado en Zoho CRM con vos como owner. Para darle seguimiento:</p>
+    <ol style="font-size:13px;color:#374151;margin:0;padding-left:20px;line-height:2">
+      <li>Abrí Zoho CRM → <strong>Leads</strong></li>
+      <li>Buscá por email: <strong>${clientEmail}</strong></li>
+      <li>En la sección <strong>Notas</strong> vas a ver toda la cronología de actividades (cita agendada, propuesta enviada, aceptación, etc.)</li>
+      <li>Podés agregar tus propias notas, llamadas y seguimientos desde ahí</li>
+    </ol>
+  </div>
+
+  <div style="text-align:center;padding:16px">
+    <a href="https://scheduling.fastfwdus.com/dashboard" style="display:inline-block;background:#C9A84C;color:#1A1C3E;padding:14px 32px;border-radius:12px;font-weight:700;text-decoration:none;font-size:14px">Ver en el Dashboard →</a>
+  </div>
+
+  <p style="text-align:center;font-size:11px;color:#9CA3AF;margin:16px 0 0">FastForward FDA Experts · Miami, FL</p>
+</div>
+</body></html>`,
+        });
+      }
     } catch (zohoErr) {
       console.error("ZOHO FAIL:", String(zohoErr));
       // Save error to DB for debugging
