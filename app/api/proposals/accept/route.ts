@@ -6,7 +6,7 @@ import { proposals, appointments, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { getQBToken } from "@/lib/quickbooks";
-import { addZohoNote, createOrUpdateZohoLead } from "@/lib/zoho";
+import { createOrUpdateZohoLead } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
