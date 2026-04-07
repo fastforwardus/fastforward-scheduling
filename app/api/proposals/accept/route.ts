@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { proposals, appointments, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
-import { findOrCreateZohoBooksContact, createZohoBooksInvoice } from "@/lib/zohobooks";
+import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent } from "@/lib/zohobooks";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -57,7 +57,8 @@ export async function POST(req: NextRequest) {
 
     zohoInvoiceId = invoice.invoice_id;
     zohoPaymentLink = invoice.invoice_url;
-    console.log("Zoho Books invoice creado:", zohoInvoiceId);
+    await markZohoBooksInvoiceSent(zohoInvoiceId);
+    console.log("Zoho Books invoice creado y marcado sent:", zohoInvoiceId);
   } catch (err) {
     console.error("Zoho Books invoice error:", err);
     return NextResponse.json({ error: "ZohoBooks: " + String(err) }, { status: 500 });

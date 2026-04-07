@@ -141,3 +141,7 @@ export async function listZohoBooksInvoices() {
   const data = await booksReq("GET", "/invoices?sort_column=created_time&sort_order=D&per_page=50");
   return data?.invoices ?? [];
 }
+
+export async function markZohoBooksInvoiceSent(invoiceId: string): Promise<void> {
+  await booksReq("POST", `/invoices/${invoiceId}/status/sent`);
+}
