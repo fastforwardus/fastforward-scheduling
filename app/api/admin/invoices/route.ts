@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
-import { proposals, appointments } from "@/db/schema";
+import { proposals } from "@/db/schema";
 import { isNotNull } from "drizzle-orm";
 import { getZohoBooksInvoice } from "@/lib/zohobooks";
 
