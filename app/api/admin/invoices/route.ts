@@ -1,57 +1,54 @@
+export const runtime = "nodejs";
 import { NextResponse } from "next/server";
-import { db } from "@/db";
-import { proposals } from "@/db/schema";
-import { isNotNull } from "drizzle-orm";
 import { getSession } from "@/lib/session";
-import { getQBToken } from "@/lib/quickbooks";
+import { db } from "@/db";
+import { proposals, appointments } from "@/db/schema";
+import { isNotNull } from "drizzle-orm";
+import { getZohoBooksInvoice } from "@/lib/zohobooks";
 
 export async function GET() {
   try {
-  const session = await getSession();
-  if (!session || session.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const session = await getSession();
+    if (!session || session.role !== "admin")
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  // Get accepted proposals with QB invoice
-  const accepted = await db.select({
-    id: proposals.id,
-    proposalNum: proposals.proposalNum,
-    total: proposals.total,
-    qbInvoiceId: proposals.qbInvoiceId,
-    qbCustomerId: proposals.qbCustomerId,
-    appointmentId: proposals.appointmentId,
-    lang: proposals.lang,
-    acceptedAt: proposals.acceptedAt,
-    invoiceSentAt: proposals.invoiceSentAt,
-  }).from(proposals)
-    .where(isNotNull(proposals.qbInvoiceId));
+    // Propuestas aceptadas con invoice de Zoho Books
+    const accepted = await db
+      .select({
+        id: proposals.id,
+        proposalNum: proposals.proposalNum,
+        total: proposals.total,
+        zohoInvoiceId: proposals.zohoInvoiceId,
+        zohoPaymentLink: proposals.zohoPaymentLink,
+        appointmentId: proposals.appointmentId,
+        lang: proposals.lang,
+        acceptedAt: proposals.acceptedAt,
+        invoiceSentAt: proposals.invoiceSentAt,
+      })
+      .from(proposals)
+      .where(isNotNull(proposals.zohoInvoiceId));
 
-  // Get QB invoice details
-  const token = await getQBToken();
-  const realmId = process.env.QB_REALM_ID;
-  const results = [];
-
-  for (const prop of accepted) {
-    try {
-      const res = await fetch(
-        `https://quickbooks.api.intuit.com/v3/company/${realmId}/invoice/${prop.qbInvoiceId}?minorversion=65`,
-        { headers: { Authorization: `Bearer ${token}`, Accept: "application/json" } }
-      );
-      const data = await res.json();
-      const inv = data.Invoice;
-      if (inv) {
+    // Para cada propuesta, obtener detalles del invoice en Zoho Books
+    const results = [];
+    for (const prop of accepted) {
+      try {
+        const inv = await getZohoBooksInvoice(prop.zohoInvoiceId!);
         results.push({
           ...prop,
-          customerName: inv.CustomerRef?.name,
-          dueDate: inv.DueDate,
-          balance: inv.Balance,
-          totalAmt: inv.TotalAmt,
-          emailStatus: inv.EmailStatus,
-          billEmail: inv.BillEmail?.Address,
+          customerName: inv?.customer_name ?? "",
+          dueDate: inv?.due_date ?? "",
+          balance: inv?.balance ?? prop.total,
+          totalAmt: inv?.total ?? prop.total,
+          status: inv?.status ?? "draft",
+          invoiceUrl: inv?.invoice_url ?? prop.zohoPaymentLink ?? "",
         });
+      } catch (err) {
+        console.error("Error fetching Zoho invoice", prop.zohoInvoiceId, err);
+        results.push({ ...prop, customerName: "", balance: prop.total, totalAmt: prop.total, status: "unknown", invoiceUrl: "" });
       }
-    } catch { results.push(prop); }
-  }
+    }
 
-  return NextResponse.json({ invoices: results });
+    return NextResponse.json({ invoices: results });
   } catch (err) {
     console.error("Invoices API error:", err);
     return NextResponse.json({ error: String(err), invoices: [] }, { status: 500 });
