@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
     console.log("Zoho Books invoice creado:", zohoInvoiceId);
   } catch (err) {
     console.error("Zoho Books invoice error:", err);
+    return NextResponse.json({ error: "ZohoBooks: " + String(err) }, { status: 500 });
   }
 
   // ── Update proposal status ───────────────────────────────────────
