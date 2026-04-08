@@ -29,7 +29,12 @@ export async function POST(req: NextRequest) {
     assignedTo: appointments.assignedTo,
   }).from(appointments).where(sql`${appointments.id}::text = ${proposal.appointmentId}`).limit(1);
 
-  if (!appt) return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
+  // Para propuestas directas sin cita, appt puede ser null
+  const clientName = clientName || (proposal as Record<string, unknown>).clientName as string || "";
+  const clientEmail = clientEmail || (proposal as Record<string, unknown>).clientEmail as string || "";
+  const clientCompany = clientCompany || (proposal as Record<string, unknown>).clientCompany as string || "";
+  const clientWhatsapp = appt?.clientWhatsapp || "";
+  const assignedTo = assignedTo || "";
 
   const services = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
 
@@ -42,10 +47,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const contact = await findOrCreateZohoBooksContact({
-      name: appt.clientName,
-      email: appt.clientEmail,
-      company: appt.clientCompany || undefined,
-      phone: appt.clientWhatsapp || undefined,
+      name: clientName,
+      email: clientEmail,
+      company: clientCompany || undefined,
+      phone: clientWhatsapp || undefined,
     });
     zohoContactId = contact.contact_id;
 
@@ -75,15 +80,15 @@ export async function POST(req: NextRequest) {
 
 
   // ── Auto-envío email de factura (async, no bloquea) ─────────────
-  if (zohoInvoiceId && appt.clientEmail) {
+  if (zohoInvoiceId && clientEmail) {
     setTimeout(async () => { try {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
       const payLink = `${appUrl}/pay/${proposal.confirmToken}`;
       const L = proposal.lang === "en"
-        ? { subject: `Invoice ${proposal.proposalNum} — FastForward`, greeting: `Hello ${appt.clientName},`, intro: "Please find attached the invoice for the requested service.", payBtn: "View & Pay Invoice", secure: "Secure payment via Stripe · info@fastfwdus.com" }
+        ? { subject: `Invoice ${proposal.proposalNum} — FastForward`, greeting: `Hello ${clientName},`, intro: "Please find attached the invoice for the requested service.", payBtn: "View & Pay Invoice", secure: "Secure payment via Stripe · info@fastfwdus.com" }
         : proposal.lang === "pt"
-        ? { subject: `Fatura ${proposal.proposalNum} — FastForward`, greeting: `Olá ${appt.clientName},`, intro: "Segue em anexo a fatura referente ao serviço solicitado.", payBtn: "Ver e Pagar Fatura", secure: "Pagamento seguro via Stripe · info@fastfwdus.com" }
-        : { subject: `Factura ${proposal.proposalNum} — FastForward`, greeting: `Hola ${appt.clientName},`, intro: "Adjunto encontrarás la factura correspondiente al servicio solicitado.", payBtn: "Ver y Pagar Factura", secure: "Pago seguro via Stripe · info@fastfwdus.com" };
+        ? { subject: `Fatura ${proposal.proposalNum} — FastForward`, greeting: `Olá ${clientName},`, intro: "Segue em anexo a fatura referente ao serviço solicitado.", payBtn: "Ver e Pagar Fatura", secure: "Pagamento seguro via Stripe · info@fastfwdus.com" }
+        : { subject: `Factura ${proposal.proposalNum} — FastForward`, greeting: `Hola ${clientName},`, intro: "Adjunto encontrarás la factura correspondiente al servicio solicitado.", payBtn: "Ver y Pagar Factura", secure: "Pago seguro via Stripe · info@fastfwdus.com" };
 
       const services2 = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
       const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
@@ -128,7 +133,7 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
 
       await resend.emails.send({
         from: "FastForward <info@fastfwdus.com>",
-        to: appt.clientEmail,
+        to: clientEmail,
         replyTo: "info@fastfwdus.com",
         subject: L.subject,
         html,
@@ -136,7 +141,7 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
       });
 
       await db.update(proposals).set({ invoiceSentAt: new Date() }).where(eq(proposals.id, proposal.id));
-      console.log("Email de factura enviado a:", appt.clientEmail);
+      console.log("Email de factura enviado a:", clientEmail);
     } catch (err) {
       console.error("Error auto-enviando email de factura:", err);
     } }, 100);
@@ -145,10 +150,10 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
   // ── Zoho note on acceptance
   try {
     const zohoRes = await createOrUpdateZohoLead({
-      clientName: appt.clientName,
-      clientEmail: appt.clientEmail,
-      clientCompany: appt.clientCompany,
-      clientWhatsapp: appt.clientWhatsapp || "",
+      clientName: clientName,
+      clientEmail: clientEmail,
+      clientCompany: clientCompany,
+      clientWhatsapp: clientWhatsapp || "",
       outcome: "closed",
       noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Propuesta aceptada — Invoice Zoho Books: ${zohoInvoiceId || "pendiente"} — Total: USD $${proposal.total.toLocaleString("en-US")}`,
     });
@@ -163,21 +168,21 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
 
   const confirmMessages = {
-    es: { subject: "Propuesta confirmada — FastForward", body: `Hola ${appt.clientName.split(" ")[0]},
+    es: { subject: "Propuesta confirmada — FastForward", body: `Hola ${clientName.split(" ")[0]},
 
 Hemos recibido tu confirmación. Tu factura fue generada y te llegará por email en los próximos minutos.
 
 Nuestro equipo se pondrá en contacto contigo para coordinar los próximos pasos.
 
 Gracias por confiar en FastForward.` },
-    en: { subject: "Proposal confirmed — FastForward", body: `Hi ${appt.clientName.split(" ")[0]},
+    en: { subject: "Proposal confirmed — FastForward", body: `Hi ${clientName.split(" ")[0]},
 
 We have received your confirmation. Your invoice has been generated and will arrive by email shortly.
 
 Our team will contact you to coordinate next steps.
 
 Thank you for trusting FastForward.` },
-    pt: { subject: "Proposta confirmada — FastForward", body: `Olá ${appt.clientName.split(" ")[0]},
+    pt: { subject: "Proposta confirmada — FastForward", body: `Olá ${clientName.split(" ")[0]},
 
 Recebemos sua confirmação. Sua fatura foi gerada e chegará por email em breve.
 
@@ -192,7 +197,7 @@ Obrigado por confiar na FastForward.` },
   await resend.emails.send({
     from: "FastForward FDA Experts <info@fastfwdus.com>",
     replyTo: "info@fastfwdus.com",
-    to: appt.clientEmail,
+    to: clientEmail,
     subject: msg.subject,
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
@@ -223,9 +228,9 @@ Obrigado por confiar na FastForward.` },
   // Get rep info
   let repEmail = "info@fastfwdus.com";
   let repName = "FastForward";
-  if (appt.assignedTo) {
+  if (assignedTo) {
     const [rep] = await db.select({ email: users.email, fullName: users.fullName })
-      .from(users).where(eq(users.id, appt.assignedTo)).limit(1);
+      .from(users).where(eq(users.id, assignedTo)).limit(1);
     if (rep) { repEmail = rep.email; repName = rep.fullName; }
   }
 
@@ -236,7 +241,7 @@ Obrigado por confiar na FastForward.` },
   await resend.emails.send({
     from: "FastForward Sistema <info@fastfwdus.com>",
     to: notifyEmails,
-    subject: `🏆 Propuesta aceptada — ${appt.clientName} (${appt.clientCompany})`,
+    subject: `🏆 Propuesta aceptada — ${clientName} (${clientCompany})`,
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
   <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
@@ -244,10 +249,10 @@ Obrigado por confiar na FastForward.` },
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
     <p style="font-size:20px;font-weight:700;color:#27295C;margin:0 0 4px;">🏆 Propuesta aceptada</p>
-    <p style="color:#6B7280;font-size:14px;margin:0 0 24px;">${repName} — ${appt.clientName} confirmó la propuesta.</p>
+    <p style="color:#6B7280;font-size:14px;margin:0 0 24px;">${repName} — ${clientName} confirmó la propuesta.</p>
     <div style="background:#F8F9FB;border-radius:12px;padding:16px;border:1px solid #E5E7EB;">
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Cliente</p>
-      <p style="font-size:15px;font-weight:700;color:#27295C;margin:0 0 12px;">${appt.clientName} — ${appt.clientCompany}</p>
+      <p style="font-size:15px;font-weight:700;color:#27295C;margin:0 0 12px;">${clientName} — ${clientCompany}</p>
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Propuesta</p>
       <p style="font-size:14px;font-weight:600;color:#27295C;margin:0 0 12px;">${proposal.proposalNum}</p>
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Total</p>
