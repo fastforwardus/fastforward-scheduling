@@ -25,15 +25,15 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
     // Raw query para evitar el problema UUID
     const apptRows = await db.execute(
       sql`SELECT client_name, client_company, client_email, assigned_to FROM appointments WHERE id = ${proposal.appointmentId}::uuid LIMIT 1`
-    );
-    const appt = apptRows.rows?.[0] as { client_name: string; client_company: string; client_email: string; assigned_to: string } | undefined;
+    ) as unknown as { rows: { client_name: string; client_company: string; client_email: string; assigned_to: string }[] };
+    const appt = apptRows.rows?.[0];
 
     let repName = "FastForward FDA Experts";
     if (appt?.assigned_to) {
       const repRows = await db.execute(
         sql`SELECT full_name FROM users WHERE id = ${appt.assigned_to}::uuid LIMIT 1`
-      );
-      const rep = repRows.rows?.[0] as { full_name: string } | undefined;
+      ) as unknown as { rows: { full_name: string }[] };
+      const rep = repRows.rows?.[0];
       if (rep) repName = rep.full_name;
     }
 
