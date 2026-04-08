@@ -6,12 +6,8 @@ import { proposals, appointments, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   const { token } = await req.json();
