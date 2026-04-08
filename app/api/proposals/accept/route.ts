@@ -30,8 +30,8 @@ export async function POST(req: NextRequest) {
   }).from(appointments).where(sql`${appointments.id}::text = ${proposal.appointmentId}`).limit(1);
 
   // Para propuestas directas sin cita, appt puede ser null
-  const clientName: string = appt?.clientName ?? "";
-  const clientEmail: string = appt?.clientEmail ?? "";
+  const clientName: string = appt?.clientName ?? (proposal.clientName as string | null) ?? "";
+  const clientEmail: string = appt?.clientEmail ?? (proposal.clientEmail as string | null) ?? "";
   const clientCompany: string = appt?.clientCompany ?? "";
   const clientWhatsapp: string = appt?.clientWhatsapp ?? "";
   const assignedTo: string = appt?.assignedTo ?? "";

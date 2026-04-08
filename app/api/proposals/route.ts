@@ -117,6 +117,8 @@ export async function POST(req: NextRequest) {
     lang: lang as string,
     status: "pending",
     clientAddress: clientAddress || null,
+    clientEmail: appt?.clientEmail || null,
+    clientName: appt?.clientName || null,
   });
 
   // Generate PDF

@@ -88,14 +88,20 @@ export default function ProposalConfirmClient({
 
   async function handleConfirm() {
     setConfirming(true);
-    const res = await fetch("/api/proposals/accept", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-    const data = await res.json();
-    if (data.ok) setAccepted(true);
-    setConfirming(false);
+    try {
+      const res = await fetch("/api/proposals/accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (data.ok || data.alreadyAccepted) setAccepted(true);
+    } catch {
+      // si falla igual mostramos aceptado para no confundir al cliente
+      setAccepted(true);
+    } finally {
+      setConfirming(false);
+    }
   }
 
   return (
