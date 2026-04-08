@@ -13,18 +13,24 @@ export async function POST(req: NextRequest) {
     console.log("Zoho webhook:", JSON.stringify(body));
 
     // Zoho Books envía el invoice_number o reference_number
-    const invoiceId = body.invoice_id || body.data?.invoice_id;
-    const status = body.status || body.data?.status;
+    // Zoho Books customer payment webhook
+    const payment = body.customer_payment;
+    if (!payment) return NextResponse.json({ ok: true });
 
-    if (!invoiceId) return NextResponse.json({ ok: true });
-    if (status !== "paid") return NextResponse.json({ ok: true });
+    const invoiceIds: string[] = payment.invoices?.map((inv: Record<string,unknown>) => inv.invoice_id as string).filter(Boolean) || [];
+    if (invoiceIds.length === 0) return NextResponse.json({ ok: true });
+
+    console.log("Payment received for invoices:", invoiceIds);
 
     // Buscar propuesta por zoho_invoice_id
-    const [proposal] = await db.select().from(proposals)
-      .where(eq(proposals.zohoInvoiceId, invoiceId)).limit(1);
+    let proposal = null;
+    for (const invoiceId of invoiceIds) {
+      const [found] = await db.select().from(proposals).where(eq(proposals.zohoInvoiceId, invoiceId)).limit(1);
+      if (found) { proposal = found; break; }
+    }
 
     if (!proposal) {
-      console.log("Propuesta no encontrada para invoice:", invoiceId);
+      console.log("Propuesta no encontrada para invoices:", invoiceIds);
       return NextResponse.json({ ok: true });
     }
 
