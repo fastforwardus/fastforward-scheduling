@@ -88,7 +88,7 @@ export default function PayClient({ token }: { token: string }) {
   return (
     <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "'DM Sans', system-ui, sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
         * { box-sizing: border-box; margin: 0; padding: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
@@ -127,7 +127,7 @@ export default function PayClient({ token }: { token: string }) {
           <p style={{ fontSize: 11, color: "#9ca3af", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>
             {t.invoice} · {data.referenceNumber}
           </p>
-          <h1 style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 32, fontWeight: 500, color: DARK, letterSpacing: -0.5 }}>
+          <h1 style={{ fontFamily: "Outfit, sans-serif", fontSize: 32, fontWeight: 500, color: DARK, letterSpacing: -0.5 }}>
             {data.invoiceNumber}
           </h1>
           {data.dueDate && (
@@ -145,7 +145,7 @@ export default function PayClient({ token }: { token: string }) {
           ) : (
             <>
               <p style={{ fontSize: 11, color: "#9ca3af", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>{t.balance}</p>
-              <p style={{ fontFamily: "Cormorant Garamond, serif", fontSize: 44, fontWeight: 500, color: DARK, letterSpacing: -1 }}>{fmt(data.balance)}</p>
+              <p style={{ fontFamily: "Outfit, sans-serif", fontSize: 44, fontWeight: 500, color: DARK, letterSpacing: -1 }}>{fmt(data.balance)}</p>
             </>
           )}
         </div>
