@@ -74,9 +74,9 @@ export async function POST(req: NextRequest) {
   }).where(eq(proposals.id, proposal.id));
 
 
-  // ── Auto-envío email de factura ─────────────────────────────────
+  // ── Auto-envío email de factura (async, no bloquea) ─────────────
   if (zohoInvoiceId && appt.clientEmail) {
-    try {
+    setTimeout(async () => { try {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
       const payLink = `${appUrl}/pay/${proposal.confirmToken}`;
       const L = proposal.lang === "en"
@@ -139,7 +139,7 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
       console.log("Email de factura enviado a:", appt.clientEmail);
     } catch (err) {
       console.error("Error auto-enviando email de factura:", err);
-    }
+    } }, 100);
   }
 
   // ── Zoho note on acceptance
