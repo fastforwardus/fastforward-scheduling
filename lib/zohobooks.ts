@@ -99,6 +99,9 @@ export async function createZohoBooksInvoice(params: {
   const data = await booksReq("POST", "/invoices", {
     customer_id: params.contactId,
     reference_number: params.invoiceNumber,
+    payment_options: {
+      payment_gateways: [{ gateway_name: "stripe", configured: true }],
+    },
     line_items: params.lineItems.map((item) => ({
       name: item.name,
       rate: item.rate,
