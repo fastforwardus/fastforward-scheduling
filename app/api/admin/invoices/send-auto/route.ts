@@ -3,10 +3,10 @@ export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { proposals, appointments } from "@/db/schema";
+import { proposals } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { Resend } from "resend";
-import { getZohoBooksInvoice, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
+import { getZohoBooksInvoicePdf } from "@/lib/zohobooks";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
