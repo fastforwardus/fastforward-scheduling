@@ -915,11 +915,9 @@ export default function AdminPanelClient({ user }: {
                   </p>
                 </div>
               </div>
-              {/* QB Token updater */}
-              <QBTokenUpdater />
 
               <div className="flex items-center justify-between">
-                <p className="text-sm" style={{ color: "#6B7280" }}>Invoices en QuickBooks</p>
+                <p className="text-sm" style={{ color: "#6B7280" }}>Invoices en Zoho Books</p>
                 <button onClick={loadInvoices} className="px-3 py-1.5 rounded-lg text-xs border" style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>↻ Actualizar</button>
               </div>
               <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
