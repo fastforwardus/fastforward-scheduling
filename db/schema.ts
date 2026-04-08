@@ -244,6 +244,7 @@ export const proposals = pgTable("proposals", {
   zohoPaymentLink: text("zoho_payment_link"),
   clientEmail:     text("client_email"),
   clientName:      text("client_name"),
+  paymentConfirmedAt: timestamp("payment_confirmed_at", { withTimezone: true }),
   confirmToken:  text("confirm_token"),
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   invoiceSentAt: timestamp("invoice_sent_at"),
