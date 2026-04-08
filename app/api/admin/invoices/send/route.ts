@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 
     // Nuestra página de pago
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-    const ourPayLink = `${appUrl}/pay/${proposal.confirmToken}`;
+    const ourPayLink = proposal.zohoPaymentLink || `${appUrl}/pay/${proposal.confirmToken}`;
 
     // Email HTML
     const html = `<!DOCTYPE html>

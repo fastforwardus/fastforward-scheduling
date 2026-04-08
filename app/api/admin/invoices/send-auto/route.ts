@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
   if (!clientEmail) return NextResponse.json({ error: "No client email" }, { status: 400 });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-  const payLink = `${appUrl}/pay/${proposal.confirmToken}`;
+  const payLink = (proposal as Record<string,unknown>).zohoPaymentLink as string || `${appUrl}/pay/${proposal.confirmToken}`;
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
   const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
