@@ -26,12 +26,12 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
     clientCompany: appointments.clientCompany,
     clientEmail: appointments.clientEmail,
     assignedTo: appointments.assignedTo,
-  }).from(appointments).where(eq(appointments.id, proposal.appointmentId as string)).limit(1);
+  }).from(appointments).where(eq(appointments.id, proposal.appointmentId!)).limit(1);
 
   let repName = "FastForward FDA Experts";
   if (appt?.assignedTo) {
     const [rep] = await db.select({ fullName: users.fullName }).from(users)
-      .where(eq(users.id, appt.assignedTo)).limit(1);
+      .where(eq(users.id, appt.assignedTo!)).limit(1);
     if (rep) repName = rep.fullName;
   }
 
