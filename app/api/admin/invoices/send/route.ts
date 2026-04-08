@@ -10,6 +10,17 @@ import { getZohoBooksInvoice, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const TRANSLATIONS = {
+  pt: {
+    subject: (num: string) => `Fatura ${num} — FastForward`,
+    greeting: (name: string) => `Olá ${name},`,
+    intro: "Segue em anexo a fatura referente ao serviço solicitado.",
+    payBtn: "Ver e Pagar Fatura",
+    payNote: "Você pode pagar com cartão de crédito, débito ou ACH pelo link seguro.",
+    bankTitle: "Transferência bancária:",
+    bankInfo: "Entre em contato em info@fastfwdus.com para receber os dados bancários.",
+    closing: "Atenciosamente,",
+    team: "A Equipe FastForward",
+  },
   es: {
     subject: (num: string) => `Factura ${num} — FastForward`,
     greeting: (name: string) => `Hola ${name},`,
@@ -48,15 +59,18 @@ export async function POST(req: NextRequest) {
     if (!proposal) return NextResponse.json({ error: "Propuesta no encontrada" }, { status: 404 });
     if (!proposal.zohoInvoiceId) return NextResponse.json({ error: "Sin invoice de Zoho Books" }, { status: 400 });
 
-    // Obtener cita para datos del cliente
-    const [appt] = await db
-      .select({ clientName: appointments.clientName, clientEmail: appointments.clientEmail })
-      .from(appointments)
-      .where(eq(appointments.id, proposal.appointmentId))
-      .limit(1);
-    if (!appt) return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
+    // Obtener cita para datos del cliente (puede ser null para propuestas directas)
+    let clientName = (proposal as Record<string,unknown>).clientName as string || "";
+    let clientEmail = (proposal as Record<string,unknown>).clientEmail as string || "";
+    if (!clientEmail && proposal.appointmentId && !proposal.appointmentId.startsWith("direct-")) {
+      const { sql } = await import("drizzle-orm");
+      const rows = await db.execute(sql`SELECT client_name, client_email FROM appointments WHERE id::text = ${proposal.appointmentId} LIMIT 1`) as unknown as { rows: {client_name:string; client_email:string}[] };
+      clientName = rows.rows?.[0]?.client_name || clientName;
+      clientEmail = rows.rows?.[0]?.client_email || clientEmail;
+    }
+    if (!clientEmail) return NextResponse.json({ error: "Sin email del cliente" }, { status: 404 });
 
-    const L = TRANSLATIONS[(proposal.lang as "es" | "en") ?? "es"];
+    const L = TRANSLATIONS[(proposal.lang as "es" | "en" | "pt") ?? "es"] ?? TRANSLATIONS["es"];
 
     // Obtener detalles del invoice en Zoho Books
     const inv = await getZohoBooksInvoice(proposal.zohoInvoiceId);
@@ -101,7 +115,7 @@ export async function POST(req: NextRequest) {
         <!-- BODY -->
         <tr>
           <td style="padding:40px 40px 24px;">
-            <p style="margin:0 0 16px;color:#1e293b;font-size:16px;font-weight:600;">${L.greeting(appt.clientName)}</p>
+            <p style="margin:0 0 16px;color:#1e293b;font-size:16px;font-weight:600;">${L.greeting(clientName)}</p>
             <p style="margin:0 0 24px;color:#475569;font-size:15px;line-height:1.6;">${L.intro}</p>
             <!-- PAYMENT BUTTON -->
             ${ourPayLink ? `
@@ -145,7 +159,7 @@ export async function POST(req: NextRequest) {
     // Enviar con Resend
     await resend.emails.send({
       from: "FastForward <info@fastfwdus.com>",
-      to: appt.clientEmail,
+      to: clientEmail,
       replyTo: "info@fastfwdus.com",
       subject: L.subject(proposal.proposalNum),
       html,
