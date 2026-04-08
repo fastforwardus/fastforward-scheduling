@@ -5,7 +5,10 @@ import { db } from "@/db";
 import { proposals, appointments, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { Resend } from "resend";
-import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent } from "@/lib/zohobooks";
+import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -71,6 +74,75 @@ export async function POST(req: NextRequest) {
     zohoPaymentLink: zohoPaymentLink || null,
     zohoInvoiceId: zohoInvoiceId || null,
   }).where(eq(proposals.id, proposal.id));
+
+
+  // ── Auto-envío email de factura ─────────────────────────────────
+  if (zohoInvoiceId && appt.clientEmail) {
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
+      const payLink = `${appUrl}/pay/${proposal.confirmToken}`;
+      const L = proposal.lang === "en"
+        ? { subject: `Invoice ${proposal.proposalNum} — FastForward`, greeting: `Hello ${appt.clientName},`, intro: "Please find attached the invoice for the requested service.", payBtn: "View & Pay Invoice", secure: "Secure payment via Stripe · info@fastfwdus.com" }
+        : proposal.lang === "pt"
+        ? { subject: `Fatura ${proposal.proposalNum} — FastForward`, greeting: `Olá ${appt.clientName},`, intro: "Segue em anexo a fatura referente ao serviço solicitado.", payBtn: "Ver e Pagar Fatura", secure: "Pagamento seguro via Stripe · info@fastfwdus.com" }
+        : { subject: `Factura ${proposal.proposalNum} — FastForward`, greeting: `Hola ${appt.clientName},`, intro: "Adjunto encontrarás la factura correspondiente al servicio solicitado.", payBtn: "Ver y Pagar Factura", secure: "Pago seguro via Stripe · info@fastfwdus.com" };
+
+      const services2 = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
+      const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+
+      let pdfBuffer: Buffer | null = null;
+      try { pdfBuffer = await getZohoBooksInvoicePdf(zohoInvoiceId); } catch {}
+
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+<tr><td style="background:#111827;padding:24px 32px;">
+<img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" alt="FastForward" height="32">
+</td></tr>
+<tr><td style="background:#1f2937;padding:28px 32px;text-align:center;">
+<p style="margin:0 0 4px;color:#9ca3af;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Balance Due</p>
+<p style="margin:0;color:#fff;font-size:40px;font-weight:700;">${fmt(proposal.total)}</p>
+<p style="margin:8px 0 0;color:#6b7280;font-size:13px;">${proposal.proposalNum}</p>
+</td></tr>
+<tr><td style="padding:32px;">
+<p style="margin:0 0 16px;color:#111827;font-size:15px;font-weight:600;">${L.greeting}</p>
+<p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6;">${L.intro}</p>
+<table width="100%" style="margin-bottom:20px;border-collapse:collapse;">
+${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#374151;font-size:14px;">${s.name}</td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#111827;font-size:14px;font-weight:500;text-align:right;">${fmt(s.price)}</td></tr>`).join("")}
+</table>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+<tr><td align="center">
+<a href="${payLink}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;">${L.payBtn} →</a>
+</td></tr>
+</table>
+<hr style="border:none;border-top:1px solid #e5e7eb;margin:0 0 20px;">
+<p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">${L.secure}</p>
+</td></tr>
+<tr><td style="background:#f9fafb;padding:16px 32px;text-align:center;border-top:1px solid #e5e7eb;">
+<p style="margin:0;color:#9ca3af;font-size:11px;">FastForward Trading Company LLC · 33 SW 2nd Ave Ste 1202, Miami FL 33130</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</body></html>`;
+
+      await resend.emails.send({
+        from: "FastForward <info@fastfwdus.com>",
+        to: appt.clientEmail,
+        replyTo: "info@fastfwdus.com",
+        subject: L.subject,
+        html,
+        ...(pdfBuffer ? { attachments: [{ filename: `Factura-FastForward-${proposal.proposalNum}.pdf`, content: pdfBuffer.toString("base64") }] } : {}),
+      });
+
+      await db.update(proposals).set({ invoiceSentAt: new Date() }).where(eq(proposals.id, proposal.id));
+      console.log("Email de factura enviado a:", appt.clientEmail);
+    } catch (err) {
+      console.error("Error auto-enviando email de factura:", err);
+    }
+  }
 
   // ── Zoho note on acceptance
   try {
