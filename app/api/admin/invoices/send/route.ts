@@ -72,6 +72,10 @@ export async function POST(req: NextRequest) {
       console.error("Zoho Books PDF error:", err);
     }
 
+    // Nuestra página de pago
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
+    const ourPayLink = `${appUrl}/pay/${proposal.confirmToken}`;
+
     // Email HTML
     const html = `<!DOCTYPE html>
 <html lang="es">
@@ -101,10 +105,10 @@ export async function POST(req: NextRequest) {
             <p style="margin:0 0 16px;color:#1e293b;font-size:16px;font-weight:600;">${L.greeting(appt.clientName)}</p>
             <p style="margin:0 0 24px;color:#475569;font-size:15px;line-height:1.6;">${L.intro}</p>
             <!-- PAYMENT BUTTON -->
-            ${paymentLink ? `
+            ${ourPayLink ? `
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
               <tr><td align="center">
-                <a href="${paymentLink}"
+                <a href="${ourPayLink}"
                    style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;
                           padding:16px 40px;border-radius:8px;font-size:16px;font-weight:700;letter-spacing:0.3px;">
                   ${L.payBtn} →
