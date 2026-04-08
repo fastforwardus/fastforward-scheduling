@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { proposals, appointments, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { Resend } from "resend";
 import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     clientEmail: appointments.clientEmail,
     clientWhatsapp: appointments.clientWhatsapp,
     assignedTo: appointments.assignedTo,
-  }).from(appointments).where(eq(appointments.id, proposal.appointmentId)).limit(1);
+  }).from(appointments).where(sql`${appointments.id}::text = ${proposal.appointmentId}`).limit(1);
 
   if (!appt) return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
 
