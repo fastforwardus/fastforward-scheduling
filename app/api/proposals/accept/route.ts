@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
     console.log("Zoho Books invoice creado y marcado sent:", zohoInvoiceId);
   } catch (err) {
     console.error("Zoho Books invoice error:", err);
-    return NextResponse.json({ error: "ZohoBooks: " + String(err) }, { status: 500 });
   }
 
   // ── Update proposal status ───────────────────────────────────────
@@ -69,7 +68,7 @@ export async function POST(req: NextRequest) {
     status: "accepted",
     acceptedAt: new Date(),
     zohoContactId: zohoContactId || null,
-      zohoPaymentLink: zohoPaymentLink || null,
+    zohoPaymentLink: zohoPaymentLink || null,
     zohoInvoiceId: zohoInvoiceId || null,
   }).where(eq(proposals.id, proposal.id));
 
