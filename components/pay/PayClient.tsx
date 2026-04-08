@@ -140,6 +140,7 @@ export default function PayClient({ token }: { token: string }) {
       {/* Header */}
       <div style={{ background: "#1e293b", borderBottom: "1px solid #334155", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" alt="FastForward" height={32} />
         <button className="lang-btn" onClick={() => setLang(lang === "es" ? "en" : lang === "en" ? "pt" : "es")}
           style={{ background: "none", border: "1px solid #334155", color: "#94a3b8", padding: "6px 14px", borderRadius: 6, cursor: "pointer", fontFamily: "DM Sans, sans-serif", fontSize: 13, letterSpacing: 1 }}>
