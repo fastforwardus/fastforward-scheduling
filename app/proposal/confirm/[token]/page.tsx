@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { proposals, appointments, users } from "@/db/schema";
+import { proposals } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import ProposalConfirmClient from "@/components/proposal/ProposalConfirmClient";
 
