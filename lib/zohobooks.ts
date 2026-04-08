@@ -1,13 +1,40 @@
-// lib/zohobooks.ts
+import { db } from "@/db";
+import { systemConfig } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
 const ZOHO_TOKEN_URL = "https://accounts.zoho.com/oauth/v2/token";
 const ZOHO_BOOKS_BASE = "https://www.zohoapis.com/books/v3";
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
+async function getStoredRefreshToken(): Promise<string> {
+  // Primero intentar desde DB
+  try {
+    const [row] = await db.select().from(systemConfig)
+      .where(eq(systemConfig.key, "ZOHO_REFRESH_TOKEN")).limit(1);
+    if (row?.value) return row.value;
+  } catch {}
+  // Fallback a env var
+  return process.env.ZOHO_REFRESH_TOKEN!;
+}
+
+async function storeRefreshToken(token: string): Promise<void> {
+  try {
+    await db.insert(systemConfig)
+      .values({ key: "ZOHO_REFRESH_TOKEN", value: token })
+      .onConflictDoUpdate({ target: systemConfig.key, set: { value: token } });
+  } catch (err) {
+    console.error("Error storing Zoho refresh token:", err);
+  }
+}
+
 export async function getZohoBooksToken(): Promise<string> {
   if (cachedToken && Date.now() < cachedToken.expiresAt - 60000) {
     return cachedToken.token;
   }
+
+  const refreshToken = await getStoredRefreshToken();
+
   const res = await fetch(ZOHO_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -15,13 +42,22 @@ export async function getZohoBooksToken(): Promise<string> {
       grant_type: "refresh_token",
       client_id: process.env.ZOHO_CLIENT_ID!,
       client_secret: process.env.ZOHO_CLIENT_SECRET!,
-      refresh_token: process.env.ZOHO_REFRESH_TOKEN!,
+      refresh_token: refreshToken,
     }),
   });
+
   const text = await res.text();
   let data: Record<string, string>;
   try { data = JSON.parse(text); } catch { throw new Error(`Zoho token parse error: ${text}`); }
+
   if (!data.access_token) throw new Error(`Zoho Books token error: ${JSON.stringify(data)}`);
+
+  // Si Zoho rotó el refresh token, guardarlo
+  if (data.refresh_token && data.refresh_token !== refreshToken) {
+    await storeRefreshToken(data.refresh_token);
+    console.log("Zoho refresh token rotado y guardado en DB");
+  }
+
   cachedToken = { token: data.access_token, expiresAt: Date.now() + 3600 * 1000 };
   return data.access_token;
 }
@@ -49,8 +85,6 @@ async function booksReq(method: string, path: string, body?: unknown) {
   try { return JSON.parse(text); } catch { throw new Error(`Zoho Books parse error: ${text}`); }
 }
 
-// ── CONTACTOS ──────────────────────────────────────────────────────
-
 export async function findOrCreateZohoBooksContact(params: {
   name: string;
   email: string;
@@ -58,7 +92,6 @@ export async function findOrCreateZohoBooksContact(params: {
   phone?: string;
 }): Promise<{ contact_id: string }> {
   const token = await getZohoBooksToken();
-  // Buscar por email
   const searchRes = await fetch(
     `${ZOHO_BOOKS_BASE}/contacts?organization_id=${orgId()}&email=${encodeURIComponent(params.email)}`,
     { headers: { Authorization: `Zoho-oauthtoken ${token}`, Accept: "application/json" } }
@@ -68,7 +101,6 @@ export async function findOrCreateZohoBooksContact(params: {
   const existing = searchData?.contacts?.[0];
   if (existing) return { contact_id: existing.contact_id };
 
-  // Crear nuevo
   const data = await booksReq("POST", "/contacts", {
     contact_name: params.name,
     company_name: params.company || params.name,
@@ -81,13 +113,10 @@ export async function findOrCreateZohoBooksContact(params: {
   return { contact_id: data.contact.contact_id };
 }
 
-// ── FACTURAS ──────────────────────────────────────────────────────
-
 export interface ZBLineItem {
   name: string;
   rate: number;
   quantity?: number;
-  description?: string;
 }
 
 export async function createZohoBooksInvoice(params: {
@@ -106,11 +135,9 @@ export async function createZohoBooksInvoice(params: {
       name: item.name,
       rate: item.rate,
       quantity: item.quantity ?? 1,
-      description: item.description ?? "",
     })),
     notes: params.notes ?? "",
-    terms:
-      "El pago es requerido para iniciar los servicios. Para transferencia bancaria: info@fastfwdus.com",
+    terms: "El pago es requerido para iniciar los servicios. Para transferencia bancaria: info@fastfwdus.com",
   });
 
   if (!data?.invoice?.invoice_id)
