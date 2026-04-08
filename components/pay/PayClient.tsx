@@ -23,6 +23,27 @@ const T = {
     secure: "Pago 100% seguro procesado por Stripe",
     lang: "EN",
   },
+  pt: {
+    loading: "Carregando fatura...",
+    notFound: "Fatura não encontrada",
+    invoice: "Fatura",
+    ref: "Referência",
+    client: "Cliente",
+    company: "Empresa",
+    due: "Vencimento",
+    services: "Serviços",
+    subtotal: "Subtotal",
+    total: "Total a pagar",
+    balance: "Saldo pendente",
+    payNow: "Pagar agora",
+    payCard: "Cartão de crédito / débito",
+    payACH: "ACH / Transferência bancária",
+    payContact: "Para pagamento por transferência bancária entre em contato:",
+    paid: "Fatura paga",
+    paidMsg: "Esta fatura já foi paga. Obrigado.",
+    secure: "Pagamento 100% seguro processado pelo Stripe",
+    lang: "ES / EN",
+  },
   en: {
     loading: "Loading invoice...",
     notFound: "Invoice not found",
@@ -64,7 +85,7 @@ interface InvoiceData {
 export default function PayClient({ token }: { token: string }) {
   const [data, setData] = useState<InvoiceData | null>(null);
   const [error, setError] = useState(false);
-  const [lang, setLang] = useState<"es" | "en">("es");
+  const [lang, setLang] = useState<"es" | "en" | "pt">("es");
 
   useEffect(() => {
     fetch(`/api/pay/${token}`)
@@ -72,12 +93,12 @@ export default function PayClient({ token }: { token: string }) {
       .then(d => {
         if (d.error) { setError(true); return; }
         setData(d);
-        setLang((d.lang === "en" ? "en" : "es") as "es" | "en");
+        setLang((d.lang === "en" ? "en" : d.lang === "pt" ? "pt" : "es") as "es" | "en" | "pt");
       })
       .catch(() => setError(true));
   }, [token]);
 
-  const t = T[lang];
+  const t = T[lang as keyof typeof T];
   const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   if (error) return (
@@ -119,9 +140,9 @@ export default function PayClient({ token }: { token: string }) {
       {/* Header */}
       <div style={{ background: "#1e293b", borderBottom: "1px solid #334155", padding: "16px 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" alt="FastForward" height={32} />
-        <button className="lang-btn" onClick={() => setLang(lang === "es" ? "en" : "es")}
+        <button className="lang-btn" onClick={() => setLang(lang === "es" ? "en" : lang === "en" ? "pt" : "es")}
           style={{ background: "none", border: "1px solid #334155", color: "#94a3b8", padding: "6px 14px", borderRadius: 6, cursor: "pointer", fontFamily: "DM Sans, sans-serif", fontSize: 13, letterSpacing: 1 }}>
-          {t.lang}
+          {lang === "es" ? "EN" : lang === "en" ? "PT" : "ES"}
         </button>
       </div>
 
