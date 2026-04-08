@@ -108,9 +108,23 @@ export async function findOrCreateZohoBooksContact(params: {
     email: params.email,
     ...(params.phone ? { mobile: params.phone } : {}),
   });
-  if (!data?.contact?.contact_id)
-    throw new Error(`No se pudo crear contacto en Zoho Books: ${JSON.stringify(data)}`);
-  return { contact_id: data.contact.contact_id };
+
+  if (data?.contact?.contact_id) return { contact_id: data.contact.contact_id };
+
+  // Si falla por duplicado de nombre, buscar por nombre
+  if (data?.code === 3062) {
+    const token = await getZohoBooksToken();
+    const nameRes = await fetch(
+      `${ZOHO_BOOKS_BASE}/contacts?organization_id=${orgId()}&contact_name=${encodeURIComponent(params.name)}`,
+      { headers: { Authorization: `Zoho-oauthtoken ${token}`, Accept: "application/json" } }
+    );
+    const nameText = await nameRes.text();
+    const nameData = nameText ? JSON.parse(nameText) : null;
+    const found = nameData?.contacts?.[0];
+    if (found) return { contact_id: found.contact_id };
+  }
+
+  throw new Error(`No se pudo crear contacto en Zoho Books: ${JSON.stringify(data)}`);
 }
 
 export interface ZBLineItem {
