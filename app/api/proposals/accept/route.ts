@@ -8,6 +8,8 @@ import { Resend } from "resend";
 import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 export async function POST(req: NextRequest) {
   const { token } = await req.json();
