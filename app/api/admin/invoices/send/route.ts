@@ -60,7 +60,6 @@ export async function POST(req: NextRequest) {
 
     // Obtener detalles del invoice en Zoho Books
     const inv = await getZohoBooksInvoice(proposal.zohoInvoiceId);
-    const paymentLink = inv?.invoice_url ?? proposal.zohoPaymentLink ?? "";
     const total = inv?.total ?? proposal.total;
     const balance = inv?.balance ?? total;
 
