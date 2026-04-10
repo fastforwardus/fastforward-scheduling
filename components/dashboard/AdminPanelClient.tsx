@@ -330,6 +330,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
   const maxDaily = Math.max(...daily.map(d => d.count), 1);
 
   return (
+    <>
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -613,6 +614,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
         </div>
       )}
   );
+    </>
 }
 
 // ─── Main AdminPanel ──────────────────────────────────────────────────────────
