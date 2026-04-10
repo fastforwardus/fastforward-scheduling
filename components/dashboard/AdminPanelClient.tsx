@@ -613,8 +613,8 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
           </div>
         </div>
       )}
-  );
     </>
+  );
 }
 
 // ─── Main AdminPanel ──────────────────────────────────────────────────────────
