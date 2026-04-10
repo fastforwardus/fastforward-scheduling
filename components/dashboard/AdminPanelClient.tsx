@@ -32,6 +32,9 @@ interface Metrics {
   }[];
   daily: { date: string; count: number }[];
   satisfaction: { total: number; avg: string | null; fiveStars: number; fourStars: number; lowRating: number };
+  surveysDetail: Array<{ id: string; rating: number; feedback: string | null; clientEmail: string; submittedAt: string; repId: string | null; clientName: string | null; clientCompany: string | null }>;
+  proposalsDetail: Array<{ id: string; proposalNum: string; total: number; status: string | null; clientName: string | null; clientEmail: string | null; acceptedAt: string | null; createdAt: string; sentById: string | null; appointmentId: string }>;
+  usersDetail: Array<{ id: string; fullName: string; email: string }>;
 }
 
 const TIMEZONES = [
@@ -321,7 +324,9 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 // ─── Metrics View ─────────────────────────────────────────────────────────────
 
 function MetricsView({ metrics }: { metrics: Metrics }) {
-  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction } = metrics;
+  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction, surveysDetail, proposalsDetail, usersDetail } = metrics;
+  const [showSurveys, setShowSurveys] = useState(false);
+  const [showProposals, setShowProposals] = useState(false);
   const maxDaily = Math.max(...daily.map(d => d.count), 1);
 
   return (
@@ -333,12 +338,18 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
           { label: "Show rate", value: `${summary.showRate}%`, sub: `${summary.completed} completadas`, color: "#22C55E" },
           { label: "Conversion", value: `${summary.conversionRate}%`, sub: `${summary.closed} cerradas`, color: "#C9A84C" },
           { label: "No-shows", value: summary.noShow, sub: `${summary.total - summary.noShow - summary.completed} pendientes`, color: "#EF4444" },
-        { label: "Satisfaccion", value: satisfaction.avg ? `${satisfaction.avg}/5 ⭐` : "—", sub: `${satisfaction.total} encuestas`, color: "#F59E0B" },
+        { label: "Satisfaccion", value: satisfaction.avg ? `${satisfaction.avg}/5 ⭐` : "—", sub: `${satisfaction.total} encuestas`, color: "#F59E0B", onClick: () => setShowSurveys(true) },
+        { label: "Propuestas enviadas", value: proposalsDetail.length, sub: `${proposalsDetail.filter(p => p.status === "accepted").length} aceptadas`, color: "#8B5CF6", onClick: () => setShowProposals(true) },
         ].map(s => (
-          <div key={s.label} className="rounded-2xl p-5 border bg-white" style={{ borderColor: "#E5E7EB" }}>
+          <div key={s.label} onClick={(s as { onClick?: () => void }).onClick}
+            className="rounded-2xl p-5 border bg-white transition-shadow"
+            style={{ borderColor: "#E5E7EB", cursor: (s as { onClick?: () => void }).onClick ? "pointer" : "default" }}
+            onMouseEnter={e => { if ((s as { onClick?: () => void }).onClick) (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 12px rgba(39,41,92,0.1)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
             <p className="text-3xl font-bold mb-1" style={{ color: s.color }}>{s.value}</p>
             <p className="text-xs font-semibold" style={{ color: "#27295C" }}>{s.label}</p>
             <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{s.sub}</p>
+            {(s as { onClick?: () => void }).onClick && <p className="text-xs mt-1" style={{ color: "#C9A84C" }}>Ver detalle →</p>}
           </div>
         ))}
       </div>
