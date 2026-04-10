@@ -84,6 +84,7 @@ export default function ProposalConfirmClient({
   const t = T[lang] || T.es;
   const [confirming, setConfirming] = useState(false);
   const [accepted, setAccepted] = useState(status === "accepted");
+  const [alreadyAccepted, setAlreadyAccepted] = useState(false);
   const subtotal = services.reduce((s, svc) => s + svc.price, 0);
 
   async function handleConfirm() {
