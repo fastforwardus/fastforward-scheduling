@@ -95,7 +95,8 @@ export default function ProposalConfirmClient({
         body: JSON.stringify({ token }),
       });
       const data = await res.json();
-      if (data.ok || data.alreadyAccepted) setAccepted(true);
+      if (data.alreadyAccepted) { setAlreadyAccepted(true); return; }
+      if (data.ok) setAccepted(true);
     } catch {
       // si falla igual mostramos aceptado para no confundir al cliente
       setAccepted(true);
