@@ -106,6 +106,19 @@ export default function ProposalConfirmClient({
     }
   }
 
+  if (alreadyAccepted) return (
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#F8F9FB" }}>
+      <div className="bg-white rounded-2xl p-10 text-center shadow-sm border max-w-md w-full" style={{ borderColor: "#E5E7EB" }}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#FEF3C7" }}>
+          <span style={{ fontSize: 32 }}>📋</span>
+        </div>
+        <p className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>Propuesta ya aceptada</p>
+        <p className="text-sm" style={{ color: "#6B7280" }}>Esta propuesta ya fue aceptada anteriormente. Si tenés alguna consulta, contactá a tu asesor de FastForward.</p>
+        <p className="text-sm mt-4 font-medium" style={{ color: "#C9A84C" }}>info@fastfwdus.com</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen" style={{ background: "#F8F9FB" }}>
       {/* Header */}
