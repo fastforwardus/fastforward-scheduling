@@ -79,7 +79,7 @@ Máximo 2 oraciones. Tono profesional pero cálido. Sin saludos ni despedidas. S
     const aiText = aiMsg.content[0].type === "text" ? aiMsg.content[0].text : "";
 
     const subjects = {
-      es: `Recordatorio: tu propuesta ${proposal.proposalNum} está pendiente — FastForward`,
+      es: `Recordatorio: su propuesta ${proposal.proposalNum} está pendiente — FastForward`,
       en: `Reminder: your proposal ${proposal.proposalNum} is pending — FastForward`,
       pt: `Lembrete: sua proposta ${proposal.proposalNum} está pendente — FastForward`,
     };

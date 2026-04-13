@@ -93,7 +93,13 @@ export async function POST(req: NextRequest) {
     dateStr: formatDate(now),
     validUntil: formatDate(validUntil),
     lang: lang as "es" | "en" | "pt",
-    introText: introText || `Estimado/a ${firstName}, es un placer presentarle esta propuesta para acompanarle en el proceso de ingreso al mercado estadounidense. Nuestro equipo ha preparado una solucion personalizada basada en los requerimientos de su empresa.`,
+    introText: introText || (
+      lang === "en"
+        ? `Dear ${firstName}, it is our pleasure to present this proposal to support your entry into the United States market. Our team has prepared a customized solution based on your company's requirements.`
+        : lang === "pt"
+        ? `Prezado/a ${firstName}, é um prazer apresentar esta proposta para acompanhá-lo no processo de entrada no mercado norte-americano. Nossa equipe preparou uma solução personalizada com base nos requisitos de sua empresa.`
+        : `Estimado/a ${firstName}, es un placer presentarle esta propuesta para acompañarle en el proceso de ingreso al mercado estadounidense. Nuestro equipo ha preparado una solución personalizada basada en los requerimientos de su empresa.`
+    ),
     services,
     discount,
     emailText,
@@ -133,27 +139,41 @@ export async function POST(req: NextRequest) {
 
 
   // Send email to client
+  const L = {
+    greeting:   lang === "en" ? `Hello, ${firstName}` : lang === "pt" ? `Olá, ${firstName}` : `Estimado/a ${firstName}`,
+    body:       lang === "en"
+      ? `Please find attached the commercial proposal we have prepared for ${appt.clientCompany || "your company"}. It includes all agreed services with a total of <strong>USD $${total.toLocaleString("en-US")}</strong>.<br><br>This proposal is valid for 15 days. To confirm it and begin the process, simply click the button below.`
+      : lang === "pt"
+      ? `Em anexo, encontrará a proposta comercial personalizada que preparamos para ${appt.clientCompany || "sua empresa"}. Ela inclui todos os serviços acordados com um total de <strong>USD $${total.toLocaleString("en-US")}</strong>.<br><br>A proposta é válida por 15 dias. Para confirmá-la e iniciar os trâmites, clique no botão abaixo.`
+      : `Adjunto encontrará la propuesta comercial personalizada que preparamos para ${appt.clientCompany || "su empresa"}. Incluye todos los servicios acordados con un total de <strong>USD $${total.toLocaleString("en-US")}</strong>.<br><br>La propuesta tiene una vigencia de 15 días. Para confirmarla e iniciar los trámites, haga clic en el botón a continuación.`,
+    cta:        lang === "en" ? "Accept proposal" : lang === "pt" ? "Aceitar proposta" : "Aceptar propuesta",
+    ctaNote:    lang === "en" ? "By clicking you confirm the services and total indicated in the attached PDF." : lang === "pt" ? "Ao clicar, você confirma os serviços e o total indicados no PDF em anexo." : "Al hacer clic confirma los servicios y el total indicado en el PDF adjunto.",
+    totalLabel: lang === "en" ? "Proposal total" : lang === "pt" ? "Total da proposta" : "Total de la propuesta",
+    validLabel: lang === "en" ? `Proposal ${proposalNum} · Valid until ${formatDate(validUntil)}` : lang === "pt" ? `Proposta ${proposalNum} · Válida até ${formatDate(validUntil)}` : `Propuesta ${proposalNum} · Vigente hasta ${formatDate(validUntil)}`,
+    contact:    lang === "en" ? "For any questions, do not hesitate to contact us." : lang === "pt" ? "Para qualquer dúvida, não hesite em nos contactar." : "Para cualquier consulta, no dude en contactarnos.",
+  };
+
   const emailHtml = `
 <div style="font-family:system-ui,sans-serif;max-width:580px;margin:0 auto;padding:24px;">
   <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="34" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
-    <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 8px;">Hola, ${firstName}</p>
+    <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 8px;">${L.greeting}</p>
     <div style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:24px;">
-      ${emailText || `Adjunto encontrara la propuesta comercial personalizada que preparamos para ${appt.clientCompany || "su empresa"}. La misma incluye todos los servicios acordados con un total de <strong>USD $${total.toLocaleString("en-US")}</strong>.<br><br>La propuesta es valida por 15 dias. Para confirmarla y dar inicio a los tramites, simplemente responda este email.`}
+      ${emailText || L.body}
     </div>
     <a href="${appUrl}/proposal/confirm/${confirmToken}"
        style="display:block;text-align:center;background:#22C55E;color:white;padding:16px;border-radius:12px;font-weight:700;text-decoration:none;font-size:16px;margin-bottom:16px;">
-      ✅ ${lang === "en" ? "Accept proposal" : lang === "pt" ? "Aceitar proposta" : "Aceptar propuesta"} →
+      ✅ ${L.cta} →
     </a>
-    <p style="text-align:center;font-size:11px;color:#9CA3AF;margin:-8px 0 20px;">Al hacer click confirmás los servicios y el total indicado en el PDF adjunto.</p>
+    <p style="text-align:center;font-size:11px;color:#9CA3AF;margin:-8px 0 20px;">${L.ctaNote}</p>
     <div style="background:#F8F9FB;border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid #E5E7EB;">
-      <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em;">Total de la propuesta</p>
+      <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em;">${L.totalLabel}</p>
       <p style="font-size:24px;font-weight:700;color:#C9A84C;margin:0;">USD $${total.toLocaleString("en-US")}</p>
-      <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">Propuesta ${proposalNum} · Valida hasta ${formatDate(validUntil)}</p>
+      <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">${L.validLabel}</p>
     </div>
-    <p style="font-size:13px;color:#6B7280;margin:0 0 4px;">Ante cualquier consulta no dude en contactarnos.</p>
+    <p style="font-size:13px;color:#6B7280;margin:0 0 4px;">${L.contact}</p>
     <p style="font-size:13px;font-weight:600;color:#27295C;margin:0;">${rep.fullName} · FastForward FDA Experts</p>
     <div style="border-top:1px solid #F0F0F0;padding-top:20px;margin-top:24px;text-align:center;">
       <p style="font-size:12px;color:#9CA3AF;margin:0;">FastForward Trading Company LLC · Miami, FL</p>
