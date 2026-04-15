@@ -70,7 +70,7 @@ async function generateUpsellEmail(params: {
   const suggestionsStr = params.suggestions.map(s => `- ${s.name} (USD ${s.price}): ${s.desc}`).join("\n");
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-5-20251001",
     max_tokens: 400,
     messages: [{
       role: "user",

@@ -54,7 +54,7 @@ Profissional, caloroso, maximo 100 palavras, um CTA para reagendar em https://sc
   };
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-5-20251001",
     max_tokens: 400,
     messages: [{ role: "user", content: prompts[lang] || prompts.es }],
   });

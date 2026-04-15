@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       : `Escribí un email de seguimiento corto y cálido en español para ${firstName} de ${lead.clientCompany}. Estaban interesados en ${serviceLabel} pero necesitaban tiempo para pensar. Ya pasaron 10+ días. Sé amigable, sin presión. Mencioná un incentivo sutil (consulta rápida, proceso ágil). Máx 80 palabras. HTML con tags <p> solo. Firma: Equipo FastForward FDA Experts`;
 
     const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5-20251001",
       max_tokens: 300,
       messages: [{ role: "user", content: prompt }],
     });

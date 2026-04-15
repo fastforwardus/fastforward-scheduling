@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
     ].filter(Boolean).join("\n");
 
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5-20251001",
       max_tokens: 600,
       messages: [{
         role: "user",
