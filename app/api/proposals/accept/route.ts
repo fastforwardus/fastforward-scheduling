@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
       contactId: contact.contact_id,
       invoiceNumber: proposal.proposalNum,
       lineItems: services.map((s) => ({ name: s.name, rate: s.price, quantity: 1 })),
+      discount: proposal.discount || 0,
       notes: `Propuesta ${proposal.proposalNum} — FastForward`,
     });
 
