@@ -90,6 +90,8 @@ export async function findOrCreateZohoBooksContact(params: {
   email: string;
   company?: string;
   phone?: string;
+  address?: string;
+  taxId?: string;
 }): Promise<{ contact_id: string }> {
   const token = await getZohoBooksToken();
   const searchRes = await fetch(
@@ -99,7 +101,17 @@ export async function findOrCreateZohoBooksContact(params: {
   const searchText = await searchRes.text();
   const searchData = searchText ? JSON.parse(searchText) : null;
   const existing = searchData?.contacts?.[0];
-  if (existing) return { contact_id: existing.contact_id };
+  if (existing) {
+    // Actualizar dirección y taxId si se proveen
+    if (params.address || params.taxId) {
+      await booksReq("PUT", `/contacts/${existing.contact_id}`, {
+        contact_name: existing.contact_name || params.name,
+        ...(params.address ? { billing_address: { address: params.address, country: "US" } } : {}),
+        ...(params.taxId ? { tax_id_value: params.taxId } : {}),
+      });
+    }
+    return { contact_id: existing.contact_id };
+  }
 
   const data = await booksReq("POST", "/contacts", {
     contact_name: params.name,
@@ -107,6 +119,8 @@ export async function findOrCreateZohoBooksContact(params: {
     contact_type: "customer",
     email: params.email,
     ...(params.phone ? { mobile: params.phone } : {}),
+    ...(params.address ? { billing_address: { address: params.address, country: "US" } } : {}),
+    ...(params.taxId ? { tax_id_value: params.taxId } : {}),
   });
 
   if (data?.contact?.contact_id) return { contact_id: data.contact.contact_id };
@@ -156,7 +170,7 @@ export async function createZohoBooksInvoice(params: {
     ...(params.discount ? { discount: params.discount, is_discount_before_tax: true, discount_type: "entity_level" } : {}),
     ...(params.clientAddress ? { billing_address: { address: params.clientAddress, country: "US" } } : {}),
     notes: params.notes ?? "",
-    ...(params.clientTaxId ? { custom_fields: [{ label: "Tax ID / Identificación Tributaria", value: params.clientTaxId }] } : {}),
+    ...(params.clientTaxId ? { custom_fields: [{ api_name: "cf_tax_id_identificaci_n_tributaria", value: params.clientTaxId }] } : {}),
     terms: "El pago es requerido para iniciar los servicios. Para transferencia bancaria: info@fastfwdus.com",
   });
 

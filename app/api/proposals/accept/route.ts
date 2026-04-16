@@ -51,6 +51,8 @@ export async function POST(req: NextRequest) {
       email: clientEmail,
       company: clientCompany || undefined,
       phone: clientWhatsapp || undefined,
+      address: (proposal as Record<string,unknown>).clientAddress as string || undefined,
+      taxId: (proposal as Record<string,unknown>).clientTaxId as string || undefined,
     });
     zohoContactId = contact.contact_id;
 
