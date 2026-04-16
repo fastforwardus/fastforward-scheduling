@@ -11,16 +11,16 @@ const UPSELL_MAP: Record<string, { name: string; price: number; desc: string }[]
   "fda": [
     { name: "Revision de etiquetas", price: 595, desc: "Asegura que tus etiquetas cumplan 100% con los requisitos FDA" },
     { name: "FSVP", price: 395, desc: "Foreign Supplier Verification Program — requerido para importadores" },
-    { name: "Registro de Marca USPTO", price: 2000, desc: "Protege tu marca en el mercado americano" },
-    { name: "Registro de Empresa LLC en Miami", price: 1100, desc: "Opera legalmente en EE.UU. con tu propia LLC" },
+    { name: "Registro de Marca USPTO", price: 2000, desc: "Proteja su marca en el mercado americano" },
+    { name: "Registro de Empresa LLC en Miami", price: 1100, desc: "Opere legalmente en EE.UU. con su propia LLC" },
   ],
   "etiqueta": [
-    { name: "Registro Establecimiento FDA", price: 595, desc: "Registra tu establecimiento ante la FDA" },
+    { name: "Registro Establecimiento FDA", price: 595, desc: "Registre su establecimiento ante la FDA" },
     { name: "FSVP", price: 395, desc: "Cumple con las regulaciones de importacion" },
   ],
   "llc": [
-    { name: "Registro de Marca USPTO", price: 2000, desc: "Protege tu marca — la LLC es requisito previo" },
-    { name: "Operating Agreement", price: 450, desc: "Documenta la estructura y operacion de tu LLC" },
+    { name: "Registro de Marca USPTO", price: 2000, desc: "Proteja su marca — la LLC es requisito previo" },
+    { name: "Operating Agreement", price: 450, desc: "Documente la estructura y operación de su LLC" },
     { name: "Registro Establecimiento FDA", price: 595, desc: "Exporta productos regulados a EE.UU." },
   ],
   "marca": [
@@ -28,7 +28,7 @@ const UPSELL_MAP: Record<string, { name: string; price: number; desc: string }[]
     { name: "Registro de Empresa LLC en Miami", price: 1100, desc: "Opera legalmente en EE.UU." },
   ],
   "alcohol": [
-    { name: "Registro de Marca USPTO", price: 2000, desc: "Protege tu marca de bebidas en EE.UU." },
+    { name: "Registro de Marca USPTO", price: 2000, desc: "Proteja su marca de bebidas en EE.UU." },
     { name: "Registro de Empresa LLC en Miami", price: 1100, desc: "Opera legalmente en EE.UU." },
   ],
 };
@@ -70,7 +70,7 @@ async function generateUpsellEmail(params: {
   const suggestionsStr = params.suggestions.map(s => `- ${s.name} (USD ${s.price}): ${s.desc}`).join("\n");
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-5-20251001",
     max_tokens: 400,
     messages: [{
       role: "user",

@@ -54,7 +54,7 @@ Profissional, caloroso, maximo 100 palavras, um CTA para reagendar em https://sc
   };
 
   const message = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+    model: "claude-sonnet-4-5-20251001",
     max_tokens: 400,
     messages: [{ role: "user", content: prompts[lang] || prompts.es }],
   });
@@ -134,9 +134,9 @@ export async function GET(req: NextRequest) {
     const stepDay = rawStep === 0 ? 1 : rawStep === 1 ? 3 : 7;
 
     const subjects: Record<string, Record<number, string>> = {
-      es: { 1: `Gracias por tu tiempo, ${appt.clientName}`, 3: "Un recurso que puede ayudarte", 7: "Como estas avanzando con tu proyecto?" },
+      es: { 1: `Gracias por su tiempo, ${appt.clientName}`, 3: "Un recurso que puede ayudarle", 7: "¿Cómo avanza su proyecto?" },
       en: { 1: `Thank you for your time, ${appt.clientName}`, 3: "A resource that might help you", 7: "How is your project moving forward?" },
-      pt: { 1: `Obrigado pelo seu tempo, ${appt.clientName}`, 3: "Um recurso que pode te ajudar", 7: "Como esta avancando o seu projeto?" },
+      pt: { 1: `Obrigado pelo seu tempo, ${appt.clientName}`, 3: "Um recurso que pode ajudá-lo", 7: "Como está avançando o seu projeto?" },
     };
 
     try {

@@ -153,33 +153,33 @@ export async function POST(req: NextRequest) {
     const meetingLinkHtml = platform === "whatsapp"
       ? `<span style="font-size:14px;font-weight:600;color:#27295C;">📞 ${clientWhatsapp}</span>`
       : `<a href="${appUrl}/book/confirm/${confirmToken}" style="font-size:14px;font-weight:600;color:#C9A84C;text-decoration:none;">
-          ${lang === "en" ? "Click here to get your meeting link" : lang === "pt" ? "Clique aqui para obter o link da reunião" : "Hacé click para obtener el link de la reunión"} →
+          ${lang === "en" ? "Click here to get your meeting link" : lang === "pt" ? "Clique aqui para obter o link da reunião" : "Haga clic para obtener el enlace de la reunión"} →
          </a>`;
 
     const subject = lang === "en"
       ? `Meeting confirmed - FastForward FDA Experts - ${formattedDate}`
       : lang === "pt"
-      ? `Reuniao confirmada - FastForward FDA Experts - ${formattedDate}`
+      ? `Reunião confirmada - FastForward FDA Experts - ${formattedDate}`
       : `Cita confirmada - FastForward FDA Experts - ${formattedDate}`;
 
     const greeting = lang === "en" ? `Hi ${clientName},`
       : lang === "pt" ? `Olá ${clientName},`
-      : `Hola ${clientName},`;
+      : `Estimado/a ${clientName},`;
 
     const bodyIntro = lang === "en"
       ? `Your free consultation with FastForward ® | FDA Experts has been confirmed.`
       : lang === "pt"
       ? `Sua consulta gratuita com FastForward ® | FDA Experts foi confirmada.`
-      : `Tu cita gratuita con FastForward ® | FDA Experts está confirmada.`;
+      : `Su consulta gratuita con FastForward ® | FDA Experts ha sido confirmada.`;
 
     const pendingText = lang === "en"
       ? `We will confirm who will assist you shortly.`
       : lang === "pt"
       ? `Em breve confirmaremos quem vai atendê-lo.`
-      : `En breve te confirmamos quién te atenderá.`;
+      : `En breve le confirmaremos quién le atenderá.`;
 
     const assignedText = assignedName
-      ? (lang === "en" ? `Your expert: <strong>${assignedName}</strong>` : lang === "pt" ? `Seu especialista: <strong>${assignedName}</strong>` : `Tu experto: <strong>${assignedName}</strong>`)
+      ? (lang === "en" ? `Your expert: <strong>${assignedName}</strong>` : lang === "pt" ? `Seu especialista: <strong>${assignedName}</strong>` : `Su experto: <strong>${assignedName}</strong>`)
       : pendingText;
 
     const html = `
@@ -246,7 +246,7 @@ export async function POST(req: NextRequest) {
           </div>
 
           <p style="font-size:13px;color:#9CA3AF;text-align:center;margin:0 0 24px;">
-            ${lang === "en" ? "You will receive a reminder 24h and 2h before your meeting." : lang === "pt" ? "Você receberá um lembrete 24h e 2h antes da reunião." : "Recibirás recordatorios 24h y 2h antes de tu cita."}
+            ${lang === "en" ? "You will receive a reminder 24h and 2h before your meeting." : lang === "pt" ? "Você receberá um lembrete 24h e 2h antes da reunião." : "Recibirá recordatorios 24h y 2h antes de su consulta."}
           </p>
 
           <!-- Footer -->

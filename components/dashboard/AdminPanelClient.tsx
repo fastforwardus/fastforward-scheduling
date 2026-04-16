@@ -32,6 +32,9 @@ interface Metrics {
   }[];
   daily: { date: string; count: number }[];
   satisfaction: { total: number; avg: string | null; fiveStars: number; fourStars: number; lowRating: number };
+  surveysDetail: Array<{ id: string; rating: number; feedback: string | null; clientEmail: string; submittedAt: string; repId: string | null; clientName: string | null; clientCompany: string | null }>;
+  proposalsDetail: Array<{ id: string; proposalNum: string; total: number; status: string | null; clientName: string | null; clientEmail: string | null; acceptedAt: string | null; createdAt: string; sentById: string | null; appointmentId: string }>;
+  usersDetail: Array<{ id: string; fullName: string; email: string }>;
 }
 
 const TIMEZONES = [
@@ -321,10 +324,13 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 // ─── Metrics View ─────────────────────────────────────────────────────────────
 
 function MetricsView({ metrics }: { metrics: Metrics }) {
-  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction } = metrics;
+  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction, surveysDetail, proposalsDetail, usersDetail } = metrics;
+  const [showSurveys, setShowSurveys] = useState(false);
+  const [showProposals, setShowProposals] = useState(false);
   const maxDaily = Math.max(...daily.map(d => d.count), 1);
 
   return (
+    <>
     <div className="space-y-6">
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -333,12 +339,18 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
           { label: "Show rate", value: `${summary.showRate}%`, sub: `${summary.completed} completadas`, color: "#22C55E" },
           { label: "Conversion", value: `${summary.conversionRate}%`, sub: `${summary.closed} cerradas`, color: "#C9A84C" },
           { label: "No-shows", value: summary.noShow, sub: `${summary.total - summary.noShow - summary.completed} pendientes`, color: "#EF4444" },
-        { label: "Satisfaccion", value: satisfaction.avg ? `${satisfaction.avg}/5 ⭐` : "—", sub: `${satisfaction.total} encuestas`, color: "#F59E0B" },
+        { label: "Satisfaccion", value: satisfaction.avg ? `${satisfaction.avg}/5 ⭐` : "—", sub: `${satisfaction.total} encuestas`, color: "#F59E0B", onClick: () => setShowSurveys(true) },
+        { label: "Propuestas enviadas", value: proposalsDetail.length, sub: `${proposalsDetail.filter(p => p.status === "accepted").length} aceptadas`, color: "#8B5CF6", onClick: () => setShowProposals(true) },
         ].map(s => (
-          <div key={s.label} className="rounded-2xl p-5 border bg-white" style={{ borderColor: "#E5E7EB" }}>
+          <div key={s.label} onClick={(s as { onClick?: () => void }).onClick}
+            className="rounded-2xl p-5 border bg-white transition-shadow"
+            style={{ borderColor: "#E5E7EB", cursor: (s as { onClick?: () => void }).onClick ? "pointer" : "default" }}
+            onMouseEnter={e => { if ((s as { onClick?: () => void }).onClick) (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 12px rgba(39,41,92,0.1)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
             <p className="text-3xl font-bold mb-1" style={{ color: s.color }}>{s.value}</p>
             <p className="text-xs font-semibold" style={{ color: "#27295C" }}>{s.label}</p>
             <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{s.sub}</p>
+            {(s as { onClick?: () => void }).onClick && <p className="text-xs mt-1" style={{ color: "#C9A84C" }}>Ver detalle →</p>}
           </div>
         ))}
       </div>
@@ -481,6 +493,127 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
         </div>
       </div>
     </div>
+
+      {/* Surveys Modal */}
+      {showSurveys && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full flex flex-col" style={{ maxWidth: 700, maxHeight: "85vh" }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "#E5E7EB" }}>
+              <p className="font-bold" style={{ color: "#27295C" }}>Encuestas de satisfacción</p>
+              <button onClick={() => setShowSurveys(false)} className="p-2 hover:bg-gray-100 rounded-lg">✕</button>
+            </div>
+            <div className="overflow-y-auto flex-1">
+              {surveysDetail.length === 0 ? (
+                <p className="text-center py-10 text-sm" style={{ color: "#9CA3AF" }}>Sin encuestas todavía</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-white border-b" style={{ borderColor: "#E5E7EB" }}>
+                    <tr>
+                      {["Cliente", "Empresa", "Rep", "Rating", "Comentario", "Fecha"].map(h => (
+                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y" style={{ borderColor: "#F3F4F6" }}>
+                    {[...surveysDetail].sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()).map(s => {
+                      const rep = usersDetail.find(u => u.id === s.repId);
+                      const stars = "⭐".repeat(s.rating) + "☆".repeat(5 - s.rating);
+                      return (
+                        <tr key={s.id} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium" style={{ color: "#27295C" }}>{s.clientName || s.clientEmail}</td>
+                          <td className="px-4 py-3 text-xs" style={{ color: "#6B7280" }}>{s.clientCompany || "—"}</td>
+                          <td className="px-4 py-3 text-xs" style={{ color: "#6B7280" }}>{rep?.fullName?.split(" ")[0] || "—"}</td>
+                          <td className="px-4 py-3 text-xs">{stars}</td>
+                          <td className="px-4 py-3 text-xs" style={{ color: "#374151" }}>{s.feedback || "—"}</td>
+                          <td className="px-4 py-3 text-xs" style={{ color: "#9CA3AF" }}>{new Date(s.submittedAt).toLocaleDateString("es-ES")}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Proposals Modal */}
+      {showProposals && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full flex flex-col" style={{ maxWidth: 900, maxHeight: "85vh" }}>
+            <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "#E5E7EB" }}>
+              <p className="font-bold" style={{ color: "#27295C" }}>Propuestas enviadas</p>
+              <button onClick={() => setShowProposals(false)} className="p-2 hover:bg-gray-100 rounded-lg">✕</button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-5 space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-2xl border p-4" style={{ borderColor: "#E5E7EB" }}>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>🏆 Más propuestas enviadas</p>
+                  {usersDetail.filter(u => proposalsDetail.some(p => p.sentById === u.id)).map(u => {
+                    const count = proposalsDetail.filter(p => p.sentById === u.id).length;
+                    return { name: u.fullName.split(" ")[0], count };
+                  }).sort((a, b) => b.count - a.count).map((r, i) => (
+                    <div key={r.name} className="flex items-center justify-between py-1.5">
+                      <span className="text-sm" style={{ color: "#27295C" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {r.name}</span>
+                      <span className="text-sm font-bold" style={{ color: "#27295C" }}>{r.count}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded-2xl border p-4" style={{ borderColor: "#E5E7EB" }}>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>💰 Más cierres</p>
+                  {usersDetail.filter(u => proposalsDetail.some(p => p.sentById === u.id && p.status === "accepted")).map(u => {
+                    const count = proposalsDetail.filter(p => p.sentById === u.id && p.status === "accepted").length;
+                    const total = proposalsDetail.filter(p => p.sentById === u.id && p.status === "accepted").reduce((s, p) => s + p.total, 0);
+                    return { name: u.fullName.split(" ")[0], count, total };
+                  }).sort((a, b) => b.count - a.count).map((r, i) => (
+                    <div key={r.name} className="flex items-center justify-between py-1.5">
+                      <span className="text-sm" style={{ color: "#27295C" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {r.name}</span>
+                      <div className="text-right">
+                        <span className="text-sm font-bold" style={{ color: "#22C55E" }}>{r.count} · </span>
+                        <span className="text-sm font-bold" style={{ color: "#C9A84C" }}>USD ${r.total.toLocaleString("en-US")}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="border-b" style={{ borderColor: "#E5E7EB" }}>
+                  <tr>
+                    {["Propuesta", "Cliente", "Importe", "Enviada por", "Estado", "Fecha"].map(h => (
+                      <th key={h} className="px-3 py-3 text-left text-xs font-semibold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y" style={{ borderColor: "#F3F4F6" }}>
+                  {[...proposalsDetail].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(p => {
+                    const rep = usersDetail.find(u => u.id === p.sentById);
+                    const isAccepted = p.status === "accepted";
+                    return (
+                      <tr key={p.id} className="hover:bg-gray-50">
+                        <td className="px-3 py-3 font-mono text-xs" style={{ color: "#6B7280" }}>{p.proposalNum}</td>
+                        <td className="px-3 py-3">
+                          <p className="font-medium text-sm" style={{ color: "#27295C" }}>{p.clientName || "—"}</p>
+                          <p className="text-xs" style={{ color: "#9CA3AF" }}>{p.clientEmail || ""}</p>
+                        </td>
+                        <td className="px-3 py-3 font-bold text-sm" style={{ color: "#C9A84C" }}>USD ${p.total.toLocaleString("en-US")}</td>
+                        <td className="px-3 py-3 text-sm" style={{ color: "#374151" }}>{rep?.fullName?.split(" ")[0] || "—"}</td>
+                        <td className="px-3 py-3">
+                          <span className="text-xs px-2 py-1 rounded-full font-semibold"
+                            style={{ background: isAccepted ? "#DCFCE7" : "#F3F4F6", color: isAccepted ? "#166534" : "#6B7280" }}>
+                            {isAccepted ? "✅ Aceptada" : "⏳ Pendiente"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-xs" style={{ color: "#9CA3AF" }}>{new Date(p.createdAt).toLocaleDateString("es-ES")}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

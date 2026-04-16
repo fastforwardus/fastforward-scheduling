@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
       contactId: contact.contact_id,
       invoiceNumber: proposal.proposalNum,
       lineItems: services.map((s) => ({ name: s.name, rate: s.price, quantity: 1 })),
+      discount: proposal.discount || 0,
       notes: `Propuesta ${proposal.proposalNum} — FastForward`,
     });
 
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
         ? { subject: `Invoice ${proposal.proposalNum} — FastForward`, greeting: `Hello ${clientName},`, intro: "Please find attached the invoice for the requested service.", payBtn: "View & Pay Invoice", secure: "Secure payment via Stripe · info@fastfwdus.com" }
         : proposal.lang === "pt"
         ? { subject: `Fatura ${proposal.proposalNum} — FastForward`, greeting: `Olá ${clientName},`, intro: "Segue em anexo a fatura referente ao serviço solicitado.", payBtn: "Ver e Pagar Fatura", secure: "Pagamento seguro via Stripe · info@fastfwdus.com" }
-        : { subject: `Factura ${proposal.proposalNum} — FastForward`, greeting: `Hola ${clientName},`, intro: "Adjunto encontrarás la factura correspondiente al servicio solicitado.", payBtn: "Ver y Pagar Factura", secure: "Pago seguro via Stripe · info@fastfwdus.com" };
+        : { subject: `Factura ${proposal.proposalNum} — FastForward`, greeting: `Estimado/a ${clientName},`, intro: "Adjunto encontrará la factura correspondiente al servicio solicitado.", payBtn: "Ver y Pagar Factura", secure: "Pago seguro vía Stripe · info@fastfwdus.com" };
 
       const services2 = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
       const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
@@ -168,11 +169,11 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
 
   const confirmMessages = {
-    es: { subject: "Propuesta confirmada — FastForward", body: `Hola ${clientName.split(" ")[0]},
+    es: { subject: "Propuesta confirmada — FastForward", body: `Estimado/a ${clientName.split(" ")[0]},
 
-Hemos recibido tu confirmación. Tu factura fue generada y te llegará por email en los próximos minutos.
+Hemos recibido su confirmación. Su factura ha sido generada y llegará por correo electrónico en los próximos minutos.
 
-Nuestro equipo se pondrá en contacto contigo para coordinar los próximos pasos.
+Nuestro equipo se pondrá en contacto para coordinar los próximos pasos.
 
 Gracias por confiar en FastForward.` },
     en: { subject: "Proposal confirmed — FastForward", body: `Hi ${clientName.split(" ")[0]},

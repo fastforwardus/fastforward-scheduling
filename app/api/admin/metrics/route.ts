@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments, users, surveys } from "@/db/schema";
+import { appointments, users, surveys, proposals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 
@@ -120,11 +120,41 @@ export async function GET() {
   const satisfactionFour = allSurveys.filter(s => s.rating === 4).length;
   const satisfactionLow  = allSurveys.filter(s => s.rating <= 3).length;
 
+  // Proposals data
+  const allProposals = await db.select({
+    id: proposals.id,
+    proposalNum: proposals.proposalNum,
+    total: proposals.total,
+    status: proposals.status,
+    clientName: proposals.clientName,
+    clientEmail: proposals.clientEmail,
+    acceptedAt: proposals.acceptedAt,
+    createdAt: proposals.createdAt,
+    sentById: proposals.sentById,
+    appointmentId: proposals.appointmentId,
+  }).from(proposals).orderBy(proposals.createdAt);
+
+  // Surveys with rep info via appointment
+  const surveysWithRep = await db.select({
+    id: surveys.id,
+    rating: surveys.rating,
+    feedback: surveys.feedback,
+    clientEmail: surveys.clientEmail,
+    submittedAt: surveys.submittedAt,
+    repId: appointments.assignedTo,
+    clientName: appointments.clientName,
+    clientCompany: appointments.clientCompany,
+  }).from(surveys)
+    .leftJoin(appointments, eq(appointments.id, surveys.appointmentId));
+
   return NextResponse.json({
     summary: { total, assigned, completed, noShow, withOutcome, proposalSent, closed, interested, showRate, conversionRate },
     last30: { total: last30.length },
     last7:  { total: last7.length },
     byPlatform, bySource, byScore, byRep, daily,
     satisfaction: { total: totalSurveys, avg: satisfactionAvg, fiveStars: satisfactionFive, fourStars: satisfactionFour, lowRating: satisfactionLow },
+    surveysDetail: surveysWithRep,
+    proposalsDetail: allProposals,
+    usersDetail: allUsers,
   });
 }

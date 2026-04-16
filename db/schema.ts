@@ -250,6 +250,7 @@ export const proposals = pgTable("proposals", {
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   invoiceSentAt: timestamp("invoice_sent_at"),
   clientAddress:  text("client_address"),
+  sentById:       uuid("sent_by_id").references(() => users.id),
 });
 
 // ── System Config

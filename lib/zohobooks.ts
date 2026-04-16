@@ -137,6 +137,7 @@ export async function createZohoBooksInvoice(params: {
   contactId: string;
   invoiceNumber: string;
   lineItems: ZBLineItem[];
+  discount?: number;
   notes?: string;
 }): Promise<{ invoice_id: string; invoice_number: string; total: number; invoice_url: string }> {
   const data = await booksReq("POST", "/invoices", {
@@ -150,9 +151,8 @@ export async function createZohoBooksInvoice(params: {
       rate: item.rate,
       quantity: item.quantity ?? 1,
     })),
-    ...(params.clientAddress ? { billing_address: { address: params.clientAddress, country: "US" } } : {}),
+    ...(params.discount ? { discount: params.discount, is_discount_before_tax: true, discount_type: "entity_level" } : {}),
     notes: params.notes ?? "",
-    ...(params.clientTaxId ? { custom_fields: [{ label: "Tax ID / Identificación Tributaria", value: params.clientTaxId }] } : {}),
     terms: "El pago es requerido para iniciar los servicios. Para transferencia bancaria: info@fastfwdus.com",
   });
 

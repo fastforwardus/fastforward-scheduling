@@ -58,13 +58,13 @@ export async function GET(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
 
     const subjects: Record<string, string> = {
-      es: "Te esperabamos - Reagenda tu consulta",
+      es: "Le esperábamos - Reagende su consulta",
       en: "We missed you - Reschedule your consultation",
       pt: "Sentimos sua falta - Reagende sua consulta",
     };
 
     const bodies: Record<string, string> = {
-      es: `Hola ${appt.clientName}, teniamos una reunion agendada hoy pero no pudimos conectar. Podes reagendar con un click.`,
+      es: `Estimado/a ${appt.clientName}, teníamos una reunión agendada hoy pero no pudimos conectar. Puede reagendar con un clic.`,
       en: `Hi ${appt.clientName}, we had a meeting scheduled today but couldn't connect. You can reschedule with one click.`,
       pt: `Ola ${appt.clientName}, tinhamos uma reuniao agendada hoje mas nao conseguimos conectar. Voce pode reagendar com um clique.`,
     };

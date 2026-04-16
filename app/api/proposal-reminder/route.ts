@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
 
     // Generate AI reminder message
     const aiMsg = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-5-20251001",
       max_tokens: 200,
       messages: [{
         role: "user",
@@ -79,7 +79,7 @@ Máximo 2 oraciones. Tono profesional pero cálido. Sin saludos ni despedidas. S
     const aiText = aiMsg.content[0].type === "text" ? aiMsg.content[0].text : "";
 
     const subjects = {
-      es: `Recordatorio: tu propuesta ${proposal.proposalNum} está pendiente — FastForward`,
+      es: `Recordatorio: su propuesta ${proposal.proposalNum} está pendiente — FastForward`,
       en: `Reminder: your proposal ${proposal.proposalNum} is pending — FastForward`,
       pt: `Lembrete: sua proposta ${proposal.proposalNum} está pendente — FastForward`,
     };

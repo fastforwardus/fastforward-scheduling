@@ -84,6 +84,7 @@ export default function ProposalConfirmClient({
   const t = T[lang] || T.es;
   const [confirming, setConfirming] = useState(false);
   const [accepted, setAccepted] = useState(status === "accepted");
+  const [alreadyAccepted, setAlreadyAccepted] = useState(false);
   const subtotal = services.reduce((s, svc) => s + svc.price, 0);
 
   async function handleConfirm() {
@@ -95,7 +96,8 @@ export default function ProposalConfirmClient({
         body: JSON.stringify({ token }),
       });
       const data = await res.json();
-      if (data.ok || data.alreadyAccepted) setAccepted(true);
+      if (data.alreadyAccepted) { setAlreadyAccepted(true); return; }
+      if (data.ok) setAccepted(true);
     } catch {
       // si falla igual mostramos aceptado para no confundir al cliente
       setAccepted(true);
@@ -103,6 +105,19 @@ export default function ProposalConfirmClient({
       setConfirming(false);
     }
   }
+
+  if (alreadyAccepted) return (
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#F8F9FB" }}>
+      <div className="bg-white rounded-2xl p-10 text-center shadow-sm border max-w-md w-full" style={{ borderColor: "#E5E7EB" }}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#FEF3C7" }}>
+          <span style={{ fontSize: 32 }}>📋</span>
+        </div>
+        <p className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>Propuesta ya aceptada</p>
+        <p className="text-sm" style={{ color: "#6B7280" }}>Esta propuesta ya fue aceptada anteriormente. Si tenés alguna consulta, contactá a tu asesor de FastForward.</p>
+        <p className="text-sm mt-4 font-medium" style={{ color: "#C9A84C" }}>info@fastfwdus.com</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen" style={{ background: "#F8F9FB" }}>

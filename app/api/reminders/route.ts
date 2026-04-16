@@ -85,19 +85,19 @@ export async function GET(req: NextRequest) {
       const isIn24h = window.type === "24h";
 
       const subjects: Record<string, string> = {
-        es: isIn24h ? "Recordatorio - Tu reunion es manana" : "Tu reunion comienza en 2 horas",
+        es: isIn24h ? "Recordatorio - Su reunión es mañana" : "Su reunión comienza en 2 horas",
         en: isIn24h ? "Reminder - Your meeting is tomorrow" : "Your meeting starts in 2 hours",
-        pt: isIn24h ? "Lembrete - Sua reuniao e amanha" : "Sua reuniao comeca em 2 horas",
+        pt: isIn24h ? "Lembrete - Sua reunião é amanhã" : "Sua reunião começa em 2 horas",
       };
 
       const intros: Record<string, string> = {
-        es: isIn24h ? `Te recordamos que manana tenes una reunion con ${repName} de FastForward.` : `Tu reunion con ${repName} comienza en 2 horas.`,
+        es: isIn24h ? `Le recordamos que mañana tiene una reunión con ${repName} de FastForward.` : `Su reunión con ${repName} comienza en 2 horas.`,
         en: isIn24h ? `Reminder: tomorrow you have a meeting with ${repName} from FastForward.` : `Your meeting with ${repName} starts in 2 hours.`,
         pt: isIn24h ? `Lembrete: amanha voce tem uma reuniao com ${repName} da FastForward.` : `Sua reuniao com ${repName} comeca em 2 horas.`,
       };
 
       const ctas: Record<string, string> = {
-        es: appt.meetingLink ? "Unirse a la reunion" : "Ver detalles",
+        es: appt.meetingLink ? "Unirse a la reunión" : "Ver detalles",
         en: appt.meetingLink ? "Join meeting" : "View details",
         pt: appt.meetingLink ? "Entrar na reuniao" : "Ver detalhes",
       };
@@ -113,20 +113,20 @@ export async function GET(req: NextRequest) {
   <p style="font-size:13px;font-weight:600;color:#C9A84C;text-transform:uppercase;margin:0 0 8px;">
     ${isIn24h ? "Recordatorio 24 horas" : "Recordatorio 2 horas"}
   </p>
-  <p style="font-size:20px;font-weight:700;color:#27295C;margin:0 0 8px;">Hola, ${appt.clientName}</p>
+  <p style="font-size:20px;font-weight:700;color:#27295C;margin:0 0 8px;">${lang === "en" ? "Hello" : lang === "pt" ? "Olá" : "Estimado/a"}, ${appt.clientName}</p>
   <p style="font-size:14px;color:#6B7280;margin:0 0 24px;">${intros[lang] || intros.es}</p>
   <div style="background:#F8F9FB;border-radius:12px;padding:20px;margin-bottom:24px;border:1px solid #E5E7EB;">
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr><td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
-        <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">Fecha y hora</span><br>
+        <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">${lang === "en" ? "Date & Time" : lang === "pt" ? "Data e Hora" : "Fecha y Hora"}</span><br>
         <span style="font-size:14px;font-weight:600;color:#27295C;">${formattedDate} · ${formattedTime}</span>
       </td></tr>
       <tr><td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
-        <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">Plataforma</span><br>
+        <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">${lang === "en" ? "Platform" : lang === "pt" ? "Plataforma" : "Plataforma"}</span><br>
         <span style="font-size:14px;font-weight:600;color:#27295C;">${platformLabel}</span>
       </td></tr>
       <tr><td style="padding:6px 0;">
-        <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">Tu experto</span><br>
+        <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">${lang === "en" ? "Your expert" : lang === "pt" ? "Seu especialista" : "Su experto"}</span><br>
         <span style="font-size:14px;font-weight:600;color:#27295C;">${repName}</span>
       </td></tr>
     </table>
