@@ -66,6 +66,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
   const [searchQ, setSearchQ] = useState("");
   const [emailText, setEmailText] = useState("");
   const [clientAddress, setClientAddress] = useState("");
+  const [clientTaxId, setClientTaxId] = useState("");
   const [customName, setCustomName] = useState("");
   const [customDesc, setCustomDesc] = useState("");
   const [customPrice, setCustomPrice] = useState("");
@@ -234,6 +235,12 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                   <input type="text" value={clientAddress} onChange={e => setClientAddress(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
                     style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Calle 123, Ciudad, País" />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>ID Tributario <span style={{ color: "#C9A84C", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
+                  <input type="text" value={clientTaxId} onChange={e => setClientTaxId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
+                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="EIN, RFC, CUIT..." />
                 </div>
               </div>
 
