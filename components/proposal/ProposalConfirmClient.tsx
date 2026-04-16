@@ -148,15 +148,15 @@ export default function ProposalConfirmClient({
           <>
             {/* Client info */}
             <div className="bg-white rounded-2xl p-6 mb-4" style={{ border: "1px solid #E5E7EB" }}>
-              <div className="flex items-start justify-between gap-4">
-                <div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="min-w-0">
                   <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{t.for}</p>
-                  <p className="text-lg font-bold" style={{ color: "#27295C" }}>{clientName}</p>
-                  <p className="text-sm" style={{ color: "#6B7280" }}>{clientCompany}</p>
+                  <p className="text-base font-bold break-words" style={{ color: "#27295C" }}>{clientCompany || clientName}</p>
+                  <p className="text-sm break-words" style={{ color: "#6B7280" }}>{clientCompany ? clientName : ""}</p>
                 </div>
-                <div className="text-right">
+                <div className="text-right min-w-0">
                   <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{t.from}</p>
-                  <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{repName}</p>
+                  <p className="text-sm font-semibold break-words" style={{ color: "#27295C" }}>{repName}</p>
                   <p className="text-xs" style={{ color: "#9CA3AF" }}>FastForward FDA Experts</p>
                 </div>
               </div>
