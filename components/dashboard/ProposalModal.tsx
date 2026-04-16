@@ -73,6 +73,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
   const [sending, setSending] = useState(false);
   const [clientEmail, setClientEmail] = useState(initialClientEmail || "");
   const [clientAddress, setClientAddress] = useState("");
+  const [clientTaxId, setClientTaxId] = useState("");
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
 
@@ -135,6 +136,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           lang,
           clientEmail: clientEmail || undefined,
           clientAddress: clientAddress || undefined,
+          clientTaxId: clientTaxId || undefined,
         }),
       });
       const data = await res.json();
@@ -193,6 +195,13 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
               className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
               style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
               placeholder="Calle 123, Ciudad, País (opcional)" />
+          </div>
+          <div className="flex items-center gap-3 mt-2">
+            <label className="text-xs font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: "#9CA3AF" }}>ID Tributario</label>
+            <input type="text" value={clientTaxId} onChange={e => setClientTaxId(e.target.value)}
+              className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
+              style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
+              placeholder="EIN, RFC, CUIT... (opcional)" />
           </div>
         </div>
 

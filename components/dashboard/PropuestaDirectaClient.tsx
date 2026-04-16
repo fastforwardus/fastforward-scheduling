@@ -48,6 +48,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
   const [error, setError] = useState("");
   const [emailText, setEmailText] = useState("");
   const [clientAddress, setClientAddress] = useState("");
+  const [clientTaxId, setClientTaxId] = useState("");
 
   const subtotal = selected.reduce((s, svc) => s + svc.price * svc.qty, 0);
   const total = subtotal - discount;
@@ -67,7 +68,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
       const res = await fetch("/api/proposals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ services: selected.map(s => ({ name: s.name, description: s.description, price: s.price * s.qty })), discount, lang, directClientName: clientName, directClientCompany: clientCompany || clientName, directClientEmail: clientEmail, emailText: emailText || undefined, clientAddress: clientAddress || undefined }),
+        body: JSON.stringify({ services: selected.map(s => ({ name: s.name, description: s.description, price: s.price * s.qty })), discount, lang, directClientName: clientName, directClientCompany: clientCompany || clientName, directClientEmail: clientEmail, emailText: emailText || undefined, clientAddress: clientAddress || undefined, clientTaxId: clientTaxId || undefined }),
       });
       const data = await res.json();
       if (data.ok) setSent(true);
@@ -140,11 +141,17 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
                     style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="email@empresa.com" />
                 </div>
-                <div className="sm:col-span-2">
+                <div>
                   <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>Dirección <span style={{ color: "#C9A84C", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
                   <input type="text" value={clientAddress} onChange={e => setClientAddress(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
                     style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Calle 123, Ciudad, País" />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>ID Tributario <span style={{ color: "#C9A84C", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
+                  <input type="text" value={clientTaxId} onChange={e => setClientTaxId(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
+                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="EIN, RFC, CUIT..." />
                 </div>
               </div>
               <div className="flex gap-2 mt-3">

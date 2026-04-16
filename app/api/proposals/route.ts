@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     lang = "es",
     clientEmail: clientEmailOverride,
     clientAddress,
+    clientTaxId,
     // Direct client fields (for proposals without appointment)
     directClientName,
     directClientCompany,
@@ -117,6 +118,7 @@ export async function POST(req: NextRequest) {
     lang: lang as string,
     status: "pending",
     clientAddress: clientAddress || null,
+    clientTaxId: clientTaxId || null,
     clientEmail: appt?.clientEmail || null,
     clientName: appt?.clientName || null,
   });

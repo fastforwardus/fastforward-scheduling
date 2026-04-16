@@ -150,7 +150,9 @@ export async function createZohoBooksInvoice(params: {
       rate: item.rate,
       quantity: item.quantity ?? 1,
     })),
+    ...(params.clientAddress ? { billing_address: { address: params.clientAddress, country: "US" } } : {}),
     notes: params.notes ?? "",
+    ...(params.clientTaxId ? { custom_fields: [{ label: "Tax ID / Identificación Tributaria", value: params.clientTaxId }] } : {}),
     terms: "El pago es requerido para iniciar los servicios. Para transferencia bancaria: info@fastfwdus.com",
   });
 
