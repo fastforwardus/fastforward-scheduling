@@ -2,7 +2,7 @@
 import type { Appt } from "@/types/appointments";
 import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send, DollarSign } from "lucide-react";
+import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send } from "lucide-react";
 import Link from "next/link";
 
 interface Stats {
@@ -48,7 +48,7 @@ export default function SalesDashboardClient({ user }: {
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [myProposals, setMyProposals] = useState<MyProposal[]>([]);
-  const [loadingProposals, setLoadingProposals] = useState(false);
+  const [loadingProposals, setLoadingProposals] = useState(false); // eslint-disable-line
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"home" | "all">("home");
 
