@@ -2,7 +2,7 @@
 import type { Appt } from "@/types/appointments";
 import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight } from "lucide-react";
+import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send, DollarSign } from "lucide-react";
 import Link from "next/link";
 
 interface Stats {
@@ -12,6 +12,21 @@ interface Stats {
   proposalsSent: number;
   closed: number;
   todayCount: number;
+}
+
+interface MyProposal {
+  id: string; proposal_num: string; total: number; discount: number;
+  status: string; created_at: string; accepted_at: string | null;
+  invoice_sent_at: string | null; payment_confirmed_at: string | null;
+  client_name: string; client_company: string; client_email: string;
+  zoho_invoice_id: string | null; confirm_token: string; rep_name: string | null;
+}
+
+function StatusBadge({ status, invoiceSent, paymentConfirmed }: { status: string; invoiceSent: boolean; paymentConfirmed: boolean }) {
+  if (paymentConfirmed) return <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "#DCFCE7", color: "#166534" }}>💰 Pagada</span>;
+  if (status === "accepted" && invoiceSent) return <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "#DBEAFE", color: "#1E40AF" }}>📧 Factura enviada</span>;
+  if (status === "accepted") return <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "#FEF9C3", color: "#854D0E" }}>✅ Aceptada</span>;
+  return <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "#F3F4F6", color: "#6B7280" }}>⏳ Pendiente</span>;
 }
 
 function StatCard({ icon: Icon, label, value, color, bg }: { icon: React.ElementType; label: string; value: number; color: string; bg: string }) {
@@ -32,6 +47,8 @@ export default function SalesDashboardClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string };
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
+  const [myProposals, setMyProposals] = useState<MyProposal[]>([]);
+  const [loadingProposals, setLoadingProposals] = useState(false);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"home" | "all">("home");
 
@@ -195,6 +212,39 @@ export default function SalesDashboardClient({ user }: {
             </div>
           </div>
         )}
+
+        {/* Mis Propuestas */}
+        <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
+          <div className="px-5 py-3.5 border-b flex items-center justify-between" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
+            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Mis propuestas ({myProposals.length})</p>
+            <Send className="w-4 h-4" style={{ color: "#C9A84C" }} />
+          </div>
+          {loadingProposals ? (
+            <div className="text-center py-8"><Clock className="w-5 h-5 animate-spin mx-auto" style={{ color: "#C9A84C" }} /></div>
+          ) : myProposals.length === 0 ? (
+            <div className="text-center py-8"><p className="text-sm" style={{ color: "#9CA3AF" }}>No hay propuestas enviadas</p></div>
+          ) : (
+            <div className="divide-y" style={{ borderColor: "#F9FAFB" }}>
+              {myProposals.slice(0, 10).map(prop => (
+                <div key={prop.id} className="px-5 py-3.5 flex items-center justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <p className="text-sm font-semibold truncate" style={{ color: "#27295C" }}>{prop.client_name || prop.client_email}</p>
+                      <StatusBadge status={prop.status} invoiceSent={!!prop.invoice_sent_at} paymentConfirmed={!!prop.payment_confirmed_at} />
+                    </div>
+                    <p className="text-xs" style={{ color: "#9CA3AF" }}>
+                      {prop.proposal_num} · USD ${Number(prop.total).toLocaleString("en-US")}
+                      {prop.client_company ? ` · ${prop.client_company}` : ""}
+                    </p>
+                  </div>
+                  <p className="text-xs shrink-0" style={{ color: "#D1D5DB" }}>
+                    {new Date(prop.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short" })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Quick actions */}
         <div className="grid grid-cols-2 gap-3">
