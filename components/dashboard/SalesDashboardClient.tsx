@@ -47,7 +47,7 @@ export default function SalesDashboardClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string };
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
-  const [myProposals, setMyProposals] = useState<MyProposal[]>([]);
+  const [myProposals, setMyProposals] = useState<MyProposal[]>([]); // eslint-disable-line
   const [loadingProposals, setLoadingProposals] = useState(false); // eslint-disable-line
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"home" | "all">("home");
