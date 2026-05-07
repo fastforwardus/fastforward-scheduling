@@ -113,6 +113,27 @@ export async function findOrCreateZohoBooksContact(params: {
     return { contact_id: existing.contact_id };
   }
 
+  // Buscar también por nombre por si existe sin email
+  if (params.email) {
+    const token3 = await getZohoBooksToken();
+    const nameSearchRes = await fetch(
+      `${ZOHO_BOOKS_BASE}/contacts?organization_id=${orgId()}&contact_name=${encodeURIComponent(params.name)}`,
+      { headers: { Authorization: `Zoho-oauthtoken ${token3}`, Accept: "application/json" } }
+    );
+    const nameSearchText = await nameSearchRes.text();
+    const nameSearchData = nameSearchText ? JSON.parse(nameSearchText) : null;
+    const existingByName = nameSearchData?.contacts?.[0];
+    if (existingByName) {
+      await booksReq("PUT", `/contacts/${existingByName.contact_id}`, {
+        contact_name: existingByName.contact_name,
+        email: params.email,
+        ...(params.address ? { billing_address: { address: params.address, country: "US" } } : {}),
+        ...(params.taxId ? { tax_id_value: params.taxId } : {}),
+      });
+      return { contact_id: existingByName.contact_id };
+    }
+  }
+
   const data = await booksReq("POST", "/contacts", {
     contact_name: params.name,
     company_name: params.company || params.name,
