@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
 
   try {
+    console.log("ZohoBooks contact params — name:", clientName, "| email:", clientEmail || "VACÍO");
     const contact = await findOrCreateZohoBooksContact({
       name: clientName,
       email: clientEmail,
