@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, boolean, integer, numeric, timestamp, time, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, uuid, text, boolean, integer, numeric, timestamp, time, pgEnum, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
 // ── Enums ──
@@ -258,4 +258,51 @@ export const systemConfig = pgTable("system_config", {
   key:       text("key").primaryKey(),
   value:     text("value").notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ── Adriana: WhatsApp Conversations ──
+export const adrianaConversations = pgTable("adriana_conversations", {
+  id:               uuid("id").primaryKey().defaultRandom(),
+  waPhone:          text("wa_phone").notNull().unique(),
+  waProfileName:    text("wa_profile_name"),
+  language:         languageEnum("language"),
+  timezone:         text("timezone"),
+  leadName:         text("lead_name"),
+  leadEmail:        text("lead_email"),
+  leadCompany:      text("lead_company"),
+  leadCountry:      text("lead_country"),
+  leadProductType:  text("lead_product_type"),
+  leadChannel:      text("lead_channel"),
+  leadTimeline:     text("lead_timeline"),
+  zohoLeadId:       text("zoho_lead_id"),
+  appointmentId:    text("appointment_id"),
+  bookedAt:         timestamp("booked_at", { withTimezone: true }),
+  surveyAskedAt:    timestamp("survey_asked_at", { withTimezone: true }),
+  surveyDoneAt:     timestamp("survey_done_at", { withTimezone: true }),
+  status:           text("status").default("active").notNull(),
+  lastUserMsgAt:    timestamp("last_user_msg_at", { withTimezone: true }),
+  lastAssistantMsgAt: timestamp("last_assistant_msg_at", { withTimezone: true }),
+  createdAt:        timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt:        timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// ── Adriana: Messages history ──
+export const adrianaMessages = pgTable("adriana_messages", {
+  id:             uuid("id").primaryKey().defaultRandom(),
+  conversationId: uuid("conversation_id").notNull().references(() => adrianaConversations.id, { onDelete: "cascade" }),
+  role:           text("role").notNull(),
+  content:        jsonb("content").notNull(),
+  waMessageId:    text("wa_message_id"),
+  tokensIn:       integer("tokens_in"),
+  tokensOut:      integer("tokens_out"),
+  createdAt:      timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// ── Adriana: Satisfaction ──
+export const adrianaSatisfaction = pgTable("adriana_satisfaction", {
+  id:             uuid("id").primaryKey().defaultRandom(),
+  conversationId: uuid("conversation_id").notNull().references(() => adrianaConversations.id, { onDelete: "cascade" }),
+  score:          integer("score").notNull(),
+  comment:        text("comment"),
+  createdAt:      timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
