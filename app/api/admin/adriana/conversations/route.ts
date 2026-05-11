@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { adrianaConversations, adrianaMessages, adrianaSatisfaction, appointments } from "@/db/schema";
+import { adrianaConversations, adrianaMessages, adrianaSatisfaction } from "@/db/schema";
 import { sql, desc, eq, and, or, ilike, gte, lte } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 

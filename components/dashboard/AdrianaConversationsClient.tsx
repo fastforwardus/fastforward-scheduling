@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import {
-  MessageCircle, Search, Filter, ChevronLeft, Phone, Mail, Building2,
-  Globe, Calendar, Star, Loader2, User, Bot, RefreshCw, X,
+  MessageCircle, Search, ChevronLeft, Mail, Building2,
+  Globe, Calendar, Star, Loader2, User, Bot, RefreshCw,
 } from "lucide-react";
 
 interface SessionUser {
@@ -339,7 +339,7 @@ export default function AdrianaConversationsClient({ user }: { user: SessionUser
                     <span className="font-medium">Encuesta: {detail.satisfaction.score}/5</span>
                   </div>
                   {detail.satisfaction.comment && (
-                    <div className="text-xs text-amber-800 mt-1 italic">"{detail.satisfaction.comment}"</div>
+                    <div className="text-xs text-amber-800 mt-1 italic">&ldquo;{detail.satisfaction.comment}&rdquo;</div>
                   )}
                 </div>
               )}
