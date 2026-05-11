@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle } from "lucide-react";
 
 interface SidebarProps {
   user: { fullName: string; email: string; role: string };
@@ -19,6 +19,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/appointments", icon: Calendar, label: "Todas las citas", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/propuesta", icon: FileText, label: "Enviar propuesta", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
+    { href: "/dashboard/admin/adriana", icon: MessageCircle, label: "Adriana", roles: ["admin"] },
     { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
   ];
 
