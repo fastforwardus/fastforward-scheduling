@@ -182,9 +182,35 @@ export function buildSystemPrompt(state: {
   }
   if (state.surveyDone) dynamicLines.push(`- La encuesta ya fue respondida. No la vuelvas a pedir.`);
 
+  // Bloque de fecha actual + reglas críticas anti-alucinación
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat("es-ES", {
+    timeZone: "America/New_York",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const nowMiamiStr = formatter.format(now);
+
+  const criticalRules = [
+    `# FECHA Y HORA ACTUAL (Miami)`,
+    `- Ahora mismo es: ${nowMiamiStr} (zona horaria America/New_York).`,
+    `- Cuando elabores fechas para get_available_slots, usa fechas posteriores a esta.`,
+    `- NUNCA uses años pasados. Si tienes dudas sobre el año actual, es el que aparece arriba.`,
+    ``,
+    `# REGLAS CRÍTICAS DE BOOKING`,
+    `- Cuando llames a create_booking, el campo "slot_iso_utc" DEBE ser EXACTAMENTE el valor "utc" que devolvió get_available_slots en este turno o uno reciente.`,
+    `- NUNCA inventes, reconstruyas, ni edites el formato del "utc". Cópialo y pégalo tal cual viene del tool.`,
+    `- Si dudas del slot exacto, llama get_available_slots de nuevo antes de bookear. Es preferible una llamada extra que una cita en fecha incorrecta.`,
+  ].join("\n");
+
   if (dynamicLines.length === 0) {
-    return ADRIANA_BASE_PROMPT;
+    return `${ADRIANA_BASE_PROMPT}\n\n${criticalRules}\n`;
   }
 
-  return `${ADRIANA_BASE_PROMPT}\n\n# ESTADO ACTUAL DE LA CONVERSACIÓN (inyectado dinámicamente)\n${dynamicLines.join("\n")}\n`;
+  return `${ADRIANA_BASE_PROMPT}\n\n${criticalRules}\n\n# ESTADO ACTUAL DE LA CONVERSACIÓN (inyectado dinámicamente)\n${dynamicLines.join("\n")}\n`;
 }
