@@ -120,6 +120,11 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
     setSelected(prev => prev.map(s => s.name === name ? { ...s, qty: Math.max(1, s.qty + delta) } : s));
   }
 
+  function updatePrice(name: string, price: number) {
+    if (isNaN(price) || price < 0) return;
+    setSelected(prev => prev.map(s => s.name === name ? { ...s, price } : s));
+  }
+
   async function handleSend() {
     if (!selected.length) return;
     setSending(true);
@@ -336,6 +341,13 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                           className="text-gray-400 hover:text-red-500 flex-shrink-0">
                           <X className="w-3 h-3" />
                         </button>
+                      </div>
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <span className="text-xs" style={{ color: "#9CA3AF" }}>$</span>
+                        <input type="number" value={svc.price} onChange={e => updatePrice(svc.name, Number(e.target.value))} min={0}
+                          className="flex-1 px-2 py-1 rounded border text-xs text-right outline-none"
+                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                        <span className="text-xs" style={{ color: "#9CA3AF" }}>c/u</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">

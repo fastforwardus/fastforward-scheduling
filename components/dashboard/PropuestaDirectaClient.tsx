@@ -93,6 +93,11 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
     setSelected(prev => prev.map(s => s.name === name ? { ...s, qty } : s));
   }
 
+  function updatePrice(name: string, price: number) {
+    if (isNaN(price) || price < 0) return;
+    setSelected(prev => prev.map(s => s.name === name ? { ...s, price } : s));
+  }
+
   function addEmail() { setClientEmails(prev => [...prev, ""]); }
   function removeEmail(i: number) { setClientEmails(prev => prev.filter((_, idx) => idx !== i)); }
   function updateEmail(i: number, val: string) { setClientEmails(prev => prev.map((e, idx) => idx === i ? val : e)); }
@@ -369,16 +374,23 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
               ) : (
                 <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
                   {selected.map((svc, i) => (
-                    <div key={i} className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs" style={{ color: "#374151" }}>{svc.name}</p>
-                        {svc.qty > 1 && <p className="text-xs" style={{ color: "#9CA3AF" }}>x{svc.qty}</p>}
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        <span className="text-xs font-semibold" style={{ color: "#27295C" }}>${(svc.price * svc.qty).toLocaleString("en-US")}</span>
+                    <div key={i} className="space-y-1.5 pb-2 border-b" style={{ borderColor: "#F0F0F0" }}>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-xs flex-1" style={{ color: "#374151" }}>{svc.name}</p>
                         <button onClick={() => setSelected(prev => prev.filter(s => s.name !== svc.name))}>
                           <X className="w-3.5 h-3.5" style={{ color: "#9CA3AF" }} />
                         </button>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs" style={{ color: "#9CA3AF" }}>$</span>
+                        <input type="number" value={svc.price} onChange={e => updatePrice(svc.name, Number(e.target.value))} min={0}
+                          className="w-20 px-2 py-1 rounded-md border text-xs text-right outline-none"
+                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                        <span className="text-xs" style={{ color: "#9CA3AF" }}>x</span>
+                        <input type="number" value={svc.qty} onChange={e => updateQty(svc.name, Number(e.target.value))} min={1}
+                          className="w-12 px-2 py-1 rounded-md border text-xs text-right outline-none"
+                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                        <span className="text-xs font-semibold ml-auto" style={{ color: "#27295C" }}>${(svc.price * svc.qty).toLocaleString("en-US")}</span>
                       </div>
                     </div>
                   ))}
