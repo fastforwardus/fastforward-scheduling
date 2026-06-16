@@ -282,7 +282,7 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
   const [tab, setTab] = useState<"today" | "unassigned" | "upcoming" | "all">("today");
   const now = new Date();
   const today = appointments.filter(a => new Date(a.scheduledAt).toDateString() === now.toDateString()).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
-  const unassigned = appointments.filter(a => !a.assignedTo);
+  const unassigned = appointments.filter(a => !a.assignedTo && a.status !== "cancelled" && a.status !== "completed");
   const upcoming = appointments.filter(a => new Date(a.scheduledAt) > now).sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
 
   const tabs = [
