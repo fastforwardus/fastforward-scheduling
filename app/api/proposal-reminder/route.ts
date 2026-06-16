@@ -141,6 +141,23 @@ function render(stageNum: 1 | 2 | 3 | 4, lang: Lang, firstName: string, proposal
 }
 
 export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const testEmail = searchParams.get("test");
+
+  if (testEmail) {
+    const confirmUrl = `${APP_URL}/proposal/confirm/SAMPLE-TOKEN`;
+    for (const stage of [1, 2, 3, 4] as const) {
+      const { subject, html } = render(stage, "es", testEmail.split("@")[0], "FF-TEST-0000", 4800, confirmUrl);
+      await resend.emails.send({
+        from: "FastForward FDA Experts — FastForward <info@fastfwdus.com>",
+        to: testEmail,
+        subject: `[PRUEBA] ${subject}`,
+        html,
+      }).catch(console.error);
+    }
+    return NextResponse.json({ ok: true, test: true, sentTo: testEmail, mails: 4 });
+  }
+
   const auth = req.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
