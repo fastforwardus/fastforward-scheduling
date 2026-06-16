@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { proposals, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -158,12 +158,15 @@ export async function GET(req: NextRequest) {
     sentById: proposals.sentById,
     createdAt: proposals.createdAt,
     reminderStage: proposals.reminderStage,
-  }).from(proposals).where(eq(proposals.status, "pending"));
+  }).from(proposals).where(eq(proposals.status, "pending")).orderBy(desc(proposals.createdAt));
 
+  const seenEmails = new Set<string>();
   let sent = 0;
 
   for (const p of rows) {
     if (!p.clientEmail) continue;
+    const email = p.clientEmail.toLowerCase().trim();
+    if (email.endsWith("@fastfwdus.com") || email.endsWith("@fastfwd.com")) continue;
 
     const ageDays = (now - new Date(p.createdAt).getTime()) / 86400000;
     const target: 0 | 1 | 2 | 3 | 4 =
@@ -171,6 +174,8 @@ export async function GET(req: NextRequest) {
 
     const current = p.reminderStage ?? 0;
     if (target === 0 || target <= current) continue;
+    if (seenEmails.has(email)) continue;
+    seenEmails.add(email);
 
     let repName = "FastForward FDA Experts";
     let repEmail = "info@fastfwdus.com";
