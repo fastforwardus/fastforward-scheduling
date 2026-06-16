@@ -158,8 +158,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, test: true, sentTo: testEmail, mails: 4 });
   }
 
+  const manualRun = searchParams.get("run");
   const auth = req.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const okCron = auth === `Bearer ${process.env.CRON_SECRET}`;
+  const okManual = manualRun && manualRun === process.env.MANUAL_RUN_TOKEN;
+  if (!okCron && !okManual) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const now = Date.now();
   const DAILY_CAP = 50;
