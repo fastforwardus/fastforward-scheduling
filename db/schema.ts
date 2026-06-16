@@ -248,6 +248,8 @@ export const proposals = pgTable("proposals", {
   paymentConfirmedAt: timestamp("payment_confirmed_at", { withTimezone: true }),
   confirmToken:  text("confirm_token"),
   createdAt:     timestamp("created_at").defaultNow().notNull(),
+  expiresAt:     timestamp("expires_at"),
+  reminderStage: integer("reminder_stage").default(0),
   invoiceSentAt: timestamp("invoice_sent_at"),
   clientAddress:  text("client_address"),
   sentById:       uuid("sent_by_id").references(() => users.id),
