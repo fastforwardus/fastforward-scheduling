@@ -4,6 +4,7 @@ import { getAvailableSlots, type GetAvailableSlotsInput } from "./get-available-
 import { createBooking, type CreateBookingInput, type CreateBookingContext } from "./create-booking";
 import { saveSatisfactionScore, type SaveSatisfactionInput, type SaveSatisfactionContext } from "./save-satisfaction-score";
 import { saveFeedbackComment, type SaveFeedbackInput, type SaveFeedbackContext } from "./save-feedback-comment";
+import { notifyTeam, type NotifyTeamInput, type NotifyTeamContext } from "./notify-team";
 
 /** Schemas que se le mandan a Claude. */
 export const ADRIANA_TOOLS: Anthropic.Tool[] = [
@@ -84,6 +85,31 @@ export const ADRIANA_TOOLS: Anthropic.Tool[] = [
       required: ["comment"],
     },
   },
+  {
+    name: "notify_team",
+    description:
+      "Notifica al equipo humano de FastForward cuando NO podés resolver algo por tu cuenta. Llamala SIEMPRE antes de prometer al cliente que el equipo lo va a contactar. Casos típicos: el cliente quiere agendar una SEGUNDA cita (ya tiene una primera), pregunta por pagos/facturación, tiene una pregunta muy técnica/regulatoria específica, pide hablar con un humano, o está molesto. NO uses esta tool para preguntas básicas que vos podés responder. Después de llamarla, decile al cliente que el equipo recibió la notificación y va a contactarlo.",
+    input_schema: {
+      type: "object",
+      properties: {
+        reason: {
+          type: "string",
+          enum: ["second_booking", "payment", "complex_question", "other"],
+          description: "Motivo del handoff: second_booking (quiere otra cita), payment (pago/factura), complex_question (técnica/regulatoria), other.",
+        },
+        urgency: {
+          type: "string",
+          enum: ["low", "normal", "high"],
+          description: "low: puede esperar, normal: default, high: cliente molesto o lead muy caliente.",
+        },
+        summary: {
+          type: "string",
+          description: "Resumen 1-3 líneas para que el humano sepa qué pasó y qué quiere el cliente. Incluí datos concretos: nombre, empresa, qué pidió, por qué Adriana no puede resolverlo.",
+        },
+      },
+      required: ["reason", "urgency", "summary"],
+    },
+  },
 ];
 
 /** Contexto que el engine inyecta al dispatcher: tools que necesitan saber de qué conversación se trata. */
@@ -117,6 +143,9 @@ export async function dispatchTool(
 
     case "save_feedback_comment":
       return saveFeedbackComment(input as SaveFeedbackInput, { conversationId: ctx.conversationId } as SaveFeedbackContext);
+
+    case "notify_team":
+      return notifyTeam(input as NotifyTeamInput, { conversationId: ctx.conversationId } as NotifyTeamContext);
 
     default:
       return { ok: false, message: `Unknown tool: ${name}` };

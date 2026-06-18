@@ -308,3 +308,16 @@ export const adrianaSatisfaction = pgTable("adriana_satisfaction", {
   comment:        text("comment"),
   createdAt:      timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// ─── Handoffs: cuando Adriana necesita escalar al equipo humano ──────────────
+export const adrianaHandoffs = pgTable("adriana_handoffs", {
+  id:               uuid("id").primaryKey().defaultRandom(),
+  conversationId:   uuid("conversation_id").notNull().references(() => adrianaConversations.id, { onDelete: "cascade" }),
+  reason:           text("reason").notNull(),          // 'second_booking', 'payment', 'complex_question', 'other'
+  urgency:          text("urgency").notNull().default("normal"),  // 'low', 'normal', 'high'
+  summary:          text("summary").notNull(),
+  notifiedAt:       timestamp("notified_at", { withTimezone: true }),
+  resolvedAt:       timestamp("resolved_at", { withTimezone: true }),
+  resolvedByUserId: uuid("resolved_by_user_id").references(() => users.id),
+  createdAt:        timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
