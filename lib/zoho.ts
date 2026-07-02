@@ -67,10 +67,10 @@ const SERVICE_TO_INDUSTRY: Record<string, string> = {
 };
 
 const OUTCOME_TO_STATUS: Record<string, string> = {
-  interested:    "Not Contacted",
+  interested:    "Contacted",
   needs_time:    "Contacted",
-  proposal_sent: "Lost Lead",
-  closed:        "Pre-Qualified",
+  proposal_sent: "Pre-Qualified",
+  closed:        "Qualified",
   not_qualified: "Not Qualified",
   no_show:       "Not Contacted",
 };

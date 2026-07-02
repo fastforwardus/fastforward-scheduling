@@ -240,7 +240,7 @@ export default function BookWizard({
           <div className="text-5xl mb-4">🚫</div>
           <h2 className="text-xl font-bold mb-3" style={{ color: "#27295C" }}>{tr.blockedTitle}</h2>
           <p className="text-gray-500 mb-6 text-sm leading-relaxed max-w-xs mx-auto">{tr.blockedText}</p>
-          <a href="https://wa.me/13058974450"
+          <a href="https://wa.me/17868225585"
              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm"
              style={{ background: "#25D366" }}>
             <MessageCircle className="w-4 h-4" /> {tr.blockedCta}
