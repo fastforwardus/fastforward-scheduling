@@ -197,6 +197,22 @@ export async function POST(req: NextRequest) {
       ? (lang === "en" ? `Your expert: <strong>${assignedName}</strong>` : lang === "pt" ? `Seu especialista: <strong>${assignedName}</strong>` : `Su experto: <strong>${assignedName}</strong>`)
       : pendingText;
 
+    const presentationUrl = lang === "es"
+      ? "https://fastfwdus.com/wp-content/uploads/2024/07/Fast_Forward_Presentacion-2024.pdf"
+      : "https://fastfwdus.com/wp-content/uploads/2024/10/Fast_Forward_Presentacion_14-10-2024-ENG.pdf";
+    const presoLabel = lang === "en" ? "While you wait for your consultation"
+      : lang === "pt" ? "Enquanto aguarda sua consulta"
+      : "Mientras espera su consulta";
+    const presoTitle = lang === "en" ? "Discover our full range of services"
+      : lang === "pt" ? "Conhe\u00e7a todos os nossos servi\u00e7os"
+      : "Conozca todos nuestros servicios";
+    const presoText = lang === "en" ? "Download our corporate presentation and come to the meeting knowing everything we can do for your company."
+      : lang === "pt" ? "Baixe nossa apresenta\u00e7\u00e3o corporativa e chegue \u00e0 reuni\u00e3o conhecendo tudo o que podemos fazer pela sua empresa."
+      : "Descargue nuestra presentaci\u00f3n corporativa y llegue a la reuni\u00f3n conociendo todo lo que podemos hacer por su empresa.";
+    const presoCta = lang === "en" ? "Download presentation (PDF)"
+      : lang === "pt" ? "Baixar apresenta\u00e7\u00e3o (PDF)"
+      : "Descargar presentaci\u00f3n (PDF)";
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -263,6 +279,16 @@ export async function POST(req: NextRequest) {
           <p style="font-size:13px;color:#9CA3AF;text-align:center;margin:0 0 24px;">
             ${lang === "en" ? "You will receive a reminder 24h and 2h before your meeting." : lang === "pt" ? "Você receberá um lembrete 24h e 2h antes da reunião." : "Recibirá recordatorios 24h y 2h antes de su consulta."}
           </p>
+
+          <!-- Presentation CTA -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+            <tr><td style="background:#27295C;border-radius:12px;padding:24px;text-align:center;">
+              <p style="font-size:11px;color:#C9A84C;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">${presoLabel}</p>
+              <p style="font-size:18px;color:#ffffff;font-weight:600;margin:0 0 6px;">${presoTitle}</p>
+              <p style="font-size:13px;color:#B9BAD1;margin:0 0 16px;line-height:1.5;">${presoText}</p>
+              <a href="${presentationUrl}" style="display:inline-block;background:#C9A84C;color:#27295C;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;">${presoCta}</a>
+            </td></tr>
+          </table>
 
           <!-- Footer -->
           <div style="border-top:1px solid #F0F0F0;padding-top:20px;text-align:center;">
