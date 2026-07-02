@@ -391,8 +391,8 @@ export default function BookWizard({
         <div>
           <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{tr.step1Title}</h2>
           <div className="space-y-3">
-            {(["fda_fsma","register_company","not_sure"] as ServiceType[]).map((s) => (
-              <button key={s} onClick={() => { w.setServiceType(s); w.setStep(3); }}
+            {(["food_beverage","alcoholic_beverages","cosmetics","pharma_supplements","medical_devices","llc_only","other_not_sure"] as ServiceType[]).map((s) => (
+              <button key={s} onClick={() => { w.setServiceType(s); w.setStep(2); }}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all duration-150 hover:-translate-y-0.5"
                 style={{
                   borderColor: w.serviceType === s ? "#C9A84C" : "#E5E7EB",
@@ -400,8 +400,12 @@ export default function BookWizard({
                   boxShadow: w.serviceType === s ? "0 4px 16px rgba(201,168,76,0.15)" : "none",
                 }}>
                 <span className="text-2xl">{
-                  s === "fda_fsma" ? "📋" :
-                  s === "register_company" ? "🏢" : "❓"
+                  s === "food_beverage" ? "🥫" :
+                  s === "alcoholic_beverages" ? "🍷" :
+                  s === "cosmetics" ? "💄" :
+                  s === "pharma_supplements" ? "💊" :
+                  s === "medical_devices" ? "🩺" :
+                  s === "llc_only" ? "🏢" : "❓"
                 }</span>
                 <span className="font-medium text-sm" style={{ color: "#27295C" }}>{tr.services[s]}</span>
                 {w.serviceType === s && <Check className="w-4 h-4 ml-auto" style={{ color: "#C9A84C" }} />}
@@ -414,9 +418,9 @@ export default function BookWizard({
       {/* ── STEP 2: Volumen ── */}
       {w.step === 2 && (
         <div>
-          <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{tr.step2Title}</h2>
+          <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{w.serviceType === "llc_only" ? tr.b2bQuestion : tr.step2Title}</h2>
           <div className="space-y-3 mb-8">
-            {(["not_exporting","starting_under_100k","exporting_100k_1m","high_volume_over_1m"] as ExportVolume[]).map((v) => (
+            {((w.serviceType === "llc_only" ? [] : ["not_exporting","starting_under_100k","exporting_100k_1m","high_volume_over_1m"]) as ExportVolume[]).map((v) => (
               <button key={v} onClick={() => w.setExportVolume(v)}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all duration-150 hover:-translate-y-0.5"
                 style={{
@@ -435,9 +439,9 @@ export default function BookWizard({
           </div>
 
           {/* B2B filter */}
-          {w.exportVolume && (
+          {(w.exportVolume || w.serviceType === "llc_only") && (
             <div className="p-4 rounded-xl mb-6" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
-              <p className="text-sm font-semibold mb-3" style={{ color: "#27295C" }}>{tr.b2bQuestion}</p>
+              {w.serviceType !== "llc_only" && <p className="text-sm font-semibold mb-3" style={{ color: "#27295C" }}>{tr.b2bQuestion}</p>}
               <div className="flex gap-3">
                 <button onClick={() => { w.setIsB2b(true); w.next(); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border-2"

@@ -333,7 +333,14 @@ export async function POST(req: NextRequest) {
       // Notify rep of new lead
       if (assignedEmail && assignedName) {
         const apptDate = new Date(scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
-        const serviceLabel: Record<string, string> = { fda_fsma: "Registro FDA / FSMA", register_company: "Apertura de Empresa", market_entry: "Ingreso al Mercado", not_sure: "Sin definir" };
+        const serviceLabel: Record<string, string> = {
+      food_beverage: "Alimentos y bebidas",
+      alcoholic_beverages: "Bebidas alcohólicas",
+      cosmetics: "Cosméticos",
+      pharma_supplements: "Medicamentos y suplementos",
+      medical_devices: "Dispositivos médicos",
+      llc_only: "Apertura de empresa (LLC)",
+      other_not_sure: "Otro / No está seguro", fda_fsma: "Registro FDA / FSMA", register_company: "Apertura de Empresa", market_entry: "Ingreso al Mercado", not_sure: "Sin definir" };
         await resend.emails.send({
           from: "FastForward Sistema <info@fastfwdus.com>",
           to: assignedEmail,

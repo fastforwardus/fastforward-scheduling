@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type Lang = "es" | "en" | "pt";
-export type ServiceType = "register_company" | "fda_fsma" | "not_sure";
+export type ServiceType = "food_beverage" | "alcoholic_beverages" | "cosmetics" | "pharma_supplements" | "medical_devices" | "llc_only" | "other_not_sure";
 export type ExportVolume = "not_exporting" | "starting_under_100k" | "exporting_100k_1m" | "high_volume_over_1m";
 export type Platform = "meet" | "whatsapp";
 

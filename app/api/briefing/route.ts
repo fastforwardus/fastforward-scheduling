@@ -72,6 +72,13 @@ export async function GET(req: NextRequest) {
     const previousAppts = history.filter(h => h.scheduledAt !== appt.scheduledAt);
 
     const SERVICE_LABELS: Record<string, string> = {
+      food_beverage: "Alimentos y bebidas",
+      alcoholic_beverages: "Bebidas alcohólicas",
+      cosmetics: "Cosméticos",
+      pharma_supplements: "Medicamentos y suplementos",
+      medical_devices: "Dispositivos médicos",
+      llc_only: "Apertura de empresa (LLC)",
+      other_not_sure: "Otro / No está seguro",
       fda_fsma: "FDA / FSMA Compliance",
       register_company: "Apertura de LLC en EE.UU.",
       not_sure: "Asesoría general",
