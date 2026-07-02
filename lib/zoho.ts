@@ -33,6 +33,24 @@ async function getZohoUserId(token: string, email: string): Promise<string | nul
   } catch { return null; }
 }
 
+// Buscar el email del owner de un lead existente por email del cliente (auto-asignacion en booking)
+export async function findZohoLeadOwnerEmail(clientEmail: string): Promise<string | null> {
+  try {
+    const token = await getZohoToken();
+    const res = await fetch(ZOHO_BASE + "/Leads/search?email=" + encodeURIComponent(clientEmail), {
+      headers: { Authorization: "Zoho-oauthtoken " + token },
+    });
+    const text = await res.text();
+    if (!text) return null;
+    const data = JSON.parse(text);
+    const owner = data?.data?.[0]?.Owner;
+    return owner?.email || null;
+  } catch (err) {
+    console.error("Zoho owner lookup error:", err);
+    return null;
+  }
+}
+
 const SERVICE_TO_INDUSTRY: Record<string, string> = {
   fda_fsma:         "Food & Beverage",
   register_company: "Finance",

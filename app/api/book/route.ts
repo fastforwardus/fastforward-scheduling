@@ -6,7 +6,7 @@ import { appointments, users, clientProfiles, systemConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
-import { createOrUpdateZohoLead } from "@/lib/zoho";
+import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
 import { formatInTimeZone } from "date-fns-tz";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -49,6 +49,21 @@ export async function POST(req: NextRequest) {
         assignedName = rep.fullName;
         assignedEmail = rep.email;
         status = "scheduled";
+      }
+    }
+
+    // Sin link personal: buscar lead en Zoho CRM y asignar al owner si existe en el sistema
+    if (!assignedTo) {
+      const ownerEmail = await findZohoLeadOwnerEmail(clientEmail.toLowerCase().trim());
+      if (ownerEmail) {
+        const allUsers = await db.select().from(users);
+        const owner = allUsers.find(u => u.email?.toLowerCase() === ownerEmail.toLowerCase());
+        if (owner) {
+          assignedTo = owner.id;
+          assignedName = owner.fullName;
+          assignedEmail = owner.email;
+          status = "scheduled";
+        }
       }
     }
 
@@ -311,7 +326,7 @@ export async function POST(req: NextRequest) {
         exportVolume,
         clientNotes,
         repName: assignedName || undefined,
-        repEmail: repSlug && repSlug !== "general" ? (await db.select({ email: users.email }).from(users).where(eq(users.slug, repSlug)).limit(1))[0]?.email : undefined,
+        repEmail: assignedEmail || undefined,
         noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
       });
       console.log("ZOHO OK:", clientEmail);
