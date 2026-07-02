@@ -3,53 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Send, Loader2, Check, X, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { CATALOGS, remapServices, Service } from "../../lib/catalog";
 
-const CATALOG = [
-  // ALIMENTOS Y BEBIDAS
-  { category: "Alimentos y Bebidas", name: "Registro Establecimiento FDA", price: 595, description: "Registro oficial ante la FDA. Obligatorio para exportar alimentos a EE.UU. Incluye DUNS sin cargo." },
-  { category: "Alimentos y Bebidas", name: "Registro Estab. enlatados / bajos en ácidos / acidificados", price: 950, description: "Registro especializado para productos enlatados, de bajo ácido y acidificados." },
-  { category: "Alimentos y Bebidas", name: "Renovación anual establecimiento FDA", price: 499, description: "Renovación bianual obligatoria del registro FDA de su establecimiento." },
-  { category: "Alimentos y Bebidas", name: "Registro por producto enlatados / bajos en ácidos / acidificados", price: 195, description: "Registro individual por producto para enlatados y productos de bajo ácido." },
-  { category: "Alimentos y Bebidas", name: "Revisión de etiquetas (1ra etiqueta)", price: 595, description: "Revisión y aprobación de etiqueta conforme lineamientos FDA." },
-  { category: "Alimentos y Bebidas", name: "Revisión de etiquetas (etiquetas adicionales)", price: 185, description: "Revisión de cada etiqueta adicional luego de la primera." },
-  { category: "Alimentos y Bebidas", name: "FSVP", price: 395, description: "Foreign Supplier Verification Program. Requerido para importadores de alimentos en EE.UU." },
-  // BEBIDAS ALCOHÓLICAS
-  { category: "Bebidas Alcohólicas", name: "Licencia en Florida para vino y cerveza", price: 6000, description: "Licencia en Florida para importación y distribución de vinos y cervezas." },
-  { category: "Bebidas Alcohólicas", name: "Licencia en Florida para otras bebidas alcohólicas", price: 7500, description: "Licencia para importación y distribución de bebidas destiladas en Florida." },
-  // USDA
-  { category: "USDA", name: "Registro en USDA Frutas y verduras", price: 1500, description: "Registro USDA para exportación de frutas y verduras frescas." },
-  { category: "USDA", name: "Registro en USDA VS Permit", price: 1500, description: "Permiso veterinario USDA para productos de origen animal." },
-  // COSMÉTICOS
-  { category: "Cosméticos", name: "Registro Establecimiento FDA (Cosméticos)", price: 595, description: "Registro FDA para establecimientos productores de cosméticos." },
-  { category: "Cosméticos", name: "Registro por producto (Cosméticos)", price: 195, description: "Registro individual de producto cosmético ante la FDA." },
-  { category: "Cosméticos", name: "Revisión de etiquetas (1ra etiqueta) — Cosméticos", price: 595, description: "Revisión del primer rótulo para cosméticos conforme FDA." },
-  { category: "Cosméticos", name: "Revisión de etiquetas (etiquetas adicionales) — Cosméticos", price: 185, description: "Revisión de rótulo adicional para cosméticos." },
-  // MEDICAMENTOS
-  { category: "Medicamentos", name: "Registro Establecimiento FDA (Medicamentos)", price: 595, description: "Registro FDA para establecimientos de medicamentos." },
-  { category: "Medicamentos", name: "Registro por producto (Medicamentos)", price: 195, description: "Registro individual de producto medicinal ante la FDA." },
-  { category: "Medicamentos", name: "Revisión de etiquetas (1ra etiqueta) — Medicamentos", price: 595, description: "Revisión del primer rótulo para medicamentos conforme FDA." },
-  { category: "Medicamentos", name: "Revisión de etiquetas (etiquetas adicionales) — Medicamentos", price: 185, description: "Revisión de rótulo adicional para medicamentos." },
-  // MEDICAL DEVICES
-  { category: "Medical Devices", name: "Registro Establecimiento FDA (Medical Devices)", price: 595, description: "Registro FDA para fabricantes y distribuidores de dispositivos médicos." },
-  { category: "Medical Devices", name: "Registro por producto (Medical Device)", price: 195, description: "Registro individual de cada dispositivo médico ante la FDA." },
-  { category: "Medical Devices", name: "Revisión de etiquetas (1ra etiqueta) — Medical Devices", price: 595, description: "Revisión del primer rótulo para devices conforme FDA." },
-  { category: "Medical Devices", name: "Revisión de etiquetas (etiquetas adicionales) — Medical Devices", price: 185, description: "Revisión de rótulo adicional para medical devices." },
-  // APERTURA DE EMPRESA
-  { category: "Apertura de Empresa", name: "Registro de Empresa LLC en Miami", price: 1100, description: "Constitución completa de LLC en Miami, Florida." },
-  { category: "Apertura de Empresa", name: "Operating Agreement", price: 450, description: "Redacción del acuerdo operacional para su LLC." },
-  // NOAA & US FISHERIES
-  { category: "NOAA & US Fisheries", name: "NOAA Fisheries", price: 1500, description: "Registro ante NOAA para productos pesqueros de exportación a EE.UU." },
-  { category: "NOAA & US Fisheries", name: "USFWS (US Fish & Wildlife Service)", price: 950, description: "Permiso US Fish & Wildlife Service para productos de fauna silvestre." },
-  // MARCAS USPTO
-  { category: "Registro de Marca USPTO", name: "Registro de Marca — Paquete Básico (LLC mandatory)", price: 2000, description: "Registro de marca en USPTO — Paquete Básico. Requiere LLC." },
-  { category: "Registro de Marca USPTO", name: "Registro de Marca — Paquete Premium (LLC mandatory)", price: 3000, description: "Registro de marca USPTO con cobertura ampliada. Requiere LLC." },
-  // CURSOS
-  { category: "Cursos", name: "Buenas Prácticas de Manufactura (BPM)", price: 299, description: "Alimentos, Suplementos dietarios, Cosméticos y Medicamentos." },
-  // OTROS
-  { category: "Otros", name: "US Agent Inbox (Monthly Fee)", price: 99, description: "Servicio mensual de US Agent Inbox para notificaciones FDA." },
-];
-
-const CATEGORIES = [...new Set(CATALOG.map(s => s.category))];
 
 interface SelectedService { name: string; description: string; price: number; qty: number; }
 interface User { id: string; fullName: string; email: string; role: string; }
@@ -77,12 +32,20 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
   const subtotal = selected.reduce((s, svc) => s + svc.price * svc.qty, 0);
   const total = subtotal - discount;
   const validEmails = clientEmails.filter(e => e.trim() && e.includes("@"));
-  const filteredCatalog = CATALOG.filter(s =>
+  const activeCatalog = CATALOGS[lang];
+  const categories = [...new Set(activeCatalog.map(s => s.category))];
+  const filteredCatalog = activeCatalog.filter(s =>
     (!selectedCat || s.category === selectedCat) &&
     (!searchQ || s.name.toLowerCase().includes(searchQ.toLowerCase()) || s.category.toLowerCase().includes(searchQ.toLowerCase()))
   );
 
-  function toggleService(svc: typeof CATALOG[0]) {
+  function handleLangChange(l: "es" | "en" | "pt") {
+    setLang(l);
+    setSelected(prev => remapServices(prev, l));
+    setSelectedCat(null);
+  }
+
+  function toggleService(svc: Service) {
     const exists = selected.find(s => s.name === svc.name);
     if (exists) setSelected(prev => prev.filter(s => s.name !== svc.name));
     else setSelected(prev => [...prev, { name: svc.name, description: svc.description, price: svc.price, qty: 1 }]);
@@ -251,7 +214,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
 
               <div className="flex gap-2 mt-3">
                 {(["es", "en", "pt"] as const).map(l => (
-                  <button key={l} onClick={() => setLang(l)}
+                  <button key={l} onClick={() => handleLangChange(l)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase"
                     style={{ background: lang === l ? "#27295C" : "#F3F4F6", color: lang === l ? "white" : "#6B7280" }}>
                     {l === "es" ? "🇪🇸 ES" : l === "en" ? "🇺🇸 EN" : "🇧🇷 PT"}
@@ -284,7 +247,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                   style={{ background: !selectedCat ? "#27295C" : "#F3F4F6", color: !selectedCat ? "white" : "#6B7280" }}>
                   Todos
                 </button>
-                {CATEGORIES.map(cat => (
+                {categories.map(cat => (
                   <button key={cat} onClick={() => setSelectedCat(selectedCat === cat ? null : cat)}
                     className="px-2.5 py-1 rounded-full text-xs font-medium"
                     style={{ background: selectedCat === cat ? "#27295C" : "#F3F4F6", color: selectedCat === cat ? "white" : "#6B7280" }}>
