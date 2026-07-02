@@ -52,6 +52,14 @@ export async function findZohoLeadOwnerEmail(clientEmail: string): Promise<strin
 }
 
 const SERVICE_TO_INDUSTRY: Record<string, string> = {
+  food_beverage:       "Food & Beverage",
+  alcoholic_beverages: "Alcoholic Beverages",
+  cosmetics:           "Cosmetics",
+  pharma_supplements:  "Pharmaceuticals & Supplements",
+  medical_devices:     "Medical Devices",
+  llc_only:            "Company Formation",
+  other_not_sure:      "Other",
+  // legacy
   fda_fsma:         "Food & Beverage",
   register_company: "Finance",
   market_entry:     "Retail",
