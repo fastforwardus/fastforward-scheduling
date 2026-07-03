@@ -7,6 +7,9 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
+
+// Owners excluidos de la auto-asignacion: sus leads quedan sin asignar para reparto manual
+const EXCLUDED_AUTO_ASSIGN_EMAILS = ["info@fastfwdus.com"];
 import { formatInTimeZone } from "date-fns-tz";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -58,7 +61,11 @@ export async function POST(req: NextRequest) {
       if (ownerEmail) {
         const allUsers = await db.select().from(users);
         const owner = allUsers.find(u => u.email?.toLowerCase() === ownerEmail.toLowerCase());
-        if (owner) {
+        const isExcludedOwner = owner && (
+          owner.fullName?.toLowerCase().includes("carlos bisio") ||
+          EXCLUDED_AUTO_ASSIGN_EMAILS.includes(owner.email?.toLowerCase() || "")
+        );
+        if (owner && !isExcludedOwner) {
           assignedTo = owner.id;
           assignedName = owner.fullName;
           assignedEmail = owner.email;
