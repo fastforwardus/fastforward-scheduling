@@ -8,7 +8,7 @@ export interface Service {
 export const CATALOG_ES: Service[] = [
   { category: "Alimentos y Bebidas", name: "Registro Establecimiento FDA", price: 595, description: "Registro oficial ante la FDA. Obligatorio para exportar alimentos a EE.UU. Incluye DUNS sin cargo." },
   { category: "Alimentos y Bebidas", name: "Registro Estab. enlatados / bajos en ácidos / acidificados", price: 950, description: "Registro especializado para productos enlatados, bajos en ácidos y acidificados." },
-  { category: "Alimentos y Bebidas", name: "Renovación anual establecimiento FDA", price: 499, description: "Renovación bianual obligatoria del registro FDA de su establecimiento." },
+  { category: "Alimentos y Bebidas", name: "Renovación anual establecimiento FDA", price: 499, description: "Renovación anual obligatoria del registro FDA de su establecimiento." },
   { category: "Alimentos y Bebidas", name: "Registro por producto enlatados / bajos en ácidos / acidificados", price: 195, description: "Registro individual por producto para líneas enlatadas y acidificadas." },
   { category: "Alimentos y Bebidas", name: "Revisión de etiquetas (1ra etiqueta)", price: 595, description: "Revisión y aprobación de etiqueta conforme lineamientos FDA." },
   { category: "Alimentos y Bebidas", name: "Revisión de etiquetas (etiquetas adicionales)", price: 185, description: "Revisión de cada etiqueta adicional luego de la primera." },
@@ -42,7 +42,7 @@ export const CATALOG_ES: Service[] = [
 export const CATALOG_EN: Service[] = [
   { category: "Food & Beverage", name: "FDA Establishment Registration", price: 595, description: "Official registration with the FDA. Mandatory to export food to the US. Includes DUNS number at no cost." },
   { category: "Food & Beverage", name: "Canned / Low-Acid / Acidified Establishment Registration", price: 950, description: "Specialized registration for canned, low-acid and acidified products." },
-  { category: "Food & Beverage", name: "FDA Establishment Annual Renewal", price: 499, description: "Mandatory biennial renewal of your FDA establishment registration." },
+  { category: "Food & Beverage", name: "FDA Establishment Annual Renewal", price: 499, description: "Mandatory annual renewal of your FDA establishment registration." },
   { category: "Food & Beverage", name: "Product Registration — Canned / Low-Acid / Acidified", price: 195, description: "Individual product registration for canned and acidified product lines." },
   { category: "Food & Beverage", name: "Label Review (1st label)", price: 595, description: "Label review and approval per FDA guidelines." },
   { category: "Food & Beverage", name: "Label Review (additional labels)", price: 185, description: "Review of each additional label after the first." },
@@ -76,7 +76,7 @@ export const CATALOG_EN: Service[] = [
 export const CATALOG_PT: Service[] = [
   { category: "Alimentos e Bebidas", name: "Registro de Estabelecimento FDA", price: 595, description: "Registro oficial na FDA. Obrigatório para exportar alimentos aos EUA. Inclui DUNS sem custo." },
   { category: "Alimentos e Bebidas", name: "Registro Estab. enlatados / baixa acidez / acidificados", price: 950, description: "Registro especializado para produtos enlatados, de baixa acidez e acidificados." },
-  { category: "Alimentos e Bebidas", name: "Renovação anual do estabelecimento FDA", price: 499, description: "Renovação bianual obrigatória do registro FDA do seu estabelecimento." },
+  { category: "Alimentos e Bebidas", name: "Renovação anual do estabelecimento FDA", price: 499, description: "Renovação anual obrigatória do registro FDA do seu estabelecimento." },
   { category: "Alimentos e Bebidas", name: "Registro por produto enlatados / baixa acidez / acidificados", price: 195, description: "Registro individual por produto para linhas enlatadas e acidificadas." },
   { category: "Alimentos e Bebidas", name: "Revisão de rótulos (1º rótulo)", price: 595, description: "Revisão e aprovação de rótulo conforme diretrizes da FDA." },
   { category: "Alimentos e Bebidas", name: "Revisão de rótulos (rótulos adicionais)", price: 185, description: "Revisão de cada rótulo adicional após o primeiro." },
