@@ -223,9 +223,12 @@ export default function BookWizard({
       const data = await res.json();
       if (data.ok) {
         setConfirmed({ appointmentId: data.appointmentId, isPending: data.isPendingAssignment });
+      } else {
+        alert(w.language === "en" ? "There was a problem booking your appointment. Please try again." : w.language === "pt" ? "Houve um problema ao agendar. Por favor tente novamente." : "Hubo un problema al agendar tu cita. Por favor intentá de nuevo.");
       }
     } catch (err) {
       console.error(err);
+      alert(w.language === "en" ? "Connection error. Please try again." : w.language === "pt" ? "Erro de conexão. Por favor tente novamente." : "Error de conexión. Por favor intentá de nuevo.");
     }
     setSubmitting(false);
   };

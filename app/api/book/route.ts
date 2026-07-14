@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, users, clientProfiles, systemConfig } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, gte } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
@@ -72,6 +72,28 @@ export async function POST(req: NextRequest) {
           status = "scheduled";
         }
       }
+    }
+
+    // Guard de idempotencia: mismo email + mismo slot creado en los ultimos 5 min → devolver existente sin duplicar
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const [existing] = await db
+      .select()
+      .from(appointments)
+      .where(and(
+        eq(appointments.clientEmail, clientEmail.toLowerCase().trim()),
+        eq(appointments.scheduledAt, new Date(scheduledAt)),
+        gte(appointments.createdAt, fiveMinAgo),
+      ))
+      .limit(1);
+    if (existing) {
+      console.log("Duplicado evitado:", existing.id, clientEmail);
+      return NextResponse.json({
+        ok: true,
+        appointmentId: existing.id,
+        confirmToken: existing.confirmToken,
+        status: existing.status,
+        isPendingAssignment: existing.status === "pending_assignment",
+      });
     }
 
     const confirmToken = nanoid(32);
