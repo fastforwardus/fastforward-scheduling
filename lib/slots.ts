@@ -88,7 +88,7 @@ export async function generateAvailableSlots(
 
   // Ocupacion: toda cita futura consume una unidad, asignada o no
   const booked = await db
-    .select({ scheduledAt: appointments.scheduledAt })
+    .select({ scheduledAt: appointments.scheduledAt, assignedTo: appointments.assignedTo })
     .from(appointments)
     .where(and(
       gte(appointments.scheduledAt, now),
@@ -96,8 +96,13 @@ export async function generateAvailableSlots(
       notInArray(appointments.status, ["cancelled", "rescheduled"]),
     ));
 
+  // Con filtro por rep solo descontamos SUS citas: restar las de todo el equipo
+  // le borraba horarios libres de su propia agenda. La sobreventa global la
+  // sigue frenando el advisory lock de book/route.ts.
+  const repIds = new Set(reps.map((r) => r.id));
   const taken = new Map<string, number>();
   for (const b of booked) {
+    if (repSlug && repSlug !== "general" && (!b.assignedTo || !repIds.has(b.assignedTo))) continue;
     const iso = new Date(b.scheduledAt).toISOString();
     taken.set(iso, (taken.get(iso) ?? 0) + 1);
   }
