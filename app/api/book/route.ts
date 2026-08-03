@@ -3,10 +3,11 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, users, clientProfiles, systemConfig } from "@/db/schema";
-import { eq, and, gte } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
+import { getSlotCapacity } from "@/lib/slots";
 
 // Owners excluidos de la auto-asignacion: sus leads quedan sin asignar para reparto manual
 const EXCLUDED_AUTO_ASSIGN_EMAILS = ["info@fastfwdus.com"];
@@ -74,54 +75,89 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Guard de idempotencia: mismo email + mismo slot creado en los ultimos 5 min → devolver existente sin duplicar
-    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
-    const [existing] = await db
-      .select()
-      .from(appointments)
-      .where(and(
-        eq(appointments.clientEmail, clientEmail.toLowerCase().trim()),
-        eq(appointments.scheduledAt, new Date(scheduledAt)),
-        gte(appointments.createdAt, fiveMinAgo),
-      ))
-      .limit(1);
-    if (existing) {
-      console.log("Duplicado evitado:", existing.id, clientEmail);
+    const confirmToken = nanoid(32);
+
+    const slotAt = new Date(scheduledAt);
+
+    type BookingOutcome =
+      | { kind: "duplicated" | "created"; appointment: typeof appointments.$inferSelect }
+      | { kind: "full" };
+
+    // Reserva atomica: lock por slot -> idempotencia -> capacidad -> insert
+    const booking: BookingOutcome = await db.transaction(async (tx) => {
+      // Serializa solo las reservas de ESTE slot; otros horarios no se bloquean
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${slotAt.toISOString()}))`);
+
+      // Guard de idempotencia: mismo email + mismo slot en los ultimos 5 min
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+      const [existing] = await tx
+        .select()
+        .from(appointments)
+        .where(and(
+          eq(appointments.clientEmail, clientEmail.toLowerCase().trim()),
+          eq(appointments.scheduledAt, slotAt),
+          gte(appointments.createdAt, fiveMinAgo),
+        ))
+        .limit(1);
+      if (existing) return { kind: "duplicated", appointment: existing };
+
+      // Capacidad real del slot vs citas ya tomadas
+      const capacity = await getSlotCapacity(slotAt);
+      const takenRows = await tx
+        .select({ id: appointments.id })
+        .from(appointments)
+        .where(eq(appointments.scheduledAt, slotAt));
+      if (takenRows.length >= capacity) {
+        console.warn("Slot lleno:", slotAt.toISOString(), takenRows.length, "/", capacity);
+        return { kind: "full" };
+      }
+
+      const [created] = await tx
+        .insert(appointments)
+        .values({
+          clientName,
+          clientEmail: clientEmail.toLowerCase().trim(),
+          clientCompany,
+          clientWhatsapp: cleanPhone,
+          clientTimezone: clientTimezone || "America/Argentina/Buenos_Aires",
+          clientLanguage: detectedLang as "es" | "en" | "pt",
+          serviceInterest,
+          exportVolume,
+          isB2b: true,
+          platform,
+          assignedTo,
+          bookedVia: repSlug || "general",
+          scheduledAt: slotAt,
+          status,
+          confirmToken,
+          leadScore: "warm",
+          utmSource,
+          partnerSlug: partnerSlug || null,
+          clientNotes: clientNotes || null,
+        })
+        .returning();
+      return { kind: "created", appointment: created };
+    });
+
+    if (booking.kind === "full") {
+      return NextResponse.json(
+        { error: "SLOT_FULL", message: "Ese horario acaba de ocuparse. Elegi otro por favor." },
+        { status: 409 },
+      );
+    }
+
+    if (booking.kind === "duplicated") {
+      console.log("Duplicado evitado:", booking.appointment.id, clientEmail);
       return NextResponse.json({
         ok: true,
-        appointmentId: existing.id,
-        confirmToken: existing.confirmToken,
-        status: existing.status,
-        isPendingAssignment: existing.status === "pending_assignment",
+        appointmentId: booking.appointment.id,
+        confirmToken: booking.appointment.confirmToken,
+        status: booking.appointment.status,
+        isPendingAssignment: booking.appointment.status === "pending_assignment",
       });
     }
 
-    const confirmToken = nanoid(32);
-
-    const [appointment] = await db
-      .insert(appointments)
-      .values({
-        clientName,
-        clientEmail: clientEmail.toLowerCase().trim(),
-        clientCompany,
-        clientWhatsapp: cleanPhone,
-        clientTimezone: clientTimezone || "America/Argentina/Buenos_Aires",
-        clientLanguage: detectedLang as "es" | "en" | "pt",
-        serviceInterest,
-        exportVolume,
-        isB2b: true,
-        platform,
-        assignedTo,
-        bookedVia: repSlug || "general",
-        scheduledAt: new Date(scheduledAt),
-        status,
-        confirmToken,
-        leadScore: "warm",
-        utmSource,
-        partnerSlug: partnerSlug || null,
-        clientNotes: clientNotes || null,
-      })
-      .returning();
+    const appointment = booking.appointment;
 
     // Notify partner if referral
     if (partnerSlug) {

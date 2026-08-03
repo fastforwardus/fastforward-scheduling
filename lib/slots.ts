@@ -122,3 +122,53 @@ export async function generateAvailableSlots(clientTz: string = MIAMI): Promise<
 
   return { slots, grouped, timezone: clientTz };
 }
+
+// Capacidad bruta de un instante puntual (cuantos reps trabajan). No descuenta citas.
+export async function getSlotCapacity(slot: Date): Promise<number> {
+  const holidayList = await db.select({ date: holidays.date }).from(holidays);
+  const miamiDate = formatInTimeZone(slot, MIAMI, "yyyy-MM-dd");
+  if (holidayList.some((h) => h.date === miamiDate)) return 0;
+
+  const reps = await db
+    .select({ id: users.id, tz: users.availabilityTimezone, fallbackTz: users.timezone })
+    .from(users)
+    .where(eq(users.isActive, true));
+
+  const rules = await db
+    .select({
+      userId: availabilityRules.userId,
+      dayOfWeek: availabilityRules.dayOfWeek,
+      startTime: availabilityRules.startTime,
+      endTime: availabilityRules.endTime,
+    })
+    .from(availabilityRules)
+    .where(eq(availabilityRules.isActive, true));
+
+  const byRep = new Map<string, Map<number, { startTime: string; endTime: string }>>();
+  for (const r of rules) {
+    if (!byRep.has(r.userId)) byRep.set(r.userId, new Map());
+    byRep.get(r.userId)!.set(r.dayOfWeek, { startTime: r.startTime, endTime: r.endTime });
+  }
+
+  let capacity = 0;
+  for (const rep of reps) {
+    const repRules = byRep.get(rep.id);
+    if (!repRules) continue;
+    const tz = rep.tz || rep.fallbackTz || MIAMI;
+    const dateStr = formatInTimeZone(slot, tz, "yyyy-MM-dd");
+    const dow = Number(formatInTimeZone(slot, tz, "i")) % 7;
+    const rule = repRules.get(dow);
+    if (!rule) continue;
+
+    const startUTC = fromZonedTime(`${dateStr}T${rule.startTime}`, tz);
+    const endUTC = fromZonedTime(`${dateStr}T${rule.endTime}`, tz);
+    if (slot < startUTC || slot >= endUTC) continue;
+
+    // El slot debe caer en la grilla de este rep
+    const offsetMin = (slot.getTime() - startUTC.getTime()) / 60000;
+    if (offsetMin % SLOT_DURATION !== 0) continue;
+
+    capacity++;
+  }
+  return capacity;
+}
