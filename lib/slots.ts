@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { holidays, appointments, users, availabilityRules } from "@/db/schema";
-import { gte, eq } from "drizzle-orm";
+import { gte, eq, and, notInArray } from "drizzle-orm";
 import { addMinutes, isBefore, addDays } from "date-fns";
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 
@@ -80,7 +80,11 @@ export async function generateAvailableSlots(clientTz: string = MIAMI): Promise<
   const booked = await db
     .select({ scheduledAt: appointments.scheduledAt })
     .from(appointments)
-    .where(gte(appointments.scheduledAt, now));
+    .where(and(
+      gte(appointments.scheduledAt, now),
+      // Una cita cancelada o reprogramada libera el lugar
+      notInArray(appointments.status, ["cancelled", "rescheduled"]),
+    ));
 
   const taken = new Map<string, number>();
   for (const b of booked) {

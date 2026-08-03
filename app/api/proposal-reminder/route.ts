@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { proposals, users, appointments, adrianaConversations } from "@/db/schema";
 import { eq, desc, sql, isNotNull } from "drizzle-orm";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
+import { normalizeWhatsAppPhone, isPlausiblePhone, phoneTail } from "@/lib/phone";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -209,7 +210,12 @@ export async function GET(req: NextRequest) {
       .select({ waPhone: adrianaConversations.waPhone })
       .from(adrianaConversations)
       .where(isNotNull(adrianaConversations.optedOutAt));
-    for (const o of outs) optedOut.add(o.waPhone.replace(/\D/g, ""));
+    // Doble clave: normalizada y ultimos 8 digitos. Ante formatos distintos
+    // preferimos no enviar antes que escribirle a quien pidio la baja.
+    for (const o of outs) {
+      optedOut.add(normalizeWhatsAppPhone(o.waPhone));
+      optedOut.add(phoneTail(o.waPhone));
+    }
   }
 
   const seenEmails = new Set<string>();
@@ -260,8 +266,9 @@ export async function GET(req: NextRequest) {
     // ── WhatsApp: etapa propia, no depende de que el email haya salido ──
     const waCurrent = p.whatsappStage ?? 0;
     if (WA_ENABLED && p.clientPhone && target > waCurrent && waSent < WA_DAILY_CAP) {
-      const phone = p.clientPhone.replace(/\D/g, "");
-      if (phone.length >= 8 && !seenPhones.has(phone) && !optedOut.has(phone)) {
+      const phone = normalizeWhatsAppPhone(p.clientPhone);
+      const baja = optedOut.has(phone) || optedOut.has(phoneTail(phone));
+      if (isPlausiblePhone(phone) && !seenPhones.has(phone) && !baja) {
         seenPhones.add(phone);
         const r = await sendWhatsAppTemplate({
           toPhone: phone,

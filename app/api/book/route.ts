@@ -3,12 +3,13 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, users, clientProfiles, systemConfig } from "@/db/schema";
-import { eq, and, gte, sql } from "drizzle-orm";
+import { eq, and, gte, sql, notInArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
 import { getSlotCapacity } from "@/lib/slots";
 import { createMeetEvent } from "@/lib/google";
+import { normalizeWhatsAppPhone } from "@/lib/phone";
 
 // Owners excluidos de la auto-asignacion: sus leads quedan sin asignar para reparto manual
 const EXCLUDED_AUTO_ASSIGN_EMAILS = ["info@fastfwdus.com"];
@@ -29,8 +30,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Faltan campos requeridos" }, { status: 400 });
     }
 
-    // Limpiar número — solo dígitos con código de país
-    const cleanPhone = clientWhatsapp.replace(/\D/g, "");
+    // Normalizar a E.164 sin "+" (AR necesita el 9, BR el noveno digito, MX sin el 1)
+    const cleanPhone = normalizeWhatsAppPhone(clientWhatsapp);
 
     // Detectar idioma por código de país como fallback
     const ptCodes = ["55", "351"];
@@ -107,7 +108,10 @@ export async function POST(req: NextRequest) {
       const takenRows = await tx
         .select({ id: appointments.id })
         .from(appointments)
-        .where(eq(appointments.scheduledAt, slotAt));
+        .where(and(
+          eq(appointments.scheduledAt, slotAt),
+          notInArray(appointments.status, ["cancelled", "rescheduled"]),
+        ));
       if (takenRows.length >= capacity) {
         console.warn("Slot lleno:", slotAt.toISOString(), takenRows.length, "/", capacity);
         return { kind: "full" };
