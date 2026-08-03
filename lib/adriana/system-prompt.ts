@@ -174,6 +174,11 @@ export function buildSystemPrompt(state: {
   alreadyBooked?: boolean;
   appointmentTimeLocal?: string | null;
   surveyDone?: boolean;
+  pendingProposal?: {
+    proposalNum: string;
+    total: number;
+    services: string;
+  } | null;
 }): string {
   const dynamicLines: string[] = [];
 
@@ -193,6 +198,17 @@ export function buildSystemPrompt(state: {
     }
   }
   if (state.surveyDone) dynamicLines.push(`- La encuesta ya fue respondida. No la vuelvas a pedir.`);
+
+  if (state.pendingProposal) {
+    const pp = state.pendingProposal;
+    dynamicLines.push(
+      `- ESTE CLIENTE TIENE UNA PROPUESTA PENDIENTE: ${pp.proposalNum}, total USD ${pp.total}, servicios: ${pp.services}. ` +
+      `Es muy probable que escriba respondiendo a un recordatorio nuestro sobre esa propuesta. ` +
+      `Si pregunta por precios, plazos o "lo que me mandaron", se refiere a ESA propuesta — no le ofrezcas cotizar de cero. ` +
+      `NO inventes descuentos, condiciones ni fechas de vencimiento que no figuren aca. ` +
+      `Si quiere aceptarla, modificarla o negociar el precio, usa notify_team para que lo tome un humano.`
+    );
+  }
 
   // Bloque de fecha actual + reglas críticas anti-alucinación
   const now = new Date();

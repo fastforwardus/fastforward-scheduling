@@ -9,6 +9,7 @@ import {
 } from "./db-helpers";
 import { ADRIANA_TOOLS, dispatchTool, type AdrianaToolContext } from "./tools";
 import { buildSystemPrompt } from "./system-prompt";
+import { getProposalContext } from "./proposal-context";
 
 const MODEL = "claude-opus-4-5";  // ajustar según preferencia / costo
 const MAX_TOKENS = 1024;
@@ -72,6 +73,9 @@ export async function processUserMessage(
     language: conv.language,
   };
 
+  // Propuesta pendiente asociada a este telefono (si respondio un recordatorio)
+  const pendingProposal = await getProposalContext(input.waPhone);
+
   const systemPrompt = buildSystemPrompt({
     language: conv.language,
     leadName: conv.leadName,
@@ -84,6 +88,13 @@ export async function processUserMessage(
     timezone: conv.timezone,
     alreadyBooked: !!conv.bookedAt,
     surveyDone: !!conv.surveyDoneAt,
+    pendingProposal: pendingProposal
+      ? {
+          proposalNum: pendingProposal.proposalNum,
+          total: pendingProposal.total,
+          services: pendingProposal.services,
+        }
+      : null,
   });
 
   let totalTokensIn = 0;
