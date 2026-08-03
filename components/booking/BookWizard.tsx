@@ -223,6 +223,11 @@ export default function BookWizard({
       const data = await res.json();
       if (data.ok) {
         setConfirmed({ appointmentId: data.appointmentId, isPending: data.isPendingAssignment });
+      } else if (res.status === 409 || data.error === "SLOT_FULL") {
+        // El slot se lleno entre el listado y el confirm: volver a elegir horario
+        alert(w.language === "en" ? "That time slot was just taken. Please choose another one." : w.language === "pt" ? "Esse horário acabou de ser ocupado. Por favor escolha outro." : "Ese horario acaba de ocuparse. Por favor elegí otro.");
+        w.setSelectedSlot("");
+        w.setStep(4);
       } else {
         alert(w.language === "en" ? "There was a problem booking your appointment. Please try again." : w.language === "pt" ? "Houve um problema ao agendar. Por favor tente novamente." : "Hubo un problema al agendar tu cita. Por favor intentá de nuevo.");
       }

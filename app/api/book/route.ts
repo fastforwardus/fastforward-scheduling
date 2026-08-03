@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
 import { getSlotCapacity } from "@/lib/slots";
+import { createMeetEvent } from "@/lib/google";
 
 // Owners excluidos de la auto-asignacion: sus leads quedan sin asignar para reparto manual
 const EXCLUDED_AUTO_ASSIGN_EMAILS = ["info@fastfwdus.com"];
@@ -158,6 +159,48 @@ export async function POST(req: NextRequest) {
     }
 
     const appointment = booking.appointment;
+
+    // Meet para citas auto-asignadas (link de rep u owner de Zoho).
+    // Fuera de la transaccion a proposito: la llamada a Google es lenta
+    // y adentro del advisory lock bloquearia a otros del mismo slot.
+    if (assignedTo && platform === "meet") {
+      try {
+        const [repRow] = await db
+          .select({ googleRefreshToken: users.googleRefreshToken, fullName: users.fullName })
+          .from(users)
+          .where(eq(users.id, assignedTo))
+          .limit(1);
+
+        if (repRow?.googleRefreshToken) {
+          const startTime = new Date(scheduledAt);
+          const endTime = new Date(startTime.getTime() + 30 * 60 * 1000);
+          const { meetLink } = await createMeetEvent({
+            refreshToken: repRow.googleRefreshToken,
+            title: `Consulta FastForward — ${clientName} (${clientCompany})`,
+            startTime,
+            endTime,
+            attendeeEmail: clientEmail.toLowerCase().trim(),
+            attendeeName: clientName,
+            description: [
+              "Consulta FastForward FDA Experts",
+              `Empresa: ${clientCompany}`,
+              `Servicio: ${serviceInterest || "General"}`,
+              `WhatsApp: ${clientWhatsapp}`,
+            ].join("\n"),
+          });
+          await db
+            .update(appointments)
+            .set({ meetingLink: meetLink })
+            .where(eq(appointments.id, appointment.id));
+          console.log("Meet creado en book para", repRow.fullName, ":", meetLink);
+        } else {
+          console.warn("Rep", assignedName, "sin Google Calendar conectado — cita sin link");
+        }
+      } catch (meetErr: unknown) {
+        const errMsg = meetErr instanceof Error ? meetErr.message : String(meetErr);
+        console.error("Error creando Meet en book:", errMsg);
+      }
+    }
 
     // Notify partner if referral
     if (partnerSlug) {
