@@ -26,6 +26,7 @@ export const users = pgTable("users", {
   googleCalendarId: text("google_calendar_id"),
   googleRefreshToken: text("google_refresh_token"),
   timezone: text("timezone").default("America/New_York"),
+  availabilityTimezone: text("availability_timezone"),
   whatsappPhone: text("whatsapp_phone"),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
