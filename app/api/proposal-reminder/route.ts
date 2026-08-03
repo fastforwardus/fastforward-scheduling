@@ -2,13 +2,30 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { proposals, users } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { proposals, users, appointments } from "@/db/schema";
+import { eq, desc, sql } from "drizzle-orm";
+import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
 const BOOK_URL = "https://ffus.link/Video";
+
+// Recordatorios por WhatsApp: apagados hasta que Meta apruebe las plantillas.
+// Activar con: vercel env add WHATSAPP_REMINDERS_ENABLED  (valor: true)
+const WA_ENABLED = process.env.WHATSAPP_REMINDERS_ENABLED === "true";
+const WA_DAILY_CAP = 30;
+
+// Meta usa pt_BR; nuestro enum guarda "pt"
+const WA_LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
+
+// Etapa -> plantilla aprobada
+const WA_TEMPLATE: Record<1 | 2 | 3 | 4, string> = {
+  1: "propuesta_recordatorio_1",
+  2: "propuesta_recordatorio_2",
+  3: "propuesta_recordatorio_2",
+  4: "propuesta_vencimiento",
+};
 
 type Lang = "es" | "en" | "pt";
 
@@ -178,10 +195,18 @@ export async function GET(req: NextRequest) {
     sentById: proposals.sentById,
     createdAt: proposals.createdAt,
     reminderStage: proposals.reminderStage,
-  }).from(proposals).where(eq(proposals.status, "pending")).orderBy(desc(proposals.createdAt));
+    whatsappStage: proposals.whatsappStage,
+    clientPhone: appointments.clientWhatsapp,
+  }).from(proposals)
+    .leftJoin(appointments, sql`${appointments.id}::text = ${proposals.appointmentId}`)
+    .where(eq(proposals.status, "pending"))
+    .orderBy(desc(proposals.createdAt));
 
   const seenEmails = new Set<string>();
+  const seenPhones = new Set<string>();
   let sent = 0;
+  let waSent = 0;
+  let waFailed = 0;
 
   for (const p of rows) {
     if (!p.clientEmail) continue;
@@ -221,8 +246,32 @@ export async function GET(req: NextRequest) {
 
     await db.update(proposals).set({ reminderStage: target }).where(eq(proposals.id, p.id));
     sent++;
+
+    // ── WhatsApp: etapa propia, no depende de que el email haya salido ──
+    const waCurrent = p.whatsappStage ?? 0;
+    if (WA_ENABLED && p.clientPhone && target > waCurrent && waSent < WA_DAILY_CAP) {
+      const phone = p.clientPhone.replace(/\D/g, "");
+      if (phone.length >= 8 && !seenPhones.has(phone)) {
+        seenPhones.add(phone);
+        const r = await sendWhatsAppTemplate({
+          toPhone: phone,
+          templateName: WA_TEMPLATE[target as 1 | 2 | 3 | 4],
+          languageCode: WA_LANG[lang] || "es",
+          bodyParams: [firstName || "", p.proposalNum],
+          urlParam: p.confirmToken || "",
+        });
+        if (r.ok) {
+          await db.update(proposals).set({ whatsappStage: target }).where(eq(proposals.id, p.id));
+          waSent++;
+        } else {
+          waFailed++;
+          console.error("[wa-reminder]", p.proposalNum, lang, "->", r.error);
+        }
+      }
+    }
+
     if (sent >= DAILY_CAP) break;
   }
 
-  return NextResponse.json({ ok: true, sent, checked: rows.length });
+  return NextResponse.json({ ok: true, sent, checked: rows.length, waEnabled: WA_ENABLED, waSent, waFailed });
 }

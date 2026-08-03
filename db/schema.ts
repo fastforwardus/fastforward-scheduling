@@ -251,6 +251,7 @@ export const proposals = pgTable("proposals", {
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   expiresAt:     timestamp("expires_at"),
   reminderStage: integer("reminder_stage").default(0),
+  whatsappStage: integer("whatsapp_stage").default(0),
   invoiceSentAt: timestamp("invoice_sent_at"),
   clientAddress:  text("client_address"),
   sentById:       uuid("sent_by_id").references(() => users.id),
