@@ -2,8 +2,8 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { proposals, users, appointments } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { proposals, users, appointments, adrianaConversations } from "@/db/schema";
+import { eq, desc, sql, isNotNull } from "drizzle-orm";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 import { Resend } from "resend";
 
@@ -202,6 +202,16 @@ export async function GET(req: NextRequest) {
     .where(eq(proposals.status, "pending"))
     .orderBy(desc(proposals.createdAt));
 
+  // Telefonos que pidieron la baja por WhatsApp
+  const optedOut = new Set<string>();
+  if (WA_ENABLED) {
+    const outs = await db
+      .select({ waPhone: adrianaConversations.waPhone })
+      .from(adrianaConversations)
+      .where(isNotNull(adrianaConversations.optedOutAt));
+    for (const o of outs) optedOut.add(o.waPhone.replace(/\D/g, ""));
+  }
+
   const seenEmails = new Set<string>();
   const seenPhones = new Set<string>();
   let sent = 0;
@@ -251,7 +261,7 @@ export async function GET(req: NextRequest) {
     const waCurrent = p.whatsappStage ?? 0;
     if (WA_ENABLED && p.clientPhone && target > waCurrent && waSent < WA_DAILY_CAP) {
       const phone = p.clientPhone.replace(/\D/g, "");
-      if (phone.length >= 8 && !seenPhones.has(phone)) {
+      if (phone.length >= 8 && !seenPhones.has(phone) && !optedOut.has(phone)) {
         seenPhones.add(phone);
         const r = await sendWhatsAppTemplate({
           toPhone: phone,
@@ -273,5 +283,5 @@ export async function GET(req: NextRequest) {
     if (sent >= DAILY_CAP) break;
   }
 
-  return NextResponse.json({ ok: true, sent, checked: rows.length, waEnabled: WA_ENABLED, waSent, waFailed });
+  return NextResponse.json({ ok: true, sent, checked: rows.length, waEnabled: WA_ENABLED, waSent, waFailed, waOptedOut: optedOut.size });
 }

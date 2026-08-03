@@ -4,9 +4,10 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { db } from "@/db";
-import { adrianaMessages } from "@/db/schema";
+import { adrianaMessages, adrianaConversations } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { processUserMessage } from "@/lib/adriana/engine";
+import { isOptOutMessage, OPT_OUT_REPLY } from "@/lib/adriana/opt-out";
 import { sendWhatsAppText, markAsRead } from "@/lib/adriana/whatsapp-sender";
 
 /**
@@ -115,6 +116,40 @@ export async function POST(req: NextRequest) {
 
         // Marcar como leído (cosmético, no esperamos)
         markAsRead(msg.id).catch(() => {});
+
+        // ── 3b. Opt-out: cortar antes del engine ──
+        // Si pidio la baja no queremos que el LLM le conteste nada mas.
+        if (isOptOutMessage(msg.text.body)) {
+          try {
+            const [conv] = await db
+              .select({ id: adrianaConversations.id, language: adrianaConversations.language })
+              .from(adrianaConversations)
+              .where(eq(adrianaConversations.waPhone, msg.from))
+              .limit(1);
+
+            if (conv) {
+              await db
+                .update(adrianaConversations)
+                .set({ optedOutAt: new Date() })
+                .where(eq(adrianaConversations.id, conv.id));
+            } else {
+              await db
+                .insert(adrianaConversations)
+                .values({ waPhone: msg.from, waProfileName: profileName, optedOutAt: new Date() })
+                .onConflictDoUpdate({
+                  target: adrianaConversations.waPhone,
+                  set: { optedOutAt: new Date() },
+                });
+            }
+
+            const lang = (conv?.language ?? "es") as "es" | "en" | "pt";
+            await sendWhatsAppText(msg.from, OPT_OUT_REPLY[lang]);
+            console.log("[wa-webhook] opt-out registrado:", msg.from);
+          } catch (err) {
+            console.error("[wa-webhook] opt-out error:", err);
+          }
+          continue;
+        }
 
         // ── 4. Llamar al engine ──
         let result;

@@ -284,6 +284,7 @@ export const adrianaConversations = pgTable("adriana_conversations", {
   surveyAskedAt:    timestamp("survey_asked_at", { withTimezone: true }),
   surveyDoneAt:     timestamp("survey_done_at", { withTimezone: true }),
   status:           text("status").default("active").notNull(),
+  optedOutAt:       timestamp("opted_out_at", { withTimezone: true }),
   lastUserMsgAt:    timestamp("last_user_msg_at", { withTimezone: true }),
   lastAssistantMsgAt: timestamp("last_assistant_msg_at", { withTimezone: true }),
   createdAt:        timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
