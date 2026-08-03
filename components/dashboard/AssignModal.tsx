@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Loader2, Check } from "lucide-react";
+import { X, Loader2, Check, AlertTriangle, Moon } from "lucide-react";
 
-interface User { id: string; fullName: string; role: string; email: string; }
+interface User { id: string; fullName: string; role: string; email: string; hasConflict?: boolean; isAvailable?: boolean; }
 interface Appointment {
   id: string;
   clientName: string;
@@ -26,10 +26,10 @@ export function AssignModal({
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    fetch("/api/users/list")
+    fetch(`/api/users/list?at=${encodeURIComponent(appointment.scheduledAt)}`)
       .then(r => r.json())
       .then(d => setUsers(d.users || []));
-  }, []);
+  }, [appointment.scheduledAt]);
 
   async function handleAssign() {
     if (!selected) return;
@@ -46,6 +46,7 @@ export function AssignModal({
     }
   }
 
+  const selectedUser = users.find(u => u.id === selected);
   const slotDate = new Date(appointment.scheduledAt);
   const formatted = slotDate.toLocaleDateString("es-ES", {
     weekday: "short", day: "numeric", month: "short",
@@ -104,6 +105,18 @@ export function AssignModal({
                         <p className="text-xs" style={{ color: "#9CA3AF" }}>
                           {u.role === "admin" ? "Admin" : u.role === "sales_manager" ? "Manager" : "Sales Rep"}
                         </p>
+                        {u.hasConflict && (
+                          <p className="text-xs flex items-center gap-1 mt-1 font-medium" style={{ color: "#D97706" }}>
+                            <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                            Ya tiene una cita a esta hora
+                          </p>
+                        )}
+                        {u.isAvailable === false && (
+                          <p className="text-xs flex items-center gap-1 mt-1" style={{ color: "#9CA3AF" }}>
+                            <Moon className="w-3 h-3 flex-shrink-0" />
+                            Fuera de su horario
+                          </p>
+                        )}
                       </div>
                       {selected === u.id && <Check className="w-4 h-4" style={{ color: "#C9A84C" }} />}
                     </button>
@@ -118,7 +131,11 @@ export function AssignModal({
                   color: !selected ? "#9CA3AF" : "#1A1C3E",
                   cursor: !selected ? "not-allowed" : "pointer",
                 }}>
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Asignar y notificar →"}
+                {loading
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : selectedUser?.hasConflict
+                    ? "Asignar igual (tiene conflicto) →"
+                    : "Asignar y notificar →"}
               </button>
             </>
           )}

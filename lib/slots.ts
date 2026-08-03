@@ -172,3 +172,43 @@ export async function getSlotCapacity(slot: Date): Promise<number> {
   }
   return capacity;
 }
+
+// IDs de reps cuya franja de disponibilidad cubre este instante.
+export async function getAvailableRepIds(slot: Date): Promise<Set<string>> {
+  const reps = await db
+    .select({ id: users.id, tz: users.availabilityTimezone, fallbackTz: users.timezone })
+    .from(users)
+    .where(eq(users.isActive, true));
+
+  const rules = await db
+    .select({
+      userId: availabilityRules.userId,
+      dayOfWeek: availabilityRules.dayOfWeek,
+      startTime: availabilityRules.startTime,
+      endTime: availabilityRules.endTime,
+    })
+    .from(availabilityRules)
+    .where(eq(availabilityRules.isActive, true));
+
+  const byRep = new Map<string, Map<number, { startTime: string; endTime: string }>>();
+  for (const r of rules) {
+    if (!byRep.has(r.userId)) byRep.set(r.userId, new Map());
+    byRep.get(r.userId)!.set(r.dayOfWeek, { startTime: r.startTime, endTime: r.endTime });
+  }
+
+  const available = new Set<string>();
+  for (const rep of reps) {
+    const repRules = byRep.get(rep.id);
+    if (!repRules) continue;
+    const tz = rep.tz || rep.fallbackTz || MIAMI;
+    const dateStr = formatInTimeZone(slot, tz, "yyyy-MM-dd");
+    const dow = Number(formatInTimeZone(slot, tz, "i")) % 7;
+    const rule = repRules.get(dow);
+    if (!rule) continue;
+
+    const startUTC = fromZonedTime(`${dateStr}T${rule.startTime}`, tz);
+    const endUTC = fromZonedTime(`${dateStr}T${rule.endTime}`, tz);
+    if (slot >= startUTC && slot < endUTC) available.add(rep.id);
+  }
+  return available;
+}
