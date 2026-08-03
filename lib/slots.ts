@@ -22,17 +22,27 @@ export interface SlotsResult {
   timezone: string;
 }
 
-export async function generateAvailableSlots(clientTz: string = MIAMI): Promise<SlotsResult> {
+export async function generateAvailableSlots(
+  clientTz: string = MIAMI,
+  repSlug?: string,
+): Promise<SlotsResult> {
   const now = new Date();
 
-  const reps = await db
+  const allReps = await db
     .select({
       id: users.id,
+      slug: users.slug,
       tz: users.availabilityTimezone,
       fallbackTz: users.timezone,
     })
     .from(users)
     .where(eq(users.isActive, true));
+
+  // Link personal: solo la agenda de ese rep. Sin esto el cliente ve horarios
+  // que su rep no cubre y la cita termina asignada a alguien que no trabaja.
+  const reps = repSlug && repSlug !== "general"
+    ? allReps.filter((r) => r.slug === repSlug)
+    : allReps;
 
   const rules = await db
     .select({

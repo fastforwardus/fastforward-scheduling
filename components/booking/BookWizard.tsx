@@ -164,7 +164,7 @@ export default function BookWizard({
   useEffect(() => {
     if (w.step !== 4) return;
     setLoadingSlots(true);
-    fetch(`/api/slots?timezone=${encodeURIComponent(timezone)}`)
+    fetch(`/api/slots?timezone=${encodeURIComponent(timezone)}${repSlug && repSlug !== "general" ? `&rep=${encodeURIComponent(repSlug)}` : ""}`)
       .then(r => r.json())
       .then(d => {
         setSlotsData(d);
@@ -174,7 +174,7 @@ export default function BookWizard({
       })
       .catch(() => setLoadingSlots(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [w.step, timezone]);
+  }, [w.step, timezone, repSlug]);
 
   const isPersonalEmail = (email: string) => {
     const domain = email.split("@")[1]?.toLowerCase();

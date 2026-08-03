@@ -7,7 +7,7 @@ import { eq, and, gte, sql, notInArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
-import { getSlotCapacity } from "@/lib/slots";
+import { getSlotCapacity, getAvailableRepIds } from "@/lib/slots";
 import { createMeetEvent } from "@/lib/google";
 import { normalizeWhatsAppPhone } from "@/lib/phone";
 
@@ -69,10 +69,17 @@ export async function POST(req: NextRequest) {
           EXCLUDED_AUTO_ASSIGN_EMAILS.includes(owner.email?.toLowerCase() || "")
         );
         if (owner && !isExcludedOwner) {
-          assignedTo = owner.id;
-          assignedName = owner.fullName;
-          assignedEmail = owner.email;
-          status = "scheduled";
+          // El owner de Zoho puede no cubrir ese horario (ej. slot de 5 AM Miami
+          // que solo atiende Emiliano). En ese caso queda para reparto manual.
+          const disponibles = await getAvailableRepIds(new Date(scheduledAt));
+          if (disponibles.has(owner.id)) {
+            assignedTo = owner.id;
+            assignedName = owner.fullName;
+            assignedEmail = owner.email;
+            status = "scheduled";
+          } else {
+            console.warn("Owner", owner.fullName, "no disponible en", scheduledAt, "- queda sin asignar");
+          }
         }
       }
     }
