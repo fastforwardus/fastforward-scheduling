@@ -8,7 +8,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { AssignModal } from "@/components/dashboard/AssignModal";
 import { OutcomeModal } from "@/components/dashboard/OutcomeModal";
 import { NotesPanel } from "@/components/dashboard/NotesPanel";
-import { RefreshCw, ChevronDown, ChevronUp, Video, MessageCircle, Phone, ExternalLink, FileText, MoreHorizontal } from "lucide-react";
+import { RefreshCw, ChevronDown, ChevronUp, Video, MessageCircle, Phone, ExternalLink, FileText, MoreHorizontal, Pencil, Check, X } from "lucide-react";
 
 
 
@@ -38,6 +38,9 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   const [showOutcome, setShowOutcome] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [editEmail, setEditEmail] = useState(false);
+  const [emailDraft, setEmailDraft] = useState(appt.clientEmail);
+  const [savingEmail, setSavingEmail] = useState(false);
   const now = new Date();
   const apptTime = new Date(appt.scheduledAt);
   const minutesPast = (now.getTime() - apptTime.getTime()) / 60000;
@@ -108,8 +111,45 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
 
                 {/* Columna izquierda: datos */}
                 <div className="space-y-1.5" style={{ minWidth: 260, maxWidth: 380 }}>
+                  <div className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>
+                    <span className="text-xs" style={{ color: "#9CA3AF" }}>Email</span>
+                    {editEmail ? (
+                      <div className="flex items-center gap-1">
+                        <input type="email" value={emailDraft} autoFocus
+                          onChange={e => setEmailDraft(e.target.value)}
+                          onKeyDown={e => { if (e.key === "Escape") { setEditEmail(false); setEmailDraft(appt.clientEmail); } }}
+                          className="text-xs px-2 py-1 rounded-md border flex-1 min-w-0"
+                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                        <button disabled={savingEmail}
+                          onClick={async () => {
+                            setSavingEmail(true);
+                            const res = await fetch("/api/appointments/update-contact", {
+                              method: "POST", headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ appointmentId: appt.id, clientEmail: emailDraft }),
+                            });
+                            setSavingEmail(false);
+                            if (res.ok) { setEditEmail(false); onRefresh(); }
+                            else { const d = await res.json().catch(() => ({})); alert(d.error || "No se pudo actualizar"); }
+                          }}
+                          className="p-1 rounded-md flex-shrink-0" style={{ background: "rgba(34,197,94,0.12)" }} aria-label="Guardar">
+                          <Check className="w-3 h-3" style={{ color: "#16A34A" }} />
+                        </button>
+                        <button onClick={() => { setEditEmail(false); setEmailDraft(appt.clientEmail); }}
+                          className="p-1 rounded-md flex-shrink-0" style={{ background: "#F3F4F6" }} aria-label="Cancelar">
+                          <X className="w-3 h-3" style={{ color: "#6B7280" }} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-xs font-medium truncate" style={{ color: "#27295C" }}>{appt.clientEmail}</span>
+                        <button onClick={() => { setEmailDraft(appt.clientEmail); setEditEmail(true); }}
+                          className="flex-shrink-0 opacity-40 hover:opacity-100 transition-opacity" aria-label="Editar email">
+                          <Pencil className="w-3 h-3" style={{ color: "#6B7280" }} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   {[
-                    { label: "Email", value: appt.clientEmail, accent: true },
                     { label: "WhatsApp", value: appt.clientWhatsapp, accent: false },
                     { label: "Plataforma", value: appt.platform === "meet" ? "Google Meet" : appt.platform === "zoom" ? "Zoom" : "WhatsApp", accent: false },
                   ].map(item => (

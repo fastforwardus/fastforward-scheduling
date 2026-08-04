@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, FileText, Send, Plus, Minus, Loader2, Check } from "lucide-react";
 import { CATALOGS, CAT_COLORS, remapServices, Service } from "../../lib/catalog";
 
@@ -50,6 +50,22 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
   const [clientTaxId, setClientTaxId] = useState("");
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
+
+  // Autopopulado: direccion y tax id de la ultima propuesta de este cliente
+  useEffect(() => {
+    const em = (initialClientEmail || "").trim();
+    if (!em) return;
+    let cancelado = false;
+    fetch(`/api/clients/last-billing?email=${encodeURIComponent(em)}`)
+      .then(r => r.json())
+      .then(d => {
+        if (cancelado) return;
+        if (d.clientAddress) setClientAddress(prev => prev || d.clientAddress);
+        if (d.clientTaxId) setClientTaxId(prev => prev || d.clientTaxId);
+      })
+      .catch(() => {});
+    return () => { cancelado = true; };
+  }, [initialClientEmail]);
 
   const activeCatalog = CATALOGS[lang];
   const categories = [...new Set(activeCatalog.map(s => s.category))];
