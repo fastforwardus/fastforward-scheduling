@@ -315,6 +315,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
           appointmentId={proposalAppt.id}
           clientName={proposalAppt.clientName}
           clientCompany={proposalAppt.clientCompany}
+          clientEmail={proposalAppt.clientEmail}
           onClose={() => setProposalAppt(null)}
           onSuccess={() => { setProposalAppt(null); onRefresh(); }}
         />
