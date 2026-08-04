@@ -134,6 +134,22 @@ export async function GET() {
     appointmentId: proposals.appointmentId,
   }).from(proposals).orderBy(proposals.createdAt);
 
+  // ── Propuestas directas (sin cita) ────────────────────────────────
+  // Se cuentan aparte: no tienen appointment donde marcar el outcome, asi que
+  // el funnel de citas nunca las veia. Van separadas para no distorsionar
+  // conversionRate, que sigue midiendo cierres sobre citas completadas.
+  const apptIds = new Set(allAppts.map(a => a.id));
+  const directAccepted = allProposals.filter(
+    p => p.status === "accepted" && !apptIds.has(p.appointmentId)
+  );
+  const closedDirect = directAccepted.length;
+  const closedTotal = closed + closedDirect;
+
+  const byRepFinal = byRep.map(rep => {
+    const mineDirect = directAccepted.filter(p => p.sentById === rep.id).length;
+    return { ...rep, closedDirect: mineDirect, closedTotal: rep.closed + mineDirect };
+  });
+
   // Surveys with rep info via appointment
   const surveysWithRep = await db.select({
     id: surveys.id,
@@ -148,10 +164,10 @@ export async function GET() {
     .leftJoin(appointments, eq(appointments.id, surveys.appointmentId));
 
   return NextResponse.json({
-    summary: { total, assigned, completed, noShow, withOutcome, proposalSent, closed, interested, showRate, conversionRate },
+    summary: { total, assigned, completed, noShow, withOutcome, proposalSent, closed, closedDirect, closedTotal, interested, showRate, conversionRate },
     last30: { total: last30.length },
     last7:  { total: last7.length },
-    byPlatform, bySource, byScore, byRep, daily,
+    byPlatform, bySource, byScore, byRep: byRepFinal, daily,
     satisfaction: { total: totalSurveys, avg: satisfactionAvg, fiveStars: satisfactionFive, fourStars: satisfactionFour, lowRating: satisfactionLow },
     surveysDetail: surveysWithRep,
     proposalsDetail: allProposals,

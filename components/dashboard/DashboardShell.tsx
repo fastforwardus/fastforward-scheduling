@@ -104,27 +104,27 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
         {expanded && (
           <div className="px-5 pb-5 pt-1" onClick={e => e.stopPropagation()}>
             <div className="ml-[74px] space-y-4">
-              <div className="grid gap-5" style={{ gridTemplateColumns: "minmax(0,1.35fr) minmax(0,180px)" }}>
+              <div className="flex gap-8 items-start flex-wrap">
 
                 {/* Columna izquierda: datos */}
-                <div className="space-y-2">
+                <div className="space-y-1.5" style={{ minWidth: 260, maxWidth: 380 }}>
                   {[
                     { label: "Email", value: appt.clientEmail, accent: true },
                     { label: "WhatsApp", value: appt.clientWhatsapp, accent: false },
                     { label: "Plataforma", value: appt.platform === "meet" ? "Google Meet" : appt.platform === "zoom" ? "Zoom" : "WhatsApp", accent: false },
                   ].map(item => (
-                    <div key={item.label} className="flex items-baseline justify-between gap-3">
-                      <span className="text-xs flex-shrink-0" style={{ color: "#9CA3AF" }}>{item.label}</span>
-                      <span className="text-xs font-medium truncate text-right" style={{ color: item.accent ? "#27295C" : "#374151" }}>{item.value}</span>
+                    <div key={item.label} className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>
+                      <span className="text-xs" style={{ color: "#9CA3AF" }}>{item.label}</span>
+                      <span className="text-xs font-medium truncate" style={{ color: item.accent ? "#27295C" : "#374151" }}>{item.value}</span>
                     </div>
                   ))}
-                  <div className="flex items-baseline justify-between gap-3">
-                    <span className="text-xs flex-shrink-0" style={{ color: "#9CA3AF" }}>Experto</span>
+                  <div className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>
+                    <span className="text-xs" style={{ color: "#9CA3AF" }}>Experto</span>
                     {appt.repName ? (
-                      <span className="text-xs font-medium text-right" style={{ color: "#374151" }}>{appt.repName}</span>
+                      <span className="text-xs font-medium truncate" style={{ color: "#374151" }}>{appt.repName}</span>
                     ) : canAssign ? (
                       <button onClick={() => setShowAssign(true)}
-                        className="text-xs font-semibold px-2 py-0.5 rounded-md"
+                        className="text-xs font-semibold px-2 py-0.5 rounded-md justify-self-start"
                         style={{ background: "#EAB308", color: "white" }}>
                         Asignar →
                       </button>
@@ -135,7 +135,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                 </div>
 
                 {/* Columna derecha: acciones */}
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1.5" style={{ width: 190, flexShrink: 0 }}>
 
                   {appt.platform !== "whatsapp" && appt.meetingLink && (
                     <a href={appt.meetingLink} target="_blank" rel="noreferrer"
@@ -190,8 +190,8 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                       )}
                     </button>
                     {openMenuId === appt.id && (
-                      <div className="absolute right-0 bottom-10 z-50 bg-white rounded-xl shadow-xl border py-1 min-w-[170px]"
-                           style={{ borderColor: "#E5E7EB", boxShadow: "0 -4px 24px rgba(0,0,0,0.12)" }}>
+                      <div className="absolute right-0 top-full mt-1 z-50 bg-white rounded-xl shadow-xl border py-1 min-w-[170px]"
+                           style={{ borderColor: "#E5E7EB", boxShadow: "0 4px 24px rgba(0,0,0,0.12)" }}>
 
                         <button onClick={() => { setShowOutcome(true); setOpenMenuId(null); }}
                           className="flex items-center gap-2 w-full px-4 py-2.5 text-xs hover:bg-gray-50 text-left"
@@ -355,7 +355,7 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
             ))}
           </div>
 
-          <div className="rounded-b-2xl overflow-hidden"
+          <div className="rounded-b-2xl"
                style={{ background: "white", border: "1px solid #E5E7EB", borderTop: "none" }}>
             {loading ? (
               [1,2,3,4,5].map(i => (
