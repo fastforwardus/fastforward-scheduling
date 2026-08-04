@@ -82,6 +82,19 @@ export async function POST(req: NextRequest) {
     zohoInvoiceId: zohoInvoiceId || null,
   }).where(eq(proposals.id, proposal.id));
 
+  // ── Marcar la cita como ganada ───────────────────────────────────
+  // appointment_id es TEXT y puede ser "direct-xxxx" (propuesta sin cita),
+  // asi que va con ::text: eq() contra la columna UUID reventaba la ruta
+  // entera con invalid input syntax y el cliente nunca recibia el mail
+  // de confirmacion. Va antes de Zoho/emails y con try/catch propio.
+  try {
+    await db.update(appointments).set({
+      outcome: "closed",
+    }).where(sql`${appointments.id}::text = ${proposal.appointmentId}`);
+  } catch (err) {
+    console.error("Error marcando cita como ganada:", err);
+  }
+
 
   // ── Auto-envío email de factura (async, no bloquea) ─────────────
   if (zohoInvoiceId && clientEmail) {
@@ -163,11 +176,6 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
     });
     console.log("Zoho updated on acceptance:", zohoRes);
   } catch (err) { console.error("Zoho accept error:", err); }
-
-  // ── Update appointment outcome ───────────────────────────────────
-  await db.update(appointments).set({
-    outcome: "closed",
-  }).where(eq(appointments.id, proposal.appointmentId));
 
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
 
