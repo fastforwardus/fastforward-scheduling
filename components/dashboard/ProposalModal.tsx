@@ -17,16 +17,19 @@ interface ProposalModalProps {
   clientName: string;
   clientCompany: string;
   clientEmail?: string;
+  clientLanguage?: string;
   repSlug?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", onClose, onSuccess }: ProposalModalProps) {
+export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", clientLanguage = "es", onClose, onSuccess }: ProposalModalProps) {
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [selected, setSelected] = useState<SelectedService[]>([]);
   const [discount, setDiscount] = useState(0);
-  const [lang, setLang] = useState<"es" | "en" | "pt">("es");
+  const [lang, setLang] = useState<"es" | "en" | "pt">(
+    (["es", "en", "pt"].includes(clientLanguage) ? clientLanguage : "es") as "es" | "en" | "pt"
+  );
   const [tab, setTab] = useState<"services" | "email" | "preview">("services");
 
   const DEFAULT_INTRO: Record<string, string> = {

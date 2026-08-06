@@ -10,14 +10,19 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { appointmentId, clientEmail } = await req.json();
-  if (!appointmentId || !clientEmail) {
+  const { appointmentId, clientEmail, clientLanguage } = await req.json();
+  if (!appointmentId || (!clientEmail && !clientLanguage)) {
     return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
   }
 
-  const email = String(clientEmail).toLowerCase().trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+  const email = clientEmail ? String(clientEmail).toLowerCase().trim() : null;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
     return NextResponse.json({ error: "Email invalido" }, { status: 400 });
+  }
+
+  const lang = clientLanguage ? String(clientLanguage) : null;
+  if (lang && !["es", "en", "pt"].includes(lang)) {
+    return NextResponse.json({ error: "Idioma invalido" }, { status: 400 });
   }
 
   try {
@@ -29,6 +34,21 @@ export async function POST(req: NextRequest) {
     if (session.role === "sales_rep" && appt.assignedTo !== session.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+
+    // Idioma: override manual de lo que se adivino al agendar
+    if (lang && lang !== appt.clientLanguage) {
+      await db.update(appointments)
+        .set({ clientLanguage: lang as "es" | "en" | "pt" })
+        .where(eq(appointments.id, appointmentId));
+      if (appt.clientEmail) {
+        await db.update(clientProfiles)
+          .set({ language: lang as "es" | "en" | "pt" })
+          .where(eq(clientProfiles.email, appt.clientEmail.toLowerCase()));
+      }
+      console.log("Idioma actualizado:", appt.clientLanguage, "->", lang);
+    }
+
+    if (!email) return NextResponse.json({ ok: true, languageUpdated: !!lang });
 
     if (appt.clientEmail?.toLowerCase() === email) {
       return NextResponse.json({ ok: true, unchanged: true });

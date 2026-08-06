@@ -32,7 +32,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   appt: Appt; canAssign: boolean; currentUserId: string; currentRole: string; onRefresh: () => void; userTimezone: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; clientEmail?: string; repSlug: string } | null>(null);
+  const [proposalAppt, setProposalAppt] = useState<{ id: string; clientName: string; clientCompany: string; clientEmail?: string; clientLanguage?: string; repSlug: string } | null>(null);
   const [rescheduleAppt, setRescheduleAppt] = useState<{ id: string; clientName: string; scheduledAt: string } | null>(null);
   const [showAssign, setShowAssign] = useState(false);
   const [showOutcome, setShowOutcome] = useState(false);
@@ -41,6 +41,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   const [editEmail, setEditEmail] = useState(false);
   const [emailDraft, setEmailDraft] = useState(appt.clientEmail);
   const [savingEmail, setSavingEmail] = useState(false);
+  const [savingLang, setSavingLang] = useState(false);
   const now = new Date();
   const apptTime = new Date(appt.scheduledAt);
   const minutesPast = (now.getTime() - apptTime.getTime()) / 60000;
@@ -149,6 +150,37 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                       </div>
                     )}
                   </div>
+                  <div className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>
+                    <span className="text-xs" style={{ color: "#9CA3AF" }}>Idioma</span>
+                    <div className="flex items-center gap-1">
+                      {(["es", "en", "pt"] as const).map(code => {
+                        const activo = (appt.clientLanguage || "es") === code;
+                        return (
+                          <button key={code} disabled={savingLang}
+                            onClick={async () => {
+                              if (activo) return;
+                              setSavingLang(true);
+                              const res = await fetch("/api/appointments/update-contact", {
+                                method: "POST", headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ appointmentId: appt.id, clientLanguage: code }),
+                              });
+                              setSavingLang(false);
+                              if (res.ok) onRefresh();
+                              else alert("No se pudo cambiar el idioma");
+                            }}
+                            className="text-xs px-2 py-0.5 rounded-md font-medium transition-colors"
+                            style={{
+                              background: activo ? "#27295C" : "transparent",
+                              color: activo ? "white" : "#9CA3AF",
+                              border: `1px solid ${activo ? "#27295C" : "#E5E7EB"}`,
+                              cursor: activo ? "default" : "pointer",
+                            }}>
+                            {code.toUpperCase()}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   {[
                     { label: "WhatsApp", value: appt.clientWhatsapp, accent: false },
                     { label: "Plataforma", value: appt.platform === "meet" ? "Google Meet" : appt.platform === "zoom" ? "Zoom" : "WhatsApp", accent: false },
@@ -212,7 +244,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                     <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#25D366" }} /> WhatsApp
                   </button>
 
-                  <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, clientEmail: appt.clientEmail, repSlug: appt.repSlug || "book" })}
+                  <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, clientEmail: appt.clientEmail, clientLanguage: appt.clientLanguage, repSlug: appt.repSlug || "book" })}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold"
                     style={{ background: "white", border: "1px solid #E5E7EB", color: "#374151" }}>
                     <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#C9A84C" }} /> Enviar propuesta
@@ -316,6 +348,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
           clientName={proposalAppt.clientName}
           clientCompany={proposalAppt.clientCompany}
           clientEmail={proposalAppt.clientEmail}
+          clientLanguage={proposalAppt.clientLanguage}
           onClose={() => setProposalAppt(null)}
           onSuccess={() => { setProposalAppt(null); onRefresh(); }}
         />
