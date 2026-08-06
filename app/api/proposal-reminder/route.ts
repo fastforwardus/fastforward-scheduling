@@ -6,6 +6,7 @@ import { proposals, users, appointments, adrianaConversations } from "@/db/schem
 import { eq, desc, sql, isNotNull } from "drizzle-orm";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 import { normalizeWhatsAppPhone, isPlausiblePhone, phoneTail } from "@/lib/phone";
+import { getOrCreateConversation, appendMessage, updateConversation } from "@/lib/adriana/db-helpers";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -280,6 +281,27 @@ export async function GET(req: NextRequest) {
         if (r.ok) {
           await db.update(proposals).set({ whatsappStage: target }).where(eq(proposals.id, p.id));
           waSent++;
+
+          // Registrar en el hilo de Adriana para que el recordatorio se vea
+          // en el panel y la respuesta del cliente caiga en la misma conversacion.
+          try {
+            const conv = await getOrCreateConversation(phone, p.clientName || undefined);
+            const tpl = WA_TEMPLATE[target as 1 | 2 | 3 | 4];
+            await appendMessage({
+              conversationId: conv.id,
+              role: "assistant",
+              content: [{ type: "text", text: `[recordatorio ${tpl}] Propuesta ${p.proposalNum} — etapa ${target}` }],
+              waMessageId: r.metaMessageId ?? null,
+            });
+            await updateConversation(conv.id, {
+              lastAssistantMsgAt: new Date(),
+              ...(conv.leadName ? {} : { leadName: p.clientName || null }),
+              ...(conv.leadEmail ? {} : { leadEmail: p.clientEmail || null }),
+              ...(conv.language ? {} : { language: lang as "es" | "en" | "pt" }),
+            });
+          } catch (logErr) {
+            console.error("[wa-reminder] no se pudo registrar en Adriana:", logErr);
+          }
         } else {
           waFailed++;
           console.error("[wa-reminder]", p.proposalNum, lang, "->", r.error);

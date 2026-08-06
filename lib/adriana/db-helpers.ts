@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { adrianaConversations, adrianaMessages, adrianaSatisfaction } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export async function getConversationByPhone(waPhone: string) {
   const [conv] = await db
@@ -11,8 +11,25 @@ export async function getConversationByPhone(waPhone: string) {
   return conv ?? null;
 }
 
+/**
+ * Busca conversacion por los ultimos 8 digitos. Necesario porque Meta
+ * normaliza distinto que nosotros: mandamos a 5491130378827 (AR con 9)
+ * y las respuestas entran como 541130378827. Sin esto se duplican hilos.
+ */
+export async function findConversationByPhoneLoose(waPhone: string) {
+  const tail = waPhone.replace(/\D/g, "").slice(-8);
+  if (tail.length < 8) return null;
+  const [conv] = await db
+    .select()
+    .from(adrianaConversations)
+    .where(sql`right(regexp_replace(${adrianaConversations.waPhone}, '[^0-9]', '', 'g'), 8) = ${tail}`)
+    .orderBy(desc(adrianaConversations.updatedAt))
+    .limit(1);
+  return conv ?? null;
+}
+
 export async function getOrCreateConversation(waPhone: string, waProfileName?: string) {
-  const existing = await getConversationByPhone(waPhone);
+  const existing = await getConversationByPhone(waPhone) ?? await findConversationByPhoneLoose(waPhone);
   if (existing) return existing;
 
   const [created] = await db
