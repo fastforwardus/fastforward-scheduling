@@ -53,9 +53,16 @@ export async function GET() {
         )
       order by ref_date desc
       limit 500
-    `) as unknown as { rows: Record<string, unknown>[] };
+    `);
 
-    const items = res.rows.map((r) => ({
+    // postgres-js devuelve el array directo; otros drivers, { rows: [...] }.
+    // Normalizamos para no depender del shape.
+    const raw = (Array.isArray(res)
+      ? res
+      : ((res as unknown as { rows?: Record<string, unknown>[] }).rows ?? [])
+    ) as Record<string, unknown>[];
+
+    const items = raw.map((r) => ({
       sourceType: r.source_type as "proposal" | "appointment",
       sourceId: String(r.source_id),
       clientName: (r.client_name as string) ?? null,
