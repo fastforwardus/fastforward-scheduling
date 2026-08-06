@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { proposals, users, appointments, adrianaConversations } from "@/db/schema";
+import { proposals, users, appointments, adrianaConversations, proposalEvents } from "@/db/schema";
 import { eq, desc, sql, isNotNull } from "drizzle-orm";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 import { normalizeWhatsAppPhone, isPlausiblePhone, phoneTail } from "@/lib/phone";
@@ -262,6 +262,10 @@ export async function GET(req: NextRequest) {
     }).catch(console.error);
 
     await db.update(proposals).set({ reminderStage: target }).where(eq(proposals.id, p.id));
+    await db.insert(proposalEvents).values({
+      proposalId: p.id, kind: "reminder", channel: "email",
+      detail: `Etapa ${target} — ${p.clientEmail}`,
+    }).catch(() => {});
     sent++;
 
     // ── WhatsApp: etapa propia, no depende de que el email haya salido ──
@@ -282,6 +286,10 @@ export async function GET(req: NextRequest) {
           await db.update(proposals)
             .set({ whatsappStage: target, whatsappLastWamid: r.metaMessageId ?? null })
             .where(eq(proposals.id, p.id));
+          await db.insert(proposalEvents).values({
+            proposalId: p.id, kind: "reminder", channel: "whatsapp",
+            detail: `Etapa ${target} — ${WA_TEMPLATE[target as 1 | 2 | 3 | 4]} (${WA_LANG[lang] || "es"})`,
+          }).catch(() => {});
           waSent++;
 
           // Registrar en el hilo de Adriana para que el recordatorio se vea
@@ -306,6 +314,10 @@ export async function GET(req: NextRequest) {
           }
         } else {
           waFailed++;
+          await db.insert(proposalEvents).values({
+            proposalId: p.id, kind: "reminder_failed", channel: "whatsapp",
+            detail: String(r.error).slice(0, 300),
+          }).catch(() => {});
           console.error("[wa-reminder]", p.proposalNum, lang, "->", r.error);
         }
       }

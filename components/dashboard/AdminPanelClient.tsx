@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import ProposalTimelineModal from "@/components/dashboard/ProposalTimelineModal";
 import { Users, BarChart2, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronUp, Clock, Trash2 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -325,6 +326,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 
 function MetricsView({ metrics }: { metrics: Metrics }) {
   const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction, surveysDetail, proposalsDetail, usersDetail } = metrics;
+  const [timelineId, setTimelineId] = useState<string | null>(null);
   const [showSurveys, setShowSurveys] = useState(false);
   const [showProposals, setShowProposals] = useState(false);
   const maxDaily = Math.max(...daily.map(d => d.count), 1);
@@ -589,7 +591,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                     const rep = usersDetail.find(u => u.id === p.sentById);
                     const isAccepted = p.status === "accepted";
                     return (
-                      <tr key={p.id} className="hover:bg-gray-50">
+                      <tr key={p.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => setTimelineId(p.id)}>
                         <td className="px-3 py-3 font-mono text-xs" style={{ color: "#6B7280" }}>{p.proposalNum}</td>
                         <td className="px-3 py-3">
                           <p className="font-medium text-sm" style={{ color: "#27295C" }}>{p.clientName || "—"}</p>
@@ -603,7 +605,10 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                             {isAccepted ? "✅ Aceptada" : "⏳ Pendiente"}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-xs" style={{ color: "#9CA3AF" }}>{new Date(p.createdAt).toLocaleDateString("es-ES")}</td>
+                        <td className="px-3 py-3 text-xs" style={{ color: "#9CA3AF" }}>
+                          {new Date(p.createdAt).toLocaleDateString("es-ES")}
+                          <span className="ml-2" style={{ color: "#C9A84C" }}>ver &rarr;</span>
+                        </td>
                       </tr>
                     );
                   })}
@@ -612,6 +617,10 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
             </div>
           </div>
         </div>
+      )}
+
+      {timelineId && (
+        <ProposalTimelineModal proposalId={timelineId} onClose={() => setTimelineId(null)} />
       )}
     </>
   );
@@ -1077,5 +1086,6 @@ export default function AdminPanelClient({ user }: {
         <CreateUserModal onClose={() => setShowCreate(false)} onCreated={loadUsers} />
       )}
     </div>
-  );
+  
+);
 }

@@ -4,7 +4,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { db } from "@/db";
-import { adrianaMessages, adrianaConversations, systemConfig, proposals } from "@/db/schema";
+import { adrianaMessages, adrianaConversations, systemConfig, proposals, proposalEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { processUserMessage } from "@/lib/adriana/engine";
 import { isOptOutMessage, OPT_OUT_REPLY } from "@/lib/adriana/opt-out";
@@ -123,6 +123,10 @@ export async function POST(req: NextRequest) {
                     ? { whatsappStage: stage - 1, whatsappFailCount: fails }
                     : { whatsappFailCount: fails };
                   await db.update(proposals).set(patch).where(eq(proposals.id, prop.id));
+                  await db.insert(proposalEvents).values({
+                    proposalId: prop.id, kind: "delivery_failed", channel: "whatsapp",
+                    detail: linea.slice(0, 300),
+                  }).catch(() => {});
                   console.log("[wa-status] propuesta", prop.id, "intento", fails, fails < 3 ? "-> reintenta" : "-> no reintenta");
                 }
               }

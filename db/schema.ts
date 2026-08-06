@@ -340,3 +340,16 @@ export const recoveryNotes = pgTable("recovery_notes", {
   content:    text("content").notNull(),
   createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// ── Eventos de propuesta ──
+// reminder_stage/whatsapp_stage son contadores, no historial: dicen que se
+// llego a la etapa 3 pero no cuando salio cada una. Esta tabla registra el
+// detalle a partir de ahora; lo anterior se reconstruye por aproximacion.
+export const proposalEvents = pgTable("proposal_events", {
+  id:         uuid("id").primaryKey().defaultRandom(),
+  proposalId: uuid("proposal_id").references(() => proposals.id, { onDelete: "cascade" }).notNull(),
+  kind:       text("kind").notNull(),
+  channel:    text("channel"),
+  detail:     text("detail"),
+  createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});

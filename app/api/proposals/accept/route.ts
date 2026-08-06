@@ -2,7 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { proposals, appointments, users } from "@/db/schema";
+import { proposals, appointments, users, proposalEvents } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { Resend } from "resend";
 import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
@@ -81,6 +81,11 @@ export async function POST(req: NextRequest) {
     zohoPaymentLink: zohoPaymentLink || null,
     zohoInvoiceId: zohoInvoiceId || null,
   }).where(eq(proposals.id, proposal.id));
+
+  await db.insert(proposalEvents).values({
+    proposalId: proposal.id, kind: "accepted", channel: "web",
+    detail: `Aceptada — invoice ${zohoInvoiceId || "pendiente"}`,
+  }).catch(() => {});
 
   // ── Marcar la cita como ganada ───────────────────────────────────
   // appointment_id es TEXT y puede ser "direct-xxxx" (propuesta sin cita),
