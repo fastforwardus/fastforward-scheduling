@@ -28,7 +28,7 @@ export async function GET() {
              a.client_company, a.client_whatsapp as client_phone,
              p.client_email,
              coalesce(u.full_name, ua.full_name) as rep_name,
-             coalesce(p.lang, a.client_language) as client_language,
+             coalesce(p.lang, a.client_language::text) as client_language,
              a.service_interest, p.total,
              p.created_at as ref_date,
              n.last_content as last_note, n.last_at as last_note_at,
@@ -42,7 +42,7 @@ export async function GET() {
       union all
       select 'appointment', a.id::text,
              a.client_name, a.client_company, a.client_whatsapp, a.client_email,
-             u.full_name, a.client_language, a.service_interest, null,
+             u.full_name, a.client_language::text, a.service_interest, null,
              a.scheduled_at,
              n.last_content, n.last_at, coalesce(n.n, 0)
       from appointments a

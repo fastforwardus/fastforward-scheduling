@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
     clientTaxId: clientTaxId || null,
     clientEmail: appt?.clientEmail || null,
     clientName: appt?.clientName || null,
+    sentById: session.id,
   });
 
   // Generate PDF
