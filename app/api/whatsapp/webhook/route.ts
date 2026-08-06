@@ -4,7 +4,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { db } from "@/db";
-import { adrianaMessages, adrianaConversations } from "@/db/schema";
+import { adrianaMessages, adrianaConversations, systemConfig } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { processUserMessage } from "@/lib/adriana/engine";
 import { isOptOutMessage, OPT_OUT_REPLY } from "@/lib/adriana/opt-out";
@@ -88,6 +88,26 @@ export async function POST(req: NextRequest) {
   for (const entry of payload.entry ?? []) {
     for (const change of entry.changes ?? []) {
       const value = change.value;
+
+      // Estados de entrega: sent / delivered / read / failed.
+      // Sin esto no hay forma de saber por que un template no llega —
+      // Meta acepta el request y reporta el fallo solo por aca.
+      if (value?.statuses?.length) {
+        for (const st of value.statuses) {
+          const err = st.errors?.[0];
+          const linea = `${st.status} | ${st.recipient_id} | ${st.id}` +
+            (err ? ` | ERROR ${err.code}: ${err.title}${err.error_data?.details ? " — " + err.error_data.details : ""}` : "");
+          console.log("[wa-status]", linea);
+          if (st.status === "failed") {
+            try {
+              await db.insert(systemConfig)
+                .values({ key: "WA_LAST_STATUS_ERROR", value: linea })
+                .onConflictDoUpdate({ target: systemConfig.key, set: { value: linea } });
+            } catch (e) { console.error("[wa-status] no se pudo guardar:", e); }
+          }
+        }
+      }
+
       if (!value?.messages) continue;
 
       const profileName = value.contacts?.[0]?.profile?.name ?? null;
@@ -199,7 +219,12 @@ interface WhatsAppWebhookPayload {
           type: string;          // "text", "image", "audio", etc.
           text?: { body?: string };
         }>;
-        statuses?: Array<{ id: string; status: string }>;
+        statuses?: Array<{
+          id: string;
+          status: string;
+          recipient_id?: string;
+          errors?: Array<{ code?: number; title?: string; error_data?: { details?: string } }>;
+        }>;
       };
     }>;
   }>;
