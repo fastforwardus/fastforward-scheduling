@@ -4,7 +4,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { db } from "@/db";
-import { adrianaMessages, adrianaConversations, systemConfig } from "@/db/schema";
+import { adrianaMessages, adrianaConversations, systemConfig, proposals } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { processUserMessage } from "@/lib/adriana/engine";
 import { isOptOutMessage, OPT_OUT_REPLY } from "@/lib/adriana/opt-out";
@@ -104,6 +104,29 @@ export async function POST(req: NextRequest) {
                 .values({ key: "WA_LAST_STATUS_ERROR", value: linea })
                 .onConflictDoUpdate({ target: systemConfig.key, set: { value: linea } });
             } catch (e) { console.error("[wa-status] no se pudo guardar:", e); }
+
+            // Meta acepta el envio y el fallo llega despues por webhook, asi que
+            // la etapa ya avanzo. La retrocedemos para que el proximo run
+            // reintente — util con 131049, que es un limite temporal por usuario.
+            // Tope de 3 intentos para no reintentar en loop un numero muerto.
+            try {
+              if (st.id) {
+                const [prop] = await db
+                  .select({ id: proposals.id, stage: proposals.whatsappStage, fails: proposals.whatsappFailCount })
+                  .from(proposals)
+                  .where(eq(proposals.whatsappLastWamid, st.id))
+                  .limit(1);
+                if (prop) {
+                  const fails = (prop.fails ?? 0) + 1;
+                  const stage = prop.stage ?? 0;
+                  const patch = fails < 3 && stage > 0
+                    ? { whatsappStage: stage - 1, whatsappFailCount: fails }
+                    : { whatsappFailCount: fails };
+                  await db.update(proposals).set(patch).where(eq(proposals.id, prop.id));
+                  console.log("[wa-status] propuesta", prop.id, "intento", fails, fails < 3 ? "-> reintenta" : "-> no reintenta");
+                }
+              }
+            } catch (e) { console.error("[wa-status] rollback fallido:", e); }
           }
         }
       }

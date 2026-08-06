@@ -279,7 +279,9 @@ export async function GET(req: NextRequest) {
           urlParam: p.confirmToken || "",
         });
         if (r.ok) {
-          await db.update(proposals).set({ whatsappStage: target }).where(eq(proposals.id, p.id));
+          await db.update(proposals)
+            .set({ whatsappStage: target, whatsappLastWamid: r.metaMessageId ?? null })
+            .where(eq(proposals.id, p.id));
           waSent++;
 
           // Registrar en el hilo de Adriana para que el recordatorio se vea
