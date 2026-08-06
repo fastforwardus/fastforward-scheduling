@@ -12,6 +12,7 @@ interface Row {
   clientPhone: string | null;
   clientEmail: string | null;
   repName: string | null;
+  clientLanguage: string;
   serviceInterest: string | null;
   total: number | null;
   refDate: string;
@@ -141,6 +142,9 @@ export default function RecoveryClient({ user }: {
                           {r.total != null && (
                             <span className="text-xs font-semibold" style={{ color: "#C9A84C" }}>USD {r.total.toLocaleString("en-US")}</span>
                           )}
+                          <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#F1F5F9", color: "#475569" }}>
+                            {(r.clientLanguage || "es").toUpperCase()}
+                          </span>
                           {r.noteCount > 0 && (
                             <span className="text-xs flex items-center gap-1" style={{ color: "#16A34A" }}>
                               <Check className="w-3 h-3" /> {r.noteCount}

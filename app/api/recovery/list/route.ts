@@ -26,7 +26,9 @@ export async function GET() {
              p.id::text as source_id,
              coalesce(p.client_name, a.client_name) as client_name,
              a.client_company, a.client_whatsapp as client_phone,
-             p.client_email, u.full_name as rep_name,
+             p.client_email,
+             coalesce(u.full_name, ua.full_name) as rep_name,
+             coalesce(p.lang, a.client_language) as client_language,
              a.service_interest, p.total,
              p.created_at as ref_date,
              n.last_content as last_note, n.last_at as last_note_at,
@@ -34,12 +36,13 @@ export async function GET() {
       from proposals p
       left join appointments a on a.id::text = p.appointment_id
       left join users u on u.id = p.sent_by_id
+      left join users ua on ua.id = a.assigned_to
       left join notas n on n.source_type = 'proposal' and n.source_id = p.id::text
       where p.status = 'pending'
       union all
       select 'appointment', a.id::text,
              a.client_name, a.client_company, a.client_whatsapp, a.client_email,
-             u.full_name, a.service_interest, null,
+             u.full_name, a.client_language, a.service_interest, null,
              a.scheduled_at,
              n.last_content, n.last_at, coalesce(n.n, 0)
       from appointments a
@@ -52,7 +55,7 @@ export async function GET() {
           where p2.appointment_id = a.id::text and p2.status = 'pending'
         )
       order by ref_date desc
-      limit 500
+      limit 2000
     `);
 
     // postgres-js devuelve el array directo; otros drivers, { rows: [...] }.
@@ -70,6 +73,7 @@ export async function GET() {
       clientPhone: (r.client_phone as string) ?? null,
       clientEmail: (r.client_email as string) ?? null,
       repName: (r.rep_name as string) ?? null,
+      clientLanguage: (r.client_language as string) ?? "es",
       serviceInterest: (r.service_interest as string) ?? null,
       total: r.total != null ? Number(r.total) : null,
       refDate: new Date(r.ref_date as string).toISOString(),
