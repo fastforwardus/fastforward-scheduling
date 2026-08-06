@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall } from "lucide-react";
 
 interface SidebarProps {
   user: { fullName: string; email: string; role: string };
@@ -18,6 +18,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard", icon: LayoutDashboard, label: "Inicio", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/appointments", icon: Calendar, label: "Todas las citas", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/propuesta", icon: FileText, label: "Enviar propuesta", roles: ["admin","sales_manager","sales_rep"] },
+    { href: "/dashboard/recovery", icon: PhoneCall, label: "Recupero", roles: ["admin","sales_manager","recovery"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
     { href: "/dashboard/admin/adriana", icon: MessageCircle, label: "Adriana", roles: ["admin"] },
     { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
@@ -55,7 +56,7 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold text-white truncate">{user.fullName}</p>
           <p className="text-xs truncate" style={{ color: "rgba(255,255,255,0.3)" }}>
-            {user.role === "admin" ? "Admin" : user.role === "sales_manager" ? "Manager" : "Sales Rep"}
+            {user.role === "admin" ? "Admin" : user.role === "sales_manager" ? "Manager" : user.role === "recovery" ? "Recupero" : "Sales Rep"}
           </p>
         </div>
       </div>

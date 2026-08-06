@@ -2,7 +2,7 @@ import { pgTable, uuid, text, boolean, integer, numeric, timestamp, time, pgEnum
 import { relations, sql } from "drizzle-orm";
 
 // ── Enums ──
-export const roleEnum = pgEnum("role", ["admin", "sales_manager", "sales_rep"]);
+export const roleEnum = pgEnum("role", ["admin", "sales_manager", "sales_rep", "recovery"]);
 export const platformEnum = pgEnum("platform", ["meet", "zoom", "whatsapp"]);
 export const appointmentStatusEnum = pgEnum("appointment_status", ["pending_assignment", "scheduled", "confirmed", "completed", "no_show", "cancelled", "rescheduled"]);
 export const outcomeEnum = pgEnum("outcome", ["interested", "needs_time", "not_qualified", "proposal_sent", "closed"]);
@@ -323,4 +323,18 @@ export const adrianaHandoffs = pgTable("adriana_handoffs", {
   resolvedAt:       timestamp("resolved_at", { withTimezone: true }),
   resolvedByUserId: uuid("resolved_by_user_id").references(() => users.id),
   createdAt:        timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// ── Notas de recupero ──
+// Tabla propia y no appointment_notes: buena parte de las propuestas son
+// directas (sin cita), asi que el comentario tiene que poder colgar de
+// una propuesta o de una cita indistintamente.
+export const recoveryNotes = pgTable("recovery_notes", {
+  id:         uuid("id").primaryKey().defaultRandom(),
+  sourceType: text("source_type").notNull(),
+  sourceId:   text("source_id").notNull(),
+  userId:     uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  authorName: text("author_name").notNull(),
+  content:    text("content").notNull(),
+  createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
