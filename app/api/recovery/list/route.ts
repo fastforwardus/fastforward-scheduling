@@ -15,6 +15,10 @@ export async function GET() {
       .where(eq(users.id, session.id)).limit(1);
     if (!u?.can) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     soloMio = session.id;
+  } else if (session.role === "sales_manager") {
+    // Los managers gestionan su propio recupero, no el del equipo entero.
+    // Solo admin y el rol recovery dedicado ven la lista completa.
+    soloMio = session.id;
   }
 
   try {

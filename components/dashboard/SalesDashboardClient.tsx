@@ -2,7 +2,7 @@
 import type { Appt } from "@/types/appointments";
 import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send } from "lucide-react";
+import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send, PhoneCall } from "lucide-react";
 import Link from "next/link";
 
 interface Stats {
@@ -44,7 +44,7 @@ function StatCard({ icon: Icon, label, value, color, bg }: { icon: React.Element
 }
 
 export default function SalesDashboardClient({ user }: {
-  user: { id?: string; fullName: string; email: string; role: string; slug?: string };
+  user: { id?: string; fullName: string; email: string; role: string; slug?: string; canRecovery?: boolean };
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [myProposals, setMyProposals] = useState<MyProposal[]>([]); // eslint-disable-line
@@ -248,6 +248,19 @@ export default function SalesDashboardClient({ user }: {
 
         {/* Quick actions */}
         <div className="grid grid-cols-2 gap-3">
+          {user.canRecovery && (
+            <Link href="/dashboard/recovery"
+              className="bg-white rounded-2xl p-5 border flex items-center gap-3 hover:shadow-md transition-all col-span-2"
+              style={{ borderColor: "#C9A84C" }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.15)" }}>
+                <PhoneCall className="w-5 h-5" style={{ color: "#C9A84C" }} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Recupero</p>
+                <p className="text-xs" style={{ color: "#9CA3AF" }}>Tus propuestas sin aceptar y citas sin cerrar</p>
+              </div>
+            </Link>
+          )}
           <Link href="/dashboard/propuesta"
             className="bg-white rounded-2xl p-5 border flex items-center gap-3 hover:shadow-md transition-all"
             style={{ borderColor: "#E5E7EB" }}>
