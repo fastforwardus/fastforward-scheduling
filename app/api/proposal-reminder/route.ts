@@ -7,6 +7,7 @@ import { eq, desc, sql, isNotNull } from "drizzle-orm";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 import { normalizeWhatsAppPhone, isPlausiblePhone, phoneTail } from "@/lib/phone";
 import { getOrCreateConversation, appendMessage, updateConversation } from "@/lib/adriana/db-helpers";
+import { renderTemplate } from "@/lib/whatsapp-templates";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -297,10 +298,17 @@ export async function GET(req: NextRequest) {
           try {
             const conv = await getOrCreateConversation(phone, p.clientName || undefined);
             const tpl = WA_TEMPLATE[target as 1 | 2 | 3 | 4];
+            // Guardamos el texto que efectivamente ve el cliente, no un marcador
+            const textoReal = renderTemplate(
+              tpl,
+              WA_LANG[lang] || "es",
+              [firstName || "", p.proposalNum],
+              p.confirmToken || undefined,
+            );
             await appendMessage({
               conversationId: conv.id,
               role: "assistant",
-              content: [{ type: "text", text: `[recordatorio ${tpl}] Propuesta ${p.proposalNum} — etapa ${target}` }],
+              content: [{ type: "text", text: textoReal }],
               waMessageId: r.metaMessageId ?? null,
             });
             await updateConversation(conv.id, {
