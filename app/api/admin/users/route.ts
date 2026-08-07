@@ -11,6 +11,7 @@ export async function GET() {
   const all = await db.select({
     id: users.id, fullName: users.fullName, email: users.email,
     role: users.role, slug: users.slug, isActive: users.isActive,
+    canRecovery: users.canRecovery,
     whatsappPhone: users.whatsappPhone, googleRefreshToken: users.googleRefreshToken,
     timezone: users.timezone,
   }).from(users).orderBy(users.createdAt);
@@ -46,10 +47,11 @@ export async function PATCH(req: NextRequest) {
   const session = await getSession();
   if (!session || session.role !== "admin") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { id, fullName, email, role, slug, whatsappPhone, isActive, password, timezone } = await req.json();
+  const { id, fullName, email, role, slug, whatsappPhone, isActive, password, timezone, canRecovery } = await req.json();
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
 
   const updates: Record<string, unknown> = { fullName, email, role, slug, whatsappPhone, timezone: timezone || "America/New_York", isActive };
+  if (canRecovery !== undefined) updates.canRecovery = !!canRecovery;
   if (password) updates.passwordHash = hashSync(password, 12);
 
   await db.update(users).set(updates).where(eq(users.id, id));

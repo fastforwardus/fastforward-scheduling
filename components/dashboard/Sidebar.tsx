@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall } from "lucide-react";
 
 interface SidebarProps {
-  user: { fullName: string; email: string; role: string };
+  user: { fullName: string; email: string; role: string; canRecovery?: boolean };
 }
 
 export function Sidebar({ user }: SidebarProps) {
@@ -24,7 +24,11 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
   ];
 
-  const links = allLinks.filter(l => l.roles.includes(user.role));
+  // Recupero tambien se habilita por usuario, no solo por rol
+  const links = allLinks.filter(l =>
+    l.roles.includes(user.role) ||
+    (l.href === "/dashboard/recovery" && !!user.canRecovery)
+  );
 
   const NavLinks = () => (
     <nav className="flex-1 px-3 py-4 space-y-1">

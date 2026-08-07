@@ -28,6 +28,7 @@ export const users = pgTable("users", {
   timezone: text("timezone").default("America/New_York"),
   availabilityTimezone: text("availability_timezone"),
   whatsappPhone: text("whatsapp_phone"),
+  canRecovery: boolean("can_recovery").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
 });

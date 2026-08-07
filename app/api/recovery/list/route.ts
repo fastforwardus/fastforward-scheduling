@@ -2,13 +2,20 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
+import { users } from "@/db/schema";
 import { getSession } from "@/lib/session";
 
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.role === "sales_rep") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  let soloMio: string | null = null;
+  if (session.role === "sales_rep") {
+    const [u] = await db.select({ can: users.canRecovery }).from(users)
+      .where(eq(users.id, session.id)).limit(1);
+    if (!u?.can) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    soloMio = session.id;
+  }
 
   try {
     // Universo 1: propuestas enviadas y no aceptadas.
@@ -39,6 +46,7 @@ export async function GET() {
       left join users ua on ua.id = a.assigned_to
       left join notas n on n.source_type = 'proposal' and n.source_id = p.id::text
       where p.status = 'pending'
+        and (${soloMio}::uuid is null or p.sent_by_id = ${soloMio}::uuid)
       union all
       select 'appointment', a.id::text,
              a.client_name, a.client_company, a.client_whatsapp, a.client_email,
@@ -54,6 +62,7 @@ export async function GET() {
           select 1 from proposals p2
           where p2.appointment_id = a.id::text and p2.status = 'pending'
         )
+        and (${soloMio}::uuid is null or a.assigned_to = ${soloMio}::uuid)
       order by ref_date desc
       limit 2000
     `);

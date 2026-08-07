@@ -9,7 +9,7 @@ import { Users, BarChart2, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronU
 
 interface User {
   id: string; fullName: string; email: string; role: string;
-  slug: string | null; isActive: boolean; whatsappPhone: string | null;
+  slug: string | null; isActive: boolean; whatsappPhone: string | null; canRecovery?: boolean;
   googleRefreshToken: string | null;
 }
 
@@ -128,7 +128,7 @@ function AvailabilityEditor({ userId }: { userId: string }) {
 function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", timezone: (user as { timezone?: string }).timezone || "America/New_York", isActive: user.isActive, password: "" });
+  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", timezone: (user as { timezone?: string }).timezone || "America/New_York", isActive: user.isActive, canRecovery: !!user.canRecovery, password: "" });
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -199,6 +199,19 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                       onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
                   </div>
                 ))}
+                <div className="col-span-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.canRecovery}
+                      onChange={e => setForm(prev => ({ ...prev, canRecovery: e.target.checked }))}
+                      className="w-4 h-4" style={{ accentColor: "#27295C" }} />
+                    <span className="text-sm" style={{ color: "#27295C" }}>
+                      Acceso a Recupero
+                      <span className="block text-xs" style={{ color: "#9CA3AF" }}>
+                        Solo ve sus propias propuestas y citas. Debe volver a iniciar sesion para que aparezca en el menu.
+                      </span>
+                    </span>
+                  </label>
+                </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Rol</label>
                   <select value={form.role} onChange={e => setForm(prev => ({ ...prev, role: e.target.value }))}

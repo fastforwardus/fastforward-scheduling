@@ -8,7 +8,7 @@ export async function getSession() {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as { id: string; email: string; fullName: string; role: string; slug: string };
+    return payload as { id: string; email: string; fullName: string; role: string; slug: string; canRecovery?: boolean };
   } catch {
     return null;
   }
