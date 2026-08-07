@@ -353,3 +353,19 @@ export const proposalEvents = pgTable("proposal_events", {
   detail:     text("detail"),
   createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// ── Registro de llamadas ──
+// sourceType/sourceId espejan recovery_notes para poder cruzar la llamada
+// con la propuesta o cita que la origino.
+export const callLogs = pgTable("call_logs", {
+  id:         uuid("id").primaryKey().defaultRandom(),
+  callSid:    text("call_sid").unique(),
+  sourceType: text("source_type"),
+  sourceId:   text("source_id"),
+  userId:     uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+  userName:   text("user_name"),
+  toPhone:    text("to_phone").notNull(),
+  status:     text("status"),
+  durationSec: integer("duration_sec"),
+  createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});

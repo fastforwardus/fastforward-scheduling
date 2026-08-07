@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
-import { RefreshCw, MessageCircle, Search, Check } from "lucide-react";
+import { RefreshCw, MessageCircle, Search, Check, Phone, PhoneOff } from "lucide-react";
 
 interface Row {
   sourceType: "proposal" | "appointment";
@@ -22,7 +22,7 @@ interface Row {
 }
 
 export default function RecoveryClient({ user }: {
-  user: { fullName: string; email: string; role: string };
+  user: { id: string; fullName: string; email: string; role: string };
 }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +31,54 @@ export default function RecoveryClient({ user }: {
   const [abierta, setAbierta] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [guardando, setGuardando] = useState(false);
+
+  // Llamadas: el SDK se carga solo si el flag esta activo. Sin VOICE_CALLS_ENABLED
+  // el token devuelve 503 y el boton no aparece.
+  const [voiceReady, setVoiceReady] = useState(false);
+  const [enLlamada, setEnLlamada] = useState<string | null>(null);
+  const deviceRef = useRef<{ connect: (o: unknown) => Promise<{ on: (e: string, cb: () => void) => void; disconnect: () => void }> } | null>(null);
+  const connRef = useRef<{ disconnect: () => void } | null>(null);
+
+  useEffect(() => {
+    let cancelado = false;
+    (async () => {
+      try {
+        const r = await fetch("/api/voice/token");
+        if (!r.ok) return;
+        const d = await r.json();
+        if (!d.token || cancelado) return;
+        const { Device } = await import("@twilio/voice-sdk");
+        if (cancelado) return;
+        deviceRef.current = new Device(d.token, { logLevel: 1 }) as unknown as typeof deviceRef.current;
+        setVoiceReady(true);
+      } catch { /* sin llamadas */ }
+    })();
+    return () => { cancelado = true; };
+  }, []);
+
+  async function llamar(r: Row) {
+    if (!deviceRef.current || !r.clientPhone) return;
+    const key = r.sourceType + ":" + r.sourceId;
+    if (enLlamada) { connRef.current?.disconnect(); return; }
+    try {
+      setEnLlamada(key);
+      const conn = await deviceRef.current.connect({
+        params: {
+          To: r.clientPhone.replace(/[^\d+]/g, ""),
+          sourceType: r.sourceType,
+          sourceId: r.sourceId,
+          userId: user.id,
+          userName: user.fullName,
+        },
+      });
+      connRef.current = conn;
+      conn.on("disconnect", () => { setEnLlamada(null); connRef.current = null; cargar(); });
+      conn.on("error", () => { setEnLlamada(null); connRef.current = null; });
+    } catch {
+      setEnLlamada(null);
+      alert("No se pudo iniciar la llamada");
+    }
+  }
 
   async function cargar() {
     setLoading(true);
@@ -174,6 +222,19 @@ export default function RecoveryClient({ user }: {
                         <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{fmtFecha(r.refDate)}</p>
                       </div>
 
+                      {voiceReady && r.clientPhone && (
+                        <button onClick={() => llamar(r)}
+                          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold self-start"
+                          style={{
+                            background: enLlamada === key ? "#FEE2E2" : "#27295C",
+                            color: enLlamada === key ? "#991B1B" : "white",
+                            border: "1px solid transparent",
+                          }}>
+                          {enLlamada === key
+                            ? <><PhoneOff className="w-3.5 h-3.5" /> Colgar</>
+                            : <><Phone className="w-3.5 h-3.5" /> Llamar</>}
+                        </button>
+                      )}
                       <button onClick={() => { setAbierta(abierto ? null : key); setDraft(""); }}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold self-start"
                         style={{ background: "white", border: "1px solid #E5E7EB", color: "#374151" }}>
