@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield } from "lucide-react";
 
 interface SidebarProps {
   user: { fullName: string; email: string; role: string; canRecovery?: boolean };
@@ -20,6 +20,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/propuesta", icon: FileText, label: "Enviar propuesta", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/recovery", icon: PhoneCall, label: "Recupero", roles: ["admin","sales_manager","recovery"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
+    { href: "/dashboard/admin", icon: Shield, label: "Administracion", roles: ["admin"] },
     { href: "/dashboard/admin/adriana", icon: MessageCircle, label: "Adriana", roles: ["admin"] },
     { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
   ];
