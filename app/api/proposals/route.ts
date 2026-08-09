@@ -114,6 +114,27 @@ export async function POST(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
 
   // Save proposal to DB
+  // Guard de idempotencia: misma cita + mismo total en los ultimos 2 min.
+  // Un rep genero 45 propuestas identicas en 20 minutos clickeando Enviar.
+  {
+    const { and: andG, eq: eqG, gte: gteG } = await import("drizzle-orm");
+    const dosMin = new Date(Date.now() - 2 * 60 * 1000);
+    const apptRef = appointmentId || null;
+    if (apptRef) {
+      const [dup] = await db.select({ id: proposals.id, num: proposals.proposalNum })
+        .from(proposals)
+        .where(andG(
+          eqG(proposals.appointmentId, apptRef),
+          eqG(proposals.total, total),
+          gteG(proposals.createdAt, dosMin),
+        )).limit(1);
+      if (dup) {
+        console.log("Propuesta duplicada evitada:", dup.num);
+        return NextResponse.json({ ok: true, duplicated: true, proposalNum: dup.num });
+      }
+    }
+  }
+
   await db.insert(proposals).values({
     appointmentId: appointmentId || "direct-" + randomBytes(8).toString("hex"),
     proposalNum,
