@@ -255,6 +255,7 @@ export const proposals = pgTable("proposals", {
   whatsappStage: integer("whatsapp_stage").default(0),
   whatsappLastWamid: text("whatsapp_last_wamid"),
   whatsappFailCount: integer("whatsapp_fail_count").default(0),
+  whatsappLastSentAt: timestamp("whatsapp_last_sent_at", { withTimezone: true }),
   invoiceSentAt: timestamp("invoice_sent_at"),
   clientAddress:  text("client_address"),
   sentById:       uuid("sent_by_id").references(() => users.id),

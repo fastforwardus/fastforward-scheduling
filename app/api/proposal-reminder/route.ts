@@ -18,6 +18,9 @@ const BOOK_URL = "https://ffus.link/Video";
 // Activar con: vercel env add WHATSAPP_REMINDERS_ENABLED  (valor: true)
 const WA_ENABLED = process.env.WHATSAPP_REMINDERS_ENABLED === "true";
 const WA_DAILY_CAP = 30;
+// Un cliente con varias propuestas pendientes recibia un mensaje por dia,
+// una por propuesta. El dedupe por telefono solo cubria la misma corrida.
+const WA_COOLDOWN_DIAS = 7;
 
 // Meta usa pt_BR; nuestro enum guarda "pt"
 const WA_LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
@@ -220,6 +223,22 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Telefonos que ya recibieron un recordatorio en la ventana de enfriamiento
+  const enfriamiento = new Set<string>();
+  if (WA_ENABLED) {
+    const desde = new Date(Date.now() - WA_COOLDOWN_DIAS * 86400000);
+    const recientes = await db
+      .select({ phone: appointments.clientWhatsapp })
+      .from(proposals)
+      .leftJoin(appointments, sql`${appointments.id}::text = ${proposals.appointmentId}`)
+      .where(sql`${proposals.whatsappLastSentAt} >= ${desde}`);
+    for (const r of recientes) {
+      if (!r.phone) continue;
+      enfriamiento.add(normalizeWhatsAppPhone(r.phone));
+      enfriamiento.add(phoneTail(r.phone));
+    }
+  }
+
   const seenEmails = new Set<string>();
   const seenPhones = new Set<string>();
   let sent = 0;
@@ -274,7 +293,8 @@ export async function GET(req: NextRequest) {
     if (WA_ENABLED && p.clientPhone && target > waCurrent && waSent < WA_DAILY_CAP) {
       const phone = normalizeWhatsAppPhone(p.clientPhone);
       const baja = optedOut.has(phone) || optedOut.has(phoneTail(phone));
-      if (isPlausiblePhone(phone) && !seenPhones.has(phone) && !baja) {
+      const enfriando = enfriamiento.has(phone) || enfriamiento.has(phoneTail(phone));
+      if (isPlausiblePhone(phone) && !seenPhones.has(phone) && !baja && !enfriando) {
         seenPhones.add(phone);
         const r = await sendWhatsAppTemplate({
           toPhone: phone,
@@ -285,13 +305,15 @@ export async function GET(req: NextRequest) {
         });
         if (r.ok) {
           await db.update(proposals)
-            .set({ whatsappStage: target, whatsappLastWamid: r.metaMessageId ?? null })
+            .set({ whatsappStage: target, whatsappLastWamid: r.metaMessageId ?? null, whatsappLastSentAt: new Date() })
             .where(eq(proposals.id, p.id));
           await db.insert(proposalEvents).values({
             proposalId: p.id, kind: "reminder", channel: "whatsapp",
             detail: `Etapa ${target} — ${WA_TEMPLATE[target as 1 | 2 | 3 | 4]} (${WA_LANG[lang] || "es"})`,
           }).catch(() => {});
           waSent++;
+          enfriamiento.add(phone);
+          enfriamiento.add(phoneTail(phone));
 
           // Registrar en el hilo de Adriana para que el recordatorio se vea
           // en el panel y la respuesta del cliente caiga en la misma conversacion.
