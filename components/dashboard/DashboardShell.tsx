@@ -42,6 +42,9 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
   const [emailDraft, setEmailDraft] = useState(appt.clientEmail);
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingLang, setSavingLang] = useState(false);
+  const [editPhone, setEditPhone] = useState(false);
+  const [phoneDraft, setPhoneDraft] = useState(appt.clientWhatsapp);
+  const [savingPhone, setSavingPhone] = useState(false);
   const now = new Date();
   const apptTime = new Date(appt.scheduledAt);
   const minutesPast = (now.getTime() - apptTime.getTime()) / 60000;
@@ -181,8 +184,50 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                       })}
                     </div>
                   </div>
+                  <div className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>
+                    <span className="text-xs" style={{ color: "#9CA3AF" }}>WhatsApp</span>
+                    {editPhone ? (
+                      <div className="flex items-center gap-1">
+                        <input type="tel" value={phoneDraft} autoFocus
+                          onChange={e => setPhoneDraft(e.target.value)}
+                          onKeyDown={e => { if (e.key === "Escape") { setEditPhone(false); setPhoneDraft(appt.clientWhatsapp); } }}
+                          placeholder="Con codigo de pais"
+                          className="text-xs px-2 py-1 rounded-md border flex-1 min-w-0"
+                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                        <button disabled={savingPhone}
+                          onClick={async () => {
+                            setSavingPhone(true);
+                            const res = await fetch("/api/appointments/update-contact", {
+                              method: "POST", headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ appointmentId: appt.id, clientWhatsapp: phoneDraft }),
+                            });
+                            setSavingPhone(false);
+                            if (res.ok) { setEditPhone(false); onRefresh(); }
+                            else { const d = await res.json().catch(() => ({})); alert(d.message || d.error || "No se pudo actualizar"); }
+                          }}
+                          className="p-1 rounded-md flex-shrink-0" style={{ background: "rgba(34,197,94,0.12)" }} aria-label="Guardar">
+                          <Check className="w-3 h-3" style={{ color: "#16A34A" }} />
+                        </button>
+                        <button onClick={() => { setEditPhone(false); setPhoneDraft(appt.clientWhatsapp); }}
+                          className="p-1 rounded-md flex-shrink-0" style={{ background: "#F3F4F6" }} aria-label="Cancelar">
+                          <X className="w-3 h-3" style={{ color: "#6B7280" }} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="text-xs font-medium truncate" style={{ color: "#374151" }}>{appt.clientWhatsapp}</span>
+                        {appt.phoneVerified === false && (
+                          <span className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+                            style={{ background: "#FEE2E2", color: "#991B1B" }}>sin verificar</span>
+                        )}
+                        <button onClick={() => { setPhoneDraft(appt.clientWhatsapp); setEditPhone(true); }}
+                          className="flex-shrink-0 opacity-40 hover:opacity-100 transition-opacity" aria-label="Editar telefono">
+                          <Pencil className="w-3 h-3" style={{ color: "#6B7280" }} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   {[
-                    { label: "WhatsApp", value: appt.clientWhatsapp, accent: false },
                     { label: "Plataforma", value: appt.platform === "meet" ? "Google Meet" : appt.platform === "zoom" ? "Zoom" : "WhatsApp", accent: false },
                   ].map(item => (
                     <div key={item.label} className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>

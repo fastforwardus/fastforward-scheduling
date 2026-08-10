@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
         clientWhatsapp: appointments.clientWhatsapp,
         clientTimezone: appointments.clientTimezone,
         clientLanguage: appointments.clientLanguage,
+        phoneVerified: appointments.phoneVerified,
         serviceInterest: appointments.serviceInterest,
         platform: appointments.platform,
         scheduledAt: appointments.scheduledAt,

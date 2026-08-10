@@ -5,13 +5,15 @@ import { db } from "@/db";
 import { appointments, clientProfiles, proposals } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { getSession } from "@/lib/session";
+import { normalizeWhatsAppPhone } from "@/lib/phone";
+import { validarTelefono } from "@/lib/phone-lookup";
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { appointmentId, clientEmail, clientLanguage } = await req.json();
-  if (!appointmentId || (!clientEmail && !clientLanguage)) {
+  const { appointmentId, clientEmail, clientLanguage, clientWhatsapp } = await req.json();
+  if (!appointmentId || (!clientEmail && !clientLanguage && !clientWhatsapp)) {
     return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
   }
 
@@ -33,6 +35,32 @@ export async function POST(req: NextRequest) {
     // Los reps solo pueden editar sus propias citas
     if (session.role === "sales_rep" && appt.assignedTo !== session.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Telefono: aca si se rechaza si Lookups dice que no existe. El rep esta
+    // corrigiendo a proposito y necesita saber si quedo bien, a diferencia del
+    // cliente en el wizard, que se iria ante un error que no sabe resolver.
+    if (clientWhatsapp) {
+      const normalizado = normalizeWhatsAppPhone(String(clientWhatsapp));
+      const chequeo = await validarTelefono(normalizado);
+      if (chequeo.verificado && !chequeo.valido) {
+        return NextResponse.json({
+          error: "PHONE_INVALID",
+          message: `Ese numero no existe (${chequeo.motivo || "invalido"}). Revisa el codigo de pais.`,
+        }, { status: 400 });
+      }
+      const final = chequeo.e164 || normalizado;
+      await db.update(appointments)
+        .set({ clientWhatsapp: final, phoneVerified: chequeo.verificado ? chequeo.valido : null })
+        .where(eq(appointments.id, appointmentId));
+      if (appt.clientEmail) {
+        await db.update(clientProfiles).set({ whatsapp: final })
+          .where(eq(clientProfiles.email, appt.clientEmail.toLowerCase())).catch(() => {});
+      }
+      console.log("Telefono actualizado:", appt.clientWhatsapp, "->", final);
+      if (!clientEmail && !clientLanguage) {
+        return NextResponse.json({ ok: true, phone: final, verificado: chequeo.valido });
+      }
     }
 
     // Idioma: override manual de lo que se adivino al agendar
