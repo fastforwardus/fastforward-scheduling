@@ -73,7 +73,35 @@ export async function POST(req: NextRequest) {
     const payload = JSON.parse(raw);
     const d = payload?.data ?? payload;
     const asunto = String(d?.subject || "");
-    const cuerpo = String(d?.text || d?.plain || "");
+
+    // El payload no siempre trae el cuerpo: segun el caso viene en text, en
+    // html, o hay que pedirlo por la API de receiving con el id del email.
+    let cuerpo = String(d?.text || d?.plain || d?.body || "");
+    if (!cuerpo && d?.html) {
+      cuerpo = String(d.html)
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&");
+    }
+    if (!cuerpo && d?.email_id && process.env.RESEND_API_KEY) {
+      try {
+        const r = await fetch(`https://api.resend.com/emails/receiving/${d.email_id}`, {
+          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+        });
+        if (r.ok) {
+          const full = await r.json();
+          cuerpo = String(full?.text || full?.html || "");
+          if (cuerpo.includes("<")) cuerpo = cuerpo.replace(/<[^>]+>/g, "");
+        } else {
+          console.warn("[web-lead] receiving API respondio", r.status);
+        }
+      } catch (e) { console.error("[web-lead] no se pudo traer el cuerpo:", e); }
+    }
+    if (!cuerpo) {
+      console.warn("[web-lead] sin cuerpo. Campos del payload:", Object.keys(d || {}).join(", "));
+    }
     const para = (Array.isArray(d?.to) ? d.to : [d?.to])
       .map((x: unknown) => String(typeof x === "object" && x ? (x as { address?: string }).address ?? "" : x ?? "").toLowerCase())
       .join(",");
