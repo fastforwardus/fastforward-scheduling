@@ -10,6 +10,7 @@ import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
 import { getSlotCapacity, getAvailableRepIds } from "@/lib/slots";
 import { createMeetEvent } from "@/lib/google";
 import { normalizeWhatsAppPhone } from "@/lib/phone";
+import { validarTelefono } from "@/lib/phone-lookup";
 
 // Owners excluidos de la auto-asignacion: sus leads quedan sin asignar para reparto manual
 const EXCLUDED_AUTO_ASSIGN_EMAILS = ["info@fastfwdus.com"];
@@ -31,7 +32,21 @@ export async function POST(req: NextRequest) {
     }
 
     // Normalizar a E.164 sin "+" (AR necesita el 9, BR el noveno digito, MX sin el 1)
-    const cleanPhone = normalizeWhatsAppPhone(clientWhatsapp);
+    let cleanPhone = normalizeWhatsAppPhone(clientWhatsapp);
+
+    // Verificar contra Twilio Lookups antes de crear la cita. Va fuera de la
+    // transaccion porque es una llamada de red. Si Lookups no responde se
+    // deja pasar: perder una reserva real es peor que guardar un numero dudoso.
+    const chequeo = await validarTelefono(cleanPhone);
+    if (!chequeo.valido) {
+      console.warn("Telefono rechazado:", clientWhatsapp, "->", cleanPhone, chequeo.motivo);
+      return NextResponse.json(
+        { error: "PHONE_INVALID", message: "El numero de WhatsApp no parece valido. Revisalo por favor." },
+        { status: 400 },
+      );
+    }
+    // Lookups devuelve el E.164 canonico, mas confiable que nuestra heuristica
+    if (chequeo.e164) cleanPhone = chequeo.e164;
 
     // Detectar idioma por código de país como fallback
     const ptCodes = ["55", "351"];

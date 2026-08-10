@@ -223,6 +223,9 @@ export default function BookWizard({
       const data = await res.json();
       if (data.ok) {
         setConfirmed({ appointmentId: data.appointmentId, isPending: data.isPendingAssignment });
+      } else if (data.error === "PHONE_INVALID") {
+        alert(w.language === "en" ? "That WhatsApp number doesn't look valid. Please check it." : w.language === "pt" ? "Esse numero de WhatsApp nao parece valido. Por favor verifique." : "Ese numero de WhatsApp no parece valido. Por favor revisalo.");
+        w.setStep(3);
       } else if (res.status === 409 || data.error === "SLOT_FULL") {
         // El slot se lleno entre el listado y el confirm: volver a elegir horario
         alert(w.language === "en" ? "That time slot was just taken. Please choose another one." : w.language === "pt" ? "Esse horário acabou de ser ocupado. Por favor escolha outro." : "Ese horario acaba de ocuparse. Por favor elegí otro.");
