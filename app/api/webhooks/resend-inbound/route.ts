@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "node:crypto";
 import { db } from "@/db";
 import { webLeads } from "@/db/schema";
 import { sql } from "drizzle-orm";
@@ -14,6 +15,37 @@ const ENABLED = process.env.WEB_LEAD_WHATSAPP_ENABLED === "true";
 // formulario, las respuestas a fdareg@, a leads@reply, etc. Filtramos por
 // destinatario y asunto para procesar solo los del formulario web.
 const BUZON = "leads@istoilrune.resend.app";
+
+/**
+ * Firma estilo Svix, que es lo que usa Resend. Sin esto el endpoint es
+ * publico: cualquiera podria disparar WhatsApps a numeros arbitrarios
+ * desde nuestro numero de negocio.
+ */
+function verificarFirma(raw: string, headers: Headers): boolean {
+  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!secret) return true; // sin secreto configurado, no bloqueamos
+
+  const id = headers.get("svix-id") || headers.get("webhook-id");
+  const ts = headers.get("svix-timestamp") || headers.get("webhook-timestamp");
+  const sig = headers.get("svix-signature") || headers.get("webhook-signature");
+  if (!id || !ts || !sig) return false;
+
+  // Rechazar reenvios viejos (mas de 5 minutos)
+  const edad = Math.abs(Date.now() / 1000 - Number(ts));
+  if (!Number.isFinite(edad) || edad > 300) return false;
+
+  const clave = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
+  const esperada = crypto.createHmac("sha256", clave)
+    .update(`${id}.${ts}.${raw}`).digest("base64");
+
+  // La cabecera trae una o varias firmas, con formato "v1,<firma>"
+  return sig.split(" ").some((parte) => {
+    const val = parte.includes(",") ? parte.split(",")[1] : parte;
+    try {
+      return crypto.timingSafeEqual(Buffer.from(val), Buffer.from(esperada));
+    } catch { return false; }
+  });
+}
 const CAP_DIARIO = 12;
 const TPL = "contacto_web_seguimiento";
 const LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
@@ -33,7 +65,12 @@ function idiomaDe(v: string): "es" | "en" | "pt" {
 
 export async function POST(req: NextRequest) {
   try {
-    const payload = await req.json();
+    const raw = await req.text();
+    if (!verificarFirma(raw, req.headers)) {
+      console.warn("[web-lead] firma invalida — request descartado");
+      return NextResponse.json({ error: "firma invalida" }, { status: 401 });
+    }
+    const payload = JSON.parse(raw);
     const d = payload?.data ?? payload;
     const asunto = String(d?.subject || "");
     const cuerpo = String(d?.text || d?.plain || "");
