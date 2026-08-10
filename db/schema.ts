@@ -376,3 +376,22 @@ export const callLogs = pgTable("call_logs", {
   followUpDone: boolean("follow_up_done").default(false).notNull(),
   createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// ── Leads del formulario web ──
+// Llegan por email a Resend, que los reenvia a nuestro webhook. Se guardan
+// para deduplicar y para saber a quien ya se le escribio por WhatsApp.
+export const webLeads = pgTable("web_leads", {
+  id:         uuid("id").primaryKey().defaultRandom(),
+  nombre:     text("nombre"),
+  email:      text("email"),
+  telefono:   text("telefono"),
+  telefonoE164: text("telefono_e164"),
+  empresa:    text("empresa"),
+  servicio:   text("servicio"),
+  idioma:     text("idioma"),
+  mensaje:    text("mensaje"),
+  urlOrigen:  text("url_origen"),
+  waEnviado:  boolean("wa_enviado").default(false).notNull(),
+  waMotivo:   text("wa_motivo"),
+  createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
