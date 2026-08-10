@@ -8,6 +8,11 @@ export const MIAMI = "America/New_York";
 export const SLOT_DURATION = 30;
 export const DAYS_AHEAD = 21;
 export const MIN_LEAD_MINUTES = 120;
+// Franja razonable en hora LOCAL DEL CLIENTE, no de Miami. Con Emiliano
+// atendiendo desde Bari el pool arranca 2 AM Miami: eso es 8 AM en Madrid
+// (bien) pero 2 AM en Nueva York (absurdo). Filtramos por donde esta el cliente.
+export const HORA_MIN_CLIENTE = 7;
+export const HORA_MAX_CLIENTE = 21;
 
 export interface AvailableSlot {
   utc: string;
@@ -122,6 +127,10 @@ export async function generateAvailableSlots(
 
     // Feriados se evaluan por fecha de Miami, no por fecha UTC
     if (holidayDates.has(formatInTimeZone(when, MIAMI, "yyyy-MM-dd"))) continue;
+
+    // Nada de madrugada para el cliente, sin importar quien lo atienda
+    const horaLocal = Number(formatInTimeZone(when, clientTz, "H"));
+    if (horaLocal < HORA_MIN_CLIENTE || horaLocal >= HORA_MAX_CLIENTE) continue;
 
     slots.push({
       utc: iso,
