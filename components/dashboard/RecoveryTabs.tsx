@@ -8,6 +8,7 @@ export function RecoveryTabs() {
   const tabs = [
     { href: "/dashboard/recovery", label: "Leads para contactar" },
     { href: "/dashboard/recovery/calls", label: "Llamados" },
+    { href: "/dashboard/recovery/metrics", label: "Metricas" },
   ];
   return (
     <div className="flex gap-1 mb-5" style={{ borderBottom: "1px solid #E5E7EB" }}>
