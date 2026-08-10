@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RefreshCw, MessageCircle, Search, Check, Phone, PhoneOff } from "lucide-react";
+import { RecoveryTabs } from "@/components/dashboard/RecoveryTabs";
 
 interface Row {
   sourceType: "proposal" | "appointment";
@@ -137,6 +138,8 @@ export default function RecoveryClient({ user }: {
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} style={{ color: "#6B7280" }} />
             </button>
           </div>
+
+          <RecoveryTabs />
 
           <div className="flex gap-3 mb-5 flex-wrap items-center">
             <div className="relative flex-1 min-w-[240px]">

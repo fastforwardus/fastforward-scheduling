@@ -369,5 +369,9 @@ export const callLogs = pgTable("call_logs", {
   toPhone:    text("to_phone").notNull(),
   status:     text("status"),
   durationSec: integer("duration_sec"),
+  outcome:     text("outcome"),
+  outcomeNote: text("outcome_note"),
+  followUpAt:  timestamp("follow_up_at", { withTimezone: true }),
+  followUpDone: boolean("follow_up_done").default(false).notNull(),
   createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

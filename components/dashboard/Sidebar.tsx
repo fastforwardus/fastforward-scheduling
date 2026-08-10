@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ReminderBell } from "@/components/dashboard/ReminderBell";
 import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield } from "lucide-react";
 
 interface SidebarProps {
@@ -32,7 +33,8 @@ export function Sidebar({ user }: SidebarProps) {
   );
 
   const NavLinks = () => (
-    <nav className="flex-1 px-3 py-4 space-y-1">
+    <nav className="flex-1 px-3 py-4 space-y-1 flex flex-col">
+      <div className="order-last pt-3"><ReminderBell /></div>
       {links.map((link) => {
         const active = pathname === link.href;
         return (
