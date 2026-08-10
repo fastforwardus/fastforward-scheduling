@@ -131,7 +131,7 @@ export default function CallsClient({ user }: {
                 color: soloPendientes ? "white" : "#6B7280",
                 border: `1px solid ${soloPendientes ? "#27295C" : "#E5E7EB"}`,
               }}>
-              Falta resultado
+              Pendientes
             </button>
             <span className="text-xs" style={{ color: "#9CA3AF" }}>{filtradas.length} de {calls.length}</span>
           </div>
@@ -165,7 +165,7 @@ export default function CallsClient({ user }: {
                           {c.followUpAt && !c.followUpDone && (
                             <span className="text-xs px-2 py-0.5 rounded-md flex items-center gap-1"
                               style={{ background: "rgba(201,168,76,0.14)", color: "#92400E" }}>
-                              <CalendarClock className="w-3 h-3" /> {fmt(c.followUpAt)}
+                              <CalendarClock className="w-3 h-3" /> Volver a llamar: {fmt(c.followUpAt)}
                             </span>
                           )}
                         </div>
