@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import twilio from "twilio";
 import { db } from "@/db";
 import { callLogs } from "@/db/schema";
+import { normalizeWhatsAppPhone, isPlausiblePhone } from "@/lib/phone";
 
 // Twilio pega aca cuando el navegador inicia la llamada. Devuelve el TwiML
 // que marca al lead. No usa getSession: la request viene de Twilio, no del
@@ -20,11 +21,14 @@ export async function POST(req: NextRequest) {
   const VoiceResponse = twilio.twiml.VoiceResponse;
   const twiml = new VoiceResponse();
 
-  const clean = to.replace(/[^\d+]/g, "");
-  if (!clean || clean.replace(/\D/g, "").length < 8) {
-    twiml.say({ language: "es-MX" }, "Numero invalido.");
+  // Sin normalizar, los moviles argentinos salen sin el 9 y Twilio los rutea
+  // a un fijo inexistente: la llamada falla siempre.
+  const clean = normalizeWhatsAppPhone(to);
+  if (!isPlausiblePhone(clean)) {
+    console.warn("[voice] numero invalido:", to, "->", clean);
+    twiml.say({ language: "es-MX" }, "El numero del contacto no es valido.");
   } else {
-    const target = clean.startsWith("+") ? clean : "+" + clean.replace(/\D/g, "");
+    const target = "+" + clean;
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
     const dial = twiml.dial({
       callerId: process.env.TWILIO_CALLER_ID,
