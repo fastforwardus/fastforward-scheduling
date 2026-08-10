@@ -4,6 +4,9 @@ import { useEffect, useState, useMemo } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { RecoveryTabs } from "@/components/dashboard/RecoveryTabs";
 import { RefreshCw, Search, Clock, Check, CalendarClock } from "lucide-react";
+import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
+
+const MIAMI = "America/New_York";
 
 interface Call {
   id: string;
@@ -66,7 +69,12 @@ export default function CallsClient({ user }: {
   const filtradas = useMemo(() => {
     const t = q.toLowerCase().trim();
     return calls.filter(c => {
-      if (soloPendientes && c.outcome) return false;
+      // Sigue pendiente si falta el outcome o si tiene un recordatorio sin cumplir:
+      // aunque ya haya resultado cargado, la gestion no termino.
+      if (soloPendientes) {
+        const pendiente = !c.outcome || (!!c.followUpAt && !c.followUpDone);
+        if (!pendiente) return false;
+      }
       if (!t) return true;
       return [c.clientName, c.clientCompany, c.toPhone, c.userName, c.proposalNum]
         .some(v => (v || "").toLowerCase().includes(t));
@@ -187,7 +195,7 @@ export default function CallsClient({ user }: {
                       <button onClick={() => {
                           setAbierta(abierto ? null : c.id);
                           setDraft(c.outcomeNote || "");
-                          setFecha(c.followUpAt ? new Date(c.followUpAt).toISOString().slice(0, 16) : "");
+                          setFecha(c.followUpAt ? formatInTimeZone(new Date(c.followUpAt), MIAMI, "yyyy-MM-dd'T'HH:mm") : "");
                         }}
                         className="px-3 py-2 rounded-lg text-xs font-semibold self-start"
                         style={{ background: "white", border: "1px solid #E5E7EB", color: "#374151" }}>
@@ -207,7 +215,7 @@ export default function CallsClient({ user }: {
                         <div className="flex gap-1.5 flex-wrap mb-3">
                           {OUTCOMES.map(([k, label, color]) => (
                             <button key={k} disabled={guardando}
-                              onClick={() => guardar(c, { outcome: k, outcomeNote: draft, followUpAt: fecha || null })}
+                              onClick={() => guardar(c, { outcome: k, outcomeNote: draft, followUpAt: fecha ? fromZonedTime(fecha, MIAMI).toISOString() : null })}
                               className="px-3 py-1.5 rounded-lg text-xs font-semibold"
                               style={{
                                 background: c.outcome === k ? color : "white",
@@ -225,11 +233,11 @@ export default function CallsClient({ user }: {
                           style={{ borderColor: "#E5E7EB" }} />
 
                         <div className="flex items-center gap-2 flex-wrap">
-                          <label className="text-xs" style={{ color: "#9CA3AF" }}>Volver a llamar</label>
+                          <label className="text-xs" style={{ color: "#9CA3AF" }}>Volver a llamar <span style={{ color: "#C9A84C" }}>(hora Miami)</span></label>
                           <input type="datetime-local" value={fecha} onChange={e => setFecha(e.target.value)}
                             className="px-2 py-1.5 rounded-lg border text-xs"
                             style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
-                          <button onClick={() => guardar(c, { outcomeNote: draft, followUpAt: fecha || null })}
+                          <button onClick={() => guardar(c, { outcomeNote: draft, followUpAt: fecha ? fromZonedTime(fecha, MIAMI).toISOString() : null })}
                             disabled={guardando}
                             className="px-4 py-1.5 rounded-lg text-xs font-semibold ml-auto"
                             style={{ background: "#27295C", color: "white" }}>
