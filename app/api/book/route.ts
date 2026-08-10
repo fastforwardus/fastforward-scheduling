@@ -37,16 +37,15 @@ export async function POST(req: NextRequest) {
     // Verificar contra Twilio Lookups antes de crear la cita. Va fuera de la
     // transaccion porque es una llamada de red. Si Lookups no responde se
     // deja pasar: perder una reserva real es peor que guardar un numero dudoso.
+    // No se rechaza la reserva: un cliente que elige mal el codigo de pais veria
+    // un error que no sabe corregir y se va. Se marca y el equipo lo confirma.
     const chequeo = await validarTelefono(cleanPhone);
     if (!chequeo.valido) {
-      console.warn("Telefono rechazado:", clientWhatsapp, "->", cleanPhone, chequeo.motivo);
-      return NextResponse.json(
-        { error: "PHONE_INVALID", message: "El numero de WhatsApp no parece valido. Revisalo por favor." },
-        { status: 400 },
-      );
+      console.warn("Telefono dudoso:", clientWhatsapp, "->", cleanPhone, chequeo.motivo);
     }
     // Lookups devuelve el E.164 canonico, mas confiable que nuestra heuristica
     if (chequeo.e164) cleanPhone = chequeo.e164;
+    const phoneVerified = chequeo.verificado ? chequeo.valido : null;
 
     // Detectar idioma por código de país como fallback
     const ptCodes = ["55", "351"];
@@ -146,6 +145,7 @@ export async function POST(req: NextRequest) {
           clientEmail: clientEmail.toLowerCase().trim(),
           clientCompany,
           clientWhatsapp: cleanPhone,
+          phoneVerified,
           clientTimezone: clientTimezone || "America/Argentina/Buenos_Aires",
           clientLanguage: detectedLang as "es" | "en" | "pt",
           serviceInterest,

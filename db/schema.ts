@@ -50,6 +50,7 @@ export const appointments = pgTable("appointments", {
   clientEmail: text("client_email").notNull(),
   clientCompany: text("client_company").notNull(),
   clientWhatsapp: text("client_whatsapp").notNull(),
+  phoneVerified: boolean("phone_verified"),
   clientTimezone: text("client_timezone").notNull(),
   clientLanguage: languageEnum("client_language").default("es").notNull(),
   serviceInterest: text("service_interest"),
