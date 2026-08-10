@@ -11,7 +11,7 @@ export const MIN_LEAD_MINUTES = 120;
 // Franja razonable en hora LOCAL DEL CLIENTE, no de Miami. Con Emiliano
 // atendiendo desde Bari el pool arranca 2 AM Miami: eso es 8 AM en Madrid
 // (bien) pero 2 AM en Nueva York (absurdo). Filtramos por donde esta el cliente.
-export const HORA_MIN_CLIENTE = 7;
+export const HORA_MIN_CLIENTE = 9;
 export const HORA_MAX_CLIENTE = 21;
 
 export interface AvailableSlot {
