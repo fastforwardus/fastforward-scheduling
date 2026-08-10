@@ -133,16 +133,38 @@ export async function POST(req: NextRequest) {
       if (filas.length) return NextResponse.json({ ok: true, ignorado: "duplicado" });
     }
 
-    // El telefono debe traer pais. Lookups lo confirma: sin codigo valido,
-    // no hay forma de saber a que pais pertenece y no se manda nada.
+    // Muchos cargan el numero sin codigo de pais. Se infiere del slug de la
+    // landing (las paginas tienen el pais en la URL) y se valida con Lookups:
+    // si el candidato no es un numero real, no se manda.
+    const PAIS_URL: [RegExp, string][] = [
+      [/mexico|-mx\b/i, "52"], [/colombia|-co\b/i, "57"], [/chile|-cl\b/i, "56"],
+      [/peru|-pe\b/i, "51"], [/argentina|-ar\b/i, "54"], [/ecuador|-ec\b/i, "593"],
+      [/espana|spain|-es\b/i, "34"], [/brasil|brazil|-br\b/i, "55"],
+      [/panama|-pa\b/i, "507"], [/guatemala|-gt\b/i, "502"],
+      [/costa-rica|-cr\b/i, "506"], [/bolivia|-bo\b/i, "591"],
+      [/estados-unidos|usa|-us\b/i, "1"],
+    ];
+
     let e164: string | null = null;
     let motivo: string | null = null;
     const digitos = telefono.replace(/\D/g, "");
-    if (!digitos) motivo = "sin telefono";
-    else {
-      const chk = await validarTelefono(digitos);
-      if (chk.valido && chk.e164) e164 = chk.e164;
-      else motivo = chk.verificado ? "telefono sin pais o invalido" : "no se pudo verificar";
+
+    if (!digitos) {
+      motivo = "sin telefono";
+    } else {
+      const candidatos = [digitos];
+      // Si no arranca con +, probamos anteponiendo el pais de la landing
+      if (!telefono.trim().startsWith("+")) {
+        const pais = PAIS_URL.find(([re]) => re.test(url))?.[1];
+        if (pais && !digitos.startsWith(pais)) candidatos.push(pais + digitos);
+      }
+
+      for (const cand of candidatos) {
+        const chk = await validarTelefono(cand);
+        if (chk.valido && chk.e164) { e164 = chk.e164; break; }
+        if (!chk.verificado) { motivo = "no se pudo verificar"; break; }
+      }
+      if (!e164 && !motivo) motivo = "telefono sin pais o invalido";
     }
 
     let enviado = false;
