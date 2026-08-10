@@ -172,7 +172,12 @@ export default function RecoveryClient({ user }: {
             {loading && rows.length === 0 ? (
               <p className="text-sm text-center py-12" style={{ color: "#9CA3AF" }}>Cargando...</p>
             ) : filtradas.length === 0 ? (
-              <p className="text-sm text-center py-12" style={{ color: "#9CA3AF" }}>Sin resultados</p>
+              <div className="text-center py-12">
+                <p className="text-sm" style={{ color: "#9CA3AF" }}>Sin resultados</p>
+                <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
+                  Los leads que ya llamaste estan en la pestana Llamados
+                </p>
+              </div>
             ) : filtradas.map(r => {
               const key = r.sourceType + ":" + r.sourceId;
               const abierto = abierta === key;

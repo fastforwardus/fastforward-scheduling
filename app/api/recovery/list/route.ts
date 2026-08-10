@@ -51,6 +51,10 @@ export async function GET() {
       left join notas n on n.source_type = 'proposal' and n.source_id = p.id::text
       where p.status = 'pending'
         and (${soloMio}::uuid is null or p.sent_by_id = ${soloMio}::uuid)
+        and not exists (
+          select 1 from call_logs cl
+          where cl.source_type = 'proposal' and cl.source_id = p.id::text
+        )
       union all
       select 'appointment', a.id::text,
              a.client_name, a.client_company, a.client_whatsapp, a.client_email,
@@ -67,6 +71,10 @@ export async function GET() {
           where p2.appointment_id = a.id::text and p2.status = 'pending'
         )
         and (${soloMio}::uuid is null or a.assigned_to = ${soloMio}::uuid)
+        and not exists (
+          select 1 from call_logs cl
+          where cl.source_type = 'appointment' and cl.source_id = a.id::text
+        )
       order by ref_date desc
       limit 2000
     `);

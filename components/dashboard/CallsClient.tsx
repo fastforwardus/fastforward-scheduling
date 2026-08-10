@@ -44,7 +44,8 @@ export default function CallsClient({ user }: {
   const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
-  const [soloPendientes, setSoloPendientes] = useState(false);
+  // Arranca en los que faltan resolver: es la bandeja de trabajo
+  const [soloPendientes, setSoloPendientes] = useState(true);
   const [abierta, setAbierta] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [fecha, setFecha] = useState("");
@@ -122,7 +123,7 @@ export default function CallsClient({ user }: {
                 color: soloPendientes ? "white" : "#6B7280",
                 border: `1px solid ${soloPendientes ? "#27295C" : "#E5E7EB"}`,
               }}>
-              Sin resultado cargado
+              Falta resultado
             </button>
             <span className="text-xs" style={{ color: "#9CA3AF" }}>{filtradas.length} de {calls.length}</span>
           </div>
