@@ -21,6 +21,7 @@ const WA_DAILY_CAP = 30;
 // Un cliente con varias propuestas pendientes recibia un mensaje por dia,
 // una por propuesta. El dedupe por telefono solo cubria la misma corrida.
 const WA_COOLDOWN_DIAS = 7;
+const WA_TPL_RESUMEN = "propuestas_pendientes_resumen";
 
 // Meta usa pt_BR; nuestro enum guarda "pt"
 const WA_LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
@@ -239,6 +240,29 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Agrupado: si un cliente tiene varias propuestas en etapa, se le manda un
+  // solo mensaje de resumen y todas avanzan. Sin esto, el cooldown de 7 dias
+  // hacia que la segunda propuesta esperara una semana para su primer aviso.
+  const grupos = new Map<string, { ids: string[]; total: number; nombre: string; lang: string; etapaMax: number }>();
+  if (WA_ENABLED) {
+    const now2 = Date.now();
+    for (const p of rows) {
+      if (!p.clientPhone) continue;
+      const dias = (now2 - new Date(p.createdAt).getTime()) / 86400000;
+      const t = dias >= 17 ? 4 : dias >= 15 ? 3 : dias >= 9 ? 2 : dias >= 5 ? 1 : 0;
+      if (t === 0 || t <= (p.whatsappStage ?? 0)) continue;
+      const tel = normalizeWhatsAppPhone(p.clientPhone);
+      if (!isPlausiblePhone(tel)) continue;
+      const g = grupos.get(tel) || { ids: [], total: 0, nombre: "", lang: "es", etapaMax: 0 };
+      g.ids.push(p.id);
+      g.total += p.total || 0;
+      if (!g.nombre) g.nombre = (p.clientName || "").split(" ")[0] || "";
+      if (["es", "en", "pt"].includes(p.lang || "")) g.lang = p.lang as string;
+      if (t > g.etapaMax) g.etapaMax = t;
+      grupos.set(tel, g);
+    }
+  }
+
   const seenEmails = new Set<string>();
   const seenPhones = new Set<string>();
   let sent = 0;
@@ -296,17 +320,45 @@ export async function GET(req: NextRequest) {
       const enfriando = enfriamiento.has(phone) || enfriamiento.has(phoneTail(phone));
       if (isPlausiblePhone(phone) && !seenPhones.has(phone) && !baja && !enfriando) {
         seenPhones.add(phone);
-        const r = await sendWhatsAppTemplate({
-          toPhone: phone,
-          templateName: WA_TEMPLATE[target as 1 | 2 | 3 | 4],
-          languageCode: WA_LANG[lang] || "es",
-          bodyParams: [firstName || "", p.proposalNum],
-          urlParam: p.confirmToken || "",
-        });
+        const grupo = grupos.get(phone);
+        const agrupar = !!grupo && grupo.ids.length > 1;
+
+        const r = agrupar
+          ? await sendWhatsAppTemplate({
+              toPhone: phone,
+              templateName: WA_TPL_RESUMEN,
+              languageCode: WA_LANG[lang] || "es",
+              bodyParams: [
+                grupo!.nombre || firstName || "",
+                String(grupo!.ids.length),
+                grupo!.total.toLocaleString("en-US"),
+              ],
+            })
+          : await sendWhatsAppTemplate({
+              toPhone: phone,
+              templateName: WA_TEMPLATE[target as 1 | 2 | 3 | 4],
+              languageCode: WA_LANG[lang] || "es",
+              bodyParams: [firstName || "", p.proposalNum],
+              urlParam: p.confirmToken || "",
+            });
         if (r.ok) {
-          await db.update(proposals)
-            .set({ whatsappStage: target, whatsappLastWamid: r.metaMessageId ?? null, whatsappLastSentAt: new Date() })
-            .where(eq(proposals.id, p.id));
+          // Con resumen, todas las del grupo avanzan: el mensaje las cubre a todas
+          const cubiertas = agrupar ? grupo!.ids : [p.id];
+          for (const pid of cubiertas) {
+            await db.update(proposals)
+              .set({
+                whatsappStage: pid === p.id ? target : grupo!.etapaMax,
+                whatsappLastWamid: pid === p.id ? (r.metaMessageId ?? null) : null,
+                whatsappLastSentAt: new Date(),
+              })
+              .where(eq(proposals.id, pid));
+            if (pid !== p.id) {
+              await db.insert(proposalEvents).values({
+                proposalId: pid, kind: "reminder", channel: "whatsapp",
+                detail: `Cubierta por resumen de ${grupo!.ids.length} propuestas`,
+              }).catch(() => {});
+            }
+          }
           await db.insert(proposalEvents).values({
             proposalId: p.id, kind: "reminder", channel: "whatsapp",
             detail: `Etapa ${target} — ${WA_TEMPLATE[target as 1 | 2 | 3 | 4]} (${WA_LANG[lang] || "es"})`,
@@ -319,14 +371,13 @@ export async function GET(req: NextRequest) {
           // en el panel y la respuesta del cliente caiga en la misma conversacion.
           try {
             const conv = await getOrCreateConversation(phone, p.clientName || undefined);
-            const tpl = WA_TEMPLATE[target as 1 | 2 | 3 | 4];
+            const tpl = agrupar ? WA_TPL_RESUMEN : WA_TEMPLATE[target as 1 | 2 | 3 | 4];
             // Guardamos el texto que efectivamente ve el cliente, no un marcador
-            const textoReal = renderTemplate(
-              tpl,
-              WA_LANG[lang] || "es",
-              [firstName || "", p.proposalNum],
-              p.confirmToken || undefined,
-            );
+            const textoReal = agrupar
+              ? renderTemplate(tpl, WA_LANG[lang] || "es",
+                  [grupo!.nombre || firstName || "", String(grupo!.ids.length), grupo!.total.toLocaleString("en-US")])
+              : renderTemplate(tpl, WA_LANG[lang] || "es",
+                  [firstName || "", p.proposalNum], p.confirmToken || undefined);
             await appendMessage({
               conversationId: conv.id,
               role: "assistant",

@@ -25,6 +25,11 @@ const TEMPLATES: Record<string, Record<Lang, Tpl>> = {
     en: { body: "Hi {{1}}, following up on proposal {{2}}. It is still available and the deadline is approaching. If you want to move ahead or have questions, just reply here.", btn: "View proposal" },
     pt_BR: { body: "Ola {{1}}, escrevo de novo sobre a proposta {{2}}. Continua disponivel e o prazo esta chegando. Se quiser avancar ou tirar duvidas, responda por aqui.", btn: "Ver proposta" },
   },
+  propuestas_pendientes_resumen: {
+    es: { body: "Hola {{1}}, tenes {{2}} propuestas pendientes de confirmacion con FastForward, por un total de USD {{3}}. Si queres revisarlas o tenes alguna duda, respondeme por aca y te ayudo.", btn: "" },
+    en: { body: "Hi {{1}}, you have {{2}} proposals pending confirmation with FastForward, for a total of USD {{3}}. If you want to review them or have any questions, just reply here and I will help you.", btn: "" },
+    pt_BR: { body: "Ola {{1}}, voce tem {{2}} propostas pendentes de confirmacao com a FastForward, num total de USD {{3}}. Se quiser revisa-las ou tiver alguma duvida, responda por aqui que eu ajudo.", btn: "" },
+  },
   propuesta_vencimiento: {
     es: { body: "Hola {{1}}, ultimo aviso: la propuesta {{2}} vence pronto. Si queres asegurar las condiciones actuales, es el momento de confirmarla.", btn: "Confirmar ahora" },
     en: { body: "Hi {{1}}, final notice: proposal {{2}} expires soon. To lock in the current terms, now is the time to confirm it.", btn: "Confirm now" },
