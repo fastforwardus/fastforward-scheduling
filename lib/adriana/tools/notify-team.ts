@@ -22,7 +22,22 @@ const ADMIN_EMAIL    = "info@fastfwdus.com";
 export async function notifyTeam(
   input: NotifyTeamInput,
   ctx: NotifyTeamContext
-): Promise<{ ok: boolean; message: string }> {
+): Promise<{
+ ok: boolean; message: string }> {
+  // Agendar es responsabilidad de Adriana, no del equipo. Si el handoff es por
+  // una cita se rechaza y se le devuelve la instruccion correcta: el modelo
+  // buscaba la vuelta usando reason=other para evitar agendar.
+  const textoHandoff = `${input.reason} ${input.summary || ""}`.toLowerCase();
+  const esCita = /cita|agenda|horario|reuni[oó]n|llamada|turno|meeting|schedul/.test(textoHandoff);
+  const esOtraCosa = /pago|factura|invoice|cancelar|reprogram|reschedul/.test(textoHandoff);
+  if (esCita && !esOtraCosa) {
+    console.warn("[notify_team] handoff por cita rechazado:", input.reason);
+    return {
+      ok: false,
+      message: "NO derives al equipo para agendar. Llama a get_available_slots y create_booking y ofrecele los horarios al cliente vos mismo, ahora.",
+    };
+  }
+
   if (!input.summary?.trim()) {
     return { ok: false, message: "Summary is empty" };
   }
