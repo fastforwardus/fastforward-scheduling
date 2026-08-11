@@ -122,15 +122,18 @@ export async function POST(req: NextRequest) {
     const empresa = campo(cuerpo, "Empresa");
     const url = campo(cuerpo, "URL de la p[aá]gina");
 
-    // Dedupe: mismo email o telefono en las ultimas 24h
-    if (email || telefono) {
+    // Dedupe solo por telefono: es a lo que le mandamos el mensaje. Filtrar
+    // tambien por email bloqueaba personas distintas que comparten direccion
+    // (por ejemplo las de "Ocultar mi correo" de Apple).
+    if (telefono) {
+      const soloDigitos = telefono.replace(/\D/g, "");
       const dup = await db.execute(sql`
         select 1 from web_leads
         where created_at > now() - interval '24 hours'
-          and (email = ${email || null} or telefono = ${telefono || null})
+          and regexp_replace(coalesce(telefono, ''), '[^0-9]', '', 'g') = ${soloDigitos}
         limit 1`);
       const filas = Array.isArray(dup) ? dup : ((dup as { rows?: unknown[] })?.rows ?? []);
-      if (filas.length) return NextResponse.json({ ok: true, ignorado: "duplicado" });
+      if (filas.length) return NextResponse.json({ ok: true, ignorado: "telefono repetido" });
     }
 
     // Muchos cargan el numero sin codigo de pais. Se infiere del slug de la
