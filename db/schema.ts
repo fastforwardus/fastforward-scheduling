@@ -395,3 +395,25 @@ export const webLeads = pgTable("web_leads", {
   waMotivo:   text("wa_motivo"),
   createdAt:  timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// ── Campana de reactivacion ──
+// Leads viejos del formulario web que nunca se contactaron por WhatsApp.
+// Se envia de a tandas chicas con freno por calidad del numero: un pico de
+// reportes aca se lleva puesto a Adriana y a los recordatorios de propuesta.
+export const campanaLeads = pgTable("campana_leads", {
+  id:          uuid("id").primaryKey().defaultRandom(),
+  nombre:      text("nombre"),
+  empresa:     text("empresa"),
+  email:       text("email"),
+  telefonoE164: text("telefono_e164").notNull().unique(),
+  servicio:    text("servicio"),
+  idioma:      text("idioma").default("es"),
+  fechaLead:   timestamp("fecha_lead", { withTimezone: true }),
+  antiguedadMeses: integer("antiguedad_meses"),
+  estado:      text("estado").default("pendiente").notNull(),
+  motivo:      text("motivo"),
+  wamid:       text("wamid"),
+  enviadoAt:   timestamp("enviado_at", { withTimezone: true }),
+  respondioAt: timestamp("respondio_at", { withTimezone: true }),
+  createdAt:   timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});

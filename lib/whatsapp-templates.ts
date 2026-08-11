@@ -35,6 +35,11 @@ const TEMPLATES: Record<string, Record<Lang, Tpl>> = {
     en: { body: "Hi {{1}}, this is Adriana from FastForward. We received your inquiry from our website about {{2}}. If you like, reply here and we can arrange a free call with one of our consultants to review your case.", btn: "" },
     pt_BR: { body: "Ola {{1}}, sou Adriana da FastForward. Recebemos sua consulta pelo nosso site sobre {{2}}. Se quiser, responda por aqui e agendamos uma ligacao sem custo com um de nossos consultores para ver seu caso.", btn: "" },
   },
+  reactivacion_consulta: {
+    es: { body: "Hola {{1}}, soy Adriana de FastForward, la consultora de Miami que ayuda a empresas de Latinoamerica a entrar al mercado de Estados Unidos. Nos escribiste hace un tiempo consultando por {{2}}. Si el proyecto sigue en pie, coordinamos una llamada sin costo con uno de nuestros consultores para ver como esta el tema hoy. Si ya no te interesa, respondeme BAJA y no te escribo mas.", btn: "" },
+    en: { body: "Hi {{1}}, this is Adriana from FastForward, the Miami consultancy that helps companies enter the United States market. You reached out to us a while back asking about {{2}}. If the project is still on, we can set up a free call with one of our consultants to see where things stand. If you are no longer interested, reply STOP and I will not write again.", btn: "" },
+    pt_BR: { body: "Ola {{1}}, sou Adriana da FastForward, a consultoria de Miami que ajuda empresas a entrar no mercado dos Estados Unidos. Voce nos escreveu ha um tempo perguntando sobre {{2}}. Se o projeto continua de pe, podemos agendar uma ligacao sem custo com um de nossos consultores para ver como esta o assunto hoje. Se nao tiver mais interesse, responda BAIXA e nao escrevo mais.", btn: "" },
+  },
   propuesta_vencimiento: {
     es: { body: "Hola {{1}}, ultimo aviso: la propuesta {{2}} vence pronto. Si queres asegurar las condiciones actuales, es el momento de confirmarla.", btn: "Confirmar ahora" },
     en: { body: "Hi {{1}}, final notice: proposal {{2}} expires soon. To lock in the current terms, now is the time to confirm it.", btn: "Confirm now" },
