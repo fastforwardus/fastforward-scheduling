@@ -29,8 +29,12 @@ async function calidadOk(): Promise<{ ok: boolean; rating: string }> {
     );
     const d = await r.json();
     const rating = String(d?.quality_rating || "desconocido");
-    return { ok: rating === "GREEN", rating };
+    // UNKNOWN es ausencia de dato, no una señal mala: la API viene desfasada
+    // respecto del panel de Meta. Solo frenamos ante un problema real.
+    const malo = rating === "YELLOW" || rating === "RED" || rating === "FLAGGED";
+    return { ok: !malo, rating };
   } catch {
+    // Si no se puede consultar, mejor no mandar a ciegas
     return { ok: false, rating: "error al consultar" };
   }
 }
