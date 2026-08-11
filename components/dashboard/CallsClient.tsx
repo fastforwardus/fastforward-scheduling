@@ -47,8 +47,7 @@ export default function CallsClient({ user }: {
   const [calls, setCalls] = useState<Call[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
-  // Arranca en los que faltan resolver: es la bandeja de trabajo
-  const [soloPendientes, setSoloPendientes] = useState(true);
+  const [soloPendientes, setSoloPendientes] = useState(false);
   const [abierta, setAbierta] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [fecha, setFecha] = useState("");
