@@ -413,6 +413,7 @@ export const campanaLeads = pgTable("campana_leads", {
   estado:      text("estado").default("pendiente").notNull(),
   motivo:      text("motivo"),
   wamid:       text("wamid"),
+  variante:    text("variante"),
   enviadoAt:   timestamp("enviado_at", { withTimezone: true }),
   respondioAt: timestamp("respondio_at", { withTimezone: true }),
   createdAt:   timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),

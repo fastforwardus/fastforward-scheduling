@@ -40,6 +40,11 @@ const TEMPLATES: Record<string, Record<Lang, Tpl>> = {
     en: { body: "Hi {{1}}, this is Adriana from FastForward, the Miami consultancy that helps companies enter the United States market. You reached out to us a while back asking about {{2}}. If the project is still on, we can set up a free call with one of our consultants to see where things stand. If you are no longer interested, reply STOP and I will not write again.", btn: "" },
     pt_BR: { body: "Ola {{1}}, sou Adriana da FastForward, a consultoria de Miami que ajuda empresas a entrar no mercado dos Estados Unidos. Voce nos escreveu ha um tempo perguntando sobre {{2}}. Se o projeto continua de pe, podemos agendar uma ligacao sem custo com um de nossos consultores para ver como esta o assunto hoje. Se nao tiver mais interesse, responda BAIXA e nao escrevo mais.", btn: "" },
   },
+  reactivacion_consulta_b: {
+    es: { body: "Hola {{1}}, soy Adriana de FastForward, consultora de Miami especializada en entrada al mercado de Estados Unidos. Hace un tiempo nos consultaste por {{2}}. Una pregunta corta: ¿sigues con ese proyecto? Si me respondes SI, te paso horarios para una llamada sin costo con un consultor esta misma semana.", btn: "" },
+    en: { body: "Hi {{1}}, this is Adriana from FastForward, a Miami consultancy specialized in US market entry. A while back you asked us about {{2}}. Quick question: are you still working on that project? Reply YES and I will send you times for a free call with a consultant this week.", btn: "" },
+    pt_BR: { body: "Ola {{1}}, sou Adriana da FastForward, consultoria de Miami especializada em entrada no mercado dos Estados Unidos. Ha um tempo voce nos consultou sobre {{2}}. Uma pergunta rapida: o projeto continua? Se responder SIM, te envio horarios para uma ligacao sem custo com um consultor ainda esta semana.", btn: "" },
+  },
   propuesta_vencimiento: {
     es: { body: "Hola {{1}}, ultimo aviso: la propuesta {{2}} vence pronto. Si quieres asegurar las condiciones actuales, es el momento de confirmarla.", btn: "Confirmar ahora" },
     en: { body: "Hi {{1}}, final notice: proposal {{2}} expires soon. To lock in the current terms, now is the time to confirm it.", btn: "Confirm now" },

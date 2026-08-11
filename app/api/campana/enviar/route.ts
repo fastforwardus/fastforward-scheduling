@@ -10,7 +10,8 @@ import { getOrCreateConversation, appendMessage, updateConversation } from "@/li
 import { renderTemplate } from "@/lib/whatsapp-templates";
 import { normalizeWhatsAppPhone, phoneTail } from "@/lib/phone";
 
-const TPL = "reactivacion_consulta";
+const TPL_A = "reactivacion_consulta";
+const TPL_B = "reactivacion_consulta_b";
 const LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
 
 /**
@@ -88,19 +89,23 @@ export async function GET(req: NextRequest) {
     const lang = LANG[p.idioma || "es"] || "es";
 
     if (simular) {
-      detalle.push({ tel, nombre, tema, lang, antiguedad: p.antiguedadMeses });
+      detalle.push({ tel, nombre, tema, lang, antiguedad: p.antiguedadMeses, variante: enviados % 2 === 0 ? "A" : "B" });
       enviados++;
       continue;
     }
 
+    // Test A/B alternado: mitad con cada variante, para comparar respuesta
+    const variante = enviados % 2 === 0 ? "A" : "B";
+    const tpl = variante === "A" ? TPL_A : TPL_B;
+
     const r = await sendWhatsAppTemplate({
-      toPhone: tel, templateName: TPL, languageCode: lang,
+      toPhone: tel, templateName: tpl, languageCode: lang,
       bodyParams: [nombre, tema],
     });
 
     if (r.ok) {
       await db.update(campanaLeads).set({
-        estado: "enviado", wamid: r.metaMessageId ?? null, enviadoAt: new Date(), motivo: null,
+        estado: "enviado", wamid: r.metaMessageId ?? null, enviadoAt: new Date(), motivo: null, variante,
       }).where(eq(campanaLeads.id, p.id));
       enviados++;
 
@@ -109,7 +114,7 @@ export async function GET(req: NextRequest) {
         const conv = await getOrCreateConversation(tel, p.nombre || undefined);
         await appendMessage({
           conversationId: conv.id, role: "assistant",
-          content: [{ type: "text", text: renderTemplate(TPL, lang, [nombre, tema]) }],
+          content: [{ type: "text", text: renderTemplate(tpl, lang, [nombre, tema]) }],
           waMessageId: r.metaMessageId ?? null,
         });
         await updateConversation(conv.id, {
