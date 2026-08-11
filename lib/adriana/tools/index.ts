@@ -94,8 +94,8 @@ export const ADRIANA_TOOLS: Anthropic.Tool[] = [
       properties: {
         reason: {
           type: "string",
-          enum: ["second_booking", "payment", "complex_question", "other"],
-          description: "Motivo del handoff: second_booking (quiere otra cita), payment (pago/factura), complex_question (técnica/regulatoria), other.",
+          enum: ["payment", "complex_question", "other"],
+          description: "Motivo del handoff: payment (pago/factura), complex_question (tecnica/regulatoria), other. Si el cliente quiere OTRA cita NO uses esta tool: agendala vos con get_available_slots y create_booking.",
         },
         urgency: {
           type: "string",

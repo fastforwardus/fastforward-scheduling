@@ -5,6 +5,8 @@ import { sendWhatsAppText } from "@/lib/adriana/whatsapp-sender";
 import { Resend } from "resend";
 
 export interface NotifyTeamInput {
+  // second_booking se conserva solo por los handoffs ya guardados;
+  // la tool ya no lo ofrece como opcion.
   reason: "second_booking" | "payment" | "complex_question" | "other";
   urgency: "low" | "normal" | "high";
   summary: string;
