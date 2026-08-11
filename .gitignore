@@ -36,3 +36,8 @@ yarn-error.log*
 next-env.d.ts
 .env.local
 .env.production
+
+# Datos de leads y scripts de carga puntual: no van al repo
+*.xlsx
+ff-importar.js
+ff-resolver.js
