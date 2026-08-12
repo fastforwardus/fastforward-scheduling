@@ -10,8 +10,13 @@ import { getOrCreateConversation, appendMessage, updateConversation } from "@/li
 import { renderTemplate } from "@/lib/whatsapp-templates";
 import { normalizeWhatsAppPhone, phoneTail } from "@/lib/phone";
 
-const TPL_A = "reactivacion_consulta";
-const TPL_B = "reactivacion_consulta_b";
+const TPL_POR_VARIANTE: Record<string, string> = {
+  A: "reactivacion_consulta",
+  B: "reactivacion_consulta_b",
+};
+// La B convirtio el doble que la A (20% vs 10%). Para volver al reparto
+// alternado, cambiar por: enviados % 2 === 0 ? "A" : "B"
+const VARIANTE_ACTIVA = "B";
 const LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
 
 /**
@@ -94,9 +99,10 @@ export async function GET(req: NextRequest) {
       continue;
     }
 
-    // Test A/B alternado: mitad con cada variante, para comparar respuesta
-    const variante = enviados % 2 === 0 ? "A" : "B";
-    const tpl = variante === "A" ? TPL_A : TPL_B;
+    // La B convirtio el doble que la A (20% vs 10%): se manda solo la B.
+    // Para volver al reparto alternado: enviados % 2 === 0 ? "A" : "B"
+    const variante = VARIANTE_ACTIVA;
+    const tpl = TPL_POR_VARIANTE[variante];
 
     const r = await sendWhatsAppTemplate({
       toPhone: tel, templateName: tpl, languageCode: lang,
