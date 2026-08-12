@@ -18,6 +18,9 @@ const TPL_POR_VARIANTE: Record<string, string> = {
 // alternado, cambiar por: enviados % 2 === 0 ? "A" : "B"
 const VARIANTE_ACTIVA = "B";
 const TPL_EXPO = "expo_fancy_food_seguimiento";
+// Idiomas de la plantilla de expo ya aprobados por Meta. Mandar en un idioma
+// no aprobado falla y quema el lead: mejor saltearlo hasta que salga.
+const IDIOMAS_EXPO_LISTOS = ["es", "pt"];
 const LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
 
 /**
@@ -98,6 +101,10 @@ export async function GET(req: NextRequest) {
     // atendio en el stand, que es el gancho real. La generica les diria
     // "nos escribiste por la web", que es falso.
     const esExpo = p.origen === "expo" && !!p.vendedor;
+    if (esExpo && !IDIOMAS_EXPO_LISTOS.includes(p.idioma || "es")) {
+      saltados++;
+      continue;
+    }
     const variante = esExpo ? "EXPO" : VARIANTE_ACTIVA;
     const tpl = esExpo ? TPL_EXPO : TPL_POR_VARIANTE[VARIANTE_ACTIVA];
 
