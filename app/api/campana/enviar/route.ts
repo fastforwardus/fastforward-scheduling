@@ -17,6 +17,7 @@ const TPL_POR_VARIANTE: Record<string, string> = {
 // La B convirtio el doble que la A (20% vs 10%). Para volver al reparto
 // alternado, cambiar por: enviados % 2 === 0 ? "A" : "B"
 const VARIANTE_ACTIVA = "B";
+const TPL_EXPO = "expo_fancy_food_seguimiento";
 const LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
 
 /**
@@ -93,20 +94,29 @@ export async function GET(req: NextRequest) {
       : "entrada al mercado de Estados Unidos";
     const lang = LANG[p.idioma || "es"] || "es";
 
+    // Los de feria llevan su propia plantilla: mencionan al vendedor que los
+    // atendio en el stand, que es el gancho real. La generica les diria
+    // "nos escribiste por la web", que es falso.
+    const esExpo = p.origen === "expo" && !!p.vendedor;
+    const variante = esExpo ? "EXPO" : VARIANTE_ACTIVA;
+    const tpl = esExpo ? TPL_EXPO : TPL_POR_VARIANTE[VARIANTE_ACTIVA];
+
     if (simular) {
-      detalle.push({ tel, nombre, tema, lang, antiguedad: p.antiguedadMeses, variante: enviados % 2 === 0 ? "A" : "B" });
+      detalle.push({ tel, nombre, tema, lang, antiguedad: p.antiguedadMeses, variante, plantilla: tpl });
       enviados++;
       continue;
     }
 
     // La B convirtio el doble que la A (20% vs 10%): se manda solo la B.
     // Para volver al reparto alternado: enviados % 2 === 0 ? "A" : "B"
-    const variante = VARIANTE_ACTIVA;
-    const tpl = TPL_POR_VARIANTE[variante];
+
+    const params = esExpo
+      ? [nombre, p.vendedor || "nuestro equipo", p.empresa || "tu empresa"]
+      : [nombre, tema];
 
     const r = await sendWhatsAppTemplate({
       toPhone: tel, templateName: tpl, languageCode: lang,
-      bodyParams: [nombre, tema],
+      bodyParams: params,
     });
 
     if (r.ok) {
@@ -120,7 +130,7 @@ export async function GET(req: NextRequest) {
         const conv = await getOrCreateConversation(tel, p.nombre || undefined);
         await appendMessage({
           conversationId: conv.id, role: "assistant",
-          content: [{ type: "text", text: renderTemplate(tpl, lang, [nombre, tema]) }],
+          content: [{ type: "text", text: renderTemplate(tpl, lang, params) }],
           waMessageId: r.metaMessageId ?? null,
         });
         await updateConversation(conv.id, {

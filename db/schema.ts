@@ -413,6 +413,10 @@ export const campanaLeads = pgTable("campana_leads", {
   estado:      text("estado").default("pendiente").notNull(),
   motivo:      text("motivo"),
   wamid:       text("wamid"),
+  // Leads de feria: el mensaje los referencia por el vendedor que los atendio
+  origen:      text("origen").default("web").notNull(),
+  vendedor:    text("vendedor"),
+  evento:      text("evento"),
   variante:    text("variante"),
   enviadoAt:   timestamp("enviado_at", { withTimezone: true }),
   respondioAt: timestamp("respondio_at", { withTimezone: true }),
