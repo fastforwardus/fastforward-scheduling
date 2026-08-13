@@ -138,6 +138,16 @@ export async function POST(req: NextRequest) {
       if (!value?.messages) continue;
 
       const profileName = value.contacts?.[0]?.profile?.name ?? null;
+      // BSUID y username: se guardan desde ya para no depender del telefono
+      // cuando WhatsApp complete el cambio a usernames.
+      const contacto = value.contacts?.[0] as {
+        wa_id?: string;
+        user_id?: string;
+        username?: string;
+        profile?: { name?: string; username?: string };
+      } | undefined;
+      const waUserId = contacto?.user_id ?? null;
+      const waUsername = contacto?.username ?? contacto?.profile?.username ?? null;
 
       for (const msg of value.messages) {
         // Solo procesamos mensajes de texto por ahora
@@ -211,6 +221,23 @@ export async function POST(req: NextRequest) {
           console.error("[wa-webhook] engine error:", err);
           await sendWhatsAppText(msg.from, "Disculpa, tuve un problema técnico. ¿Puedes intentar de nuevo en unos minutos?");
           continue;
+        }
+
+        // Guardar BSUID y username sobre la conversacion que acaba de crear el
+        // engine. Va aparte y en try propio: es preparacion para el cambio de
+        // WhatsApp a usernames y no debe poder romper el flujo actual.
+        if (waUserId || waUsername) {
+          try {
+            await db
+              .update(adrianaConversations)
+              .set({
+                ...(waUserId ? { waUserId } : {}),
+                ...(waUsername ? { waUsername } : {}),
+              })
+              .where(eq(adrianaConversations.waPhone, msg.from));
+          } catch (e) {
+            console.error("[wa-webhook] no se pudo guardar wa_user_id:", e);
+          }
         }
 
         // ── 5. Mandar respuesta vía Meta ──
