@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { holidays, appointments, users, availabilityRules } from "@/db/schema";
-import { gte, eq, and, notInArray } from "drizzle-orm";
+import { gte, eq, and, ne, isNotNull, notInArray } from "drizzle-orm";
 import { addMinutes, isBefore, addDays } from "date-fns";
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 
@@ -239,4 +239,52 @@ export async function getAvailableRepIds(slot: Date): Promise<Set<string>> {
     if (slot >= startUTC && slot < endUTC) available.add(rep.id);
   }
   return available;
+}
+
+
+/**
+ * Elige a quién asignar una cita cuando no hay link personal ni owner de Zoho.
+ *
+ * Prioridad: Tomás y Francisco alternados (round robin por carga), y si ninguno
+ * cubre ese horario, Emiliano; después Mauricio. El desempate es por cantidad de
+ * citas futuras, así el reparto queda parejo sin guardar estado en ningún lado.
+ */
+export async function elegirRepAutomatico(slot: Date): Promise<string | null> {
+  const PRIORIDAD: string[][] = [
+    ["tomás marino", "tomas marino", "francisco logarzo"],
+    ["emiliano caracciolo"],
+    ["mauricio lobatón", "mauricio lobaton"],
+  ];
+
+  const disponibles = await getAvailableRepIds(slot);
+  if (!disponibles.size) return null;
+
+  const activos = await db
+    .select({ id: users.id, fullName: users.fullName })
+    .from(users)
+    .where(eq(users.isActive, true));
+
+  // Citas futuras por rep: la carga define quién sigue en el round robin
+  const carga = new Map<string, number>();
+  const futuras = await db
+    .select({ assignedTo: appointments.assignedTo })
+    .from(appointments)
+    .where(and(
+      isNotNull(appointments.assignedTo),
+      gte(appointments.scheduledAt, new Date()),
+      ne(appointments.status, "cancelled"),
+    ));
+  for (const a of futuras) {
+    if (a.assignedTo) carga.set(a.assignedTo, (carga.get(a.assignedTo) ?? 0) + 1);
+  }
+
+  for (const nivel of PRIORIDAD) {
+    const candidatos = activos.filter((u) =>
+      disponibles.has(u.id) && nivel.includes((u.fullName || "").toLowerCase().trim()),
+    );
+    if (!candidatos.length) continue;
+    candidatos.sort((a, b) => (carga.get(a.id) ?? 0) - (carga.get(b.id) ?? 0));
+    return candidatos[0].id;
+  }
+  return null;
 }
