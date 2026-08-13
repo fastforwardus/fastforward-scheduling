@@ -20,6 +20,8 @@ const VARIANTE_ACTIVA = "B";
 const TPL_EXPO = "expo_fancy_food_seguimiento";
 // Idiomas de la plantilla de expo ya aprobados por Meta. Mandar en un idioma
 // no aprobado falla y quema el lead: mejor saltearlo hasta que salga.
+// Idiomas de la plantilla de expo aprobados por Meta. Al cambiar esto,
+// actualizar tambien el IN de la consulta de pendientes mas abajo.
 const IDIOMAS_EXPO_LISTOS = ["es", "pt"];
 const LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
 
@@ -79,7 +81,7 @@ export async function GET(req: NextRequest) {
   const pendientes = await db.select().from(campanaLeads)
     .where(and(
       eq(campanaLeads.estado, "pendiente"),
-      sql`(${campanaLeads.origen} <> 'expo' or coalesce(${campanaLeads.idioma}, 'es') = any(${IDIOMAS_EXPO_LISTOS}))`,
+      sql`(${campanaLeads.origen} <> 'expo' or coalesce(${campanaLeads.idioma}, 'es') in ('es','pt'))`,
     ))
     .orderBy(sql`${campanaLeads.antiguedadMeses} asc nulls last`)
     .limit(cantidad * 2);
