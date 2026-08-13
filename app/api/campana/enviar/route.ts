@@ -4,7 +4,7 @@ export const maxDuration = 300;
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { campanaLeads, adrianaConversations } from "@/db/schema";
-import { eq, sql, isNotNull } from "drizzle-orm";
+import { eq, and, sql, isNotNull } from "drizzle-orm";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 import { getOrCreateConversation, appendMessage, updateConversation } from "@/lib/adriana/db-helpers";
 import { renderTemplate } from "@/lib/whatsapp-templates";
@@ -72,8 +72,15 @@ export async function GET(req: NextRequest) {
   for (const o of outs) { bajas.add(normalizeWhatsAppPhone(o.waPhone)); bajas.add(phoneTail(o.waPhone)); }
 
   // Los mas recientes primero: son los que mas chance tienen de recordarnos
+  // Los de expo en un idioma sin plantilla aprobada se excluyen en la consulta,
+  // no despues: como son los mas recientes encabezan el orden y llenaban el
+  // lote entero de candidatos, dejando casi sin lugar a los que si se pueden
+  // mandar (7 enviados y 113 saltados en una tanda de 60).
   const pendientes = await db.select().from(campanaLeads)
-    .where(eq(campanaLeads.estado, "pendiente"))
+    .where(and(
+      eq(campanaLeads.estado, "pendiente"),
+      sql`(${campanaLeads.origen} <> 'expo' or coalesce(${campanaLeads.idioma}, 'es') = any(${IDIOMAS_EXPO_LISTOS}))`,
+    ))
     .orderBy(sql`${campanaLeads.antiguedadMeses} asc nulls last`)
     .limit(cantidad * 2);
 
