@@ -16,6 +16,8 @@ interface Row {
   clientLanguage: string;
   serviceInterest: string | null;
   total: number | null;
+  /** Etapa del seguimiento por WhatsApp. 4 = ya no recibe mas recordatorios. */
+  waStage: number | null;
   refDate: string;
   lastNote: string | null;
   lastNoteAt: string | null;
@@ -197,6 +199,13 @@ export default function RecoveryClient({ user }: {
                           </span>
                           {r.total != null && (
                             <span className="text-xs font-semibold" style={{ color: "#C9A84C" }}>USD {r.total.toLocaleString("en-US")}</span>
+                          )}
+                          {r.sourceType === "proposal" && (r.waStage ?? 0) >= 4 && (
+                            <span className="text-xs px-1.5 py-0.5 rounded font-medium"
+                              title="El sistema ya no le manda recordatorios: depende de que la trabajes vos"
+                              style={{ background: "rgba(239,68,68,.12)", color: "#DC2626" }}>
+                              Sin seguimiento
+                            </span>
                           )}
                           <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#F1F5F9", color: "#475569" }}>
                             {(r.clientLanguage || "es").toUpperCase()}
