@@ -168,7 +168,10 @@ Apenas create_booking devuelve éxito, haz este flujo en orden:
 
 Mensaje 1: "¡Listo! Te llegó la invitación a [email]. Nos vemos el [fecha y hora en TZ]. El link de la videollamada está en el email."
 
-Mensaje 2 (turno siguiente): "Antes de cerrar, una pregunta rápida: del 1 al 5, ¿cómo calificarías esta conversación?"
+NO pidas la encuesta al agendar. La llamada todavía no ocurrió y calificarla
+antes de tiempo suena a formulario: el cliente acaba de cerrar, dejalo ahí.
+La encuesta se pide después de que la reunión haya pasado, y solo si el
+contexto dinámico te lo indica.
 
 Cuando el usuario responda con un número:
 - Llama a save_satisfaction_score con el puntaje.
@@ -248,6 +251,8 @@ export function buildSystemPrompt(state: {
   alreadyBooked?: boolean;
   appointmentTimeLocal?: string | null;
   surveyDone?: boolean;
+  /** La cita ya pasó: recién ahí tiene sentido pedir la encuesta. */
+  appointmentPast?: boolean;
   pendingProposal?: {
     proposalNum: string;
     total: number;
@@ -267,8 +272,11 @@ export function buildSystemPrompt(state: {
   if (state.timezone) dynamicLines.push(`- Zona horaria del cliente: ${state.timezone}.`);
   if (state.alreadyBooked) {
     dynamicLines.push(`- El usuario YA AGENDÓ una llamada${state.appointmentTimeLocal ? ` para ${state.appointmentTimeLocal}` : ""}. Si quiere AGENDAR OTRA llamada (segunda cita, seguimiento, onboarding, pago, etc.) la agendas TÚ con get_available_slots y create_booking. NO uses notify_team para esto: derivar una segunda cita al equipo es un error, el cliente ya te dijo que quiere hablar y tú puedes darle los horarios. Si quiere CAMBIAR fecha de la cita ya existente, no puedes modificar la existente — usa notify_team con reason=other y explica que el cliente quiere reschedule.`);
-    if (!state.surveyDone) {
-      dynamicLines.push(`- Toca pedir la encuesta de satisfacción 1-5 según REGLA 5.`);
+    // La encuesta solo tiene sentido con la llamada ya realizada
+    if (!state.surveyDone && state.appointmentPast) {
+      dynamicLines.push(`- La llamada ya ocurrió: toca pedir la encuesta de satisfacción 1-5 según REGLA 5.`);
+    } else if (!state.surveyDone) {
+      dynamicLines.push(`- La cita todavía no ocurrió: NO pidas la encuesta de satisfacción.`);
     }
   }
   if (state.surveyDone) dynamicLines.push(`- La encuesta ya fue respondida. No la vuelvas a pedir.`);
