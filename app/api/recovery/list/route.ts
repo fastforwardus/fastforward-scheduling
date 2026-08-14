@@ -41,6 +41,7 @@ export async function GET() {
              coalesce(u.full_name, ua.full_name) as rep_name,
              coalesce(p.lang, a.client_language::text) as client_language,
              a.service_interest, p.total,
+             coalesce(p.whatsapp_stage, 0) as wa_stage,
              p.created_at as ref_date,
              n.last_content as last_note, n.last_at as last_note_at,
              coalesce(n.n, 0) as note_count
@@ -59,6 +60,7 @@ export async function GET() {
       select 'appointment', a.id::text,
              a.client_name, a.client_company, a.client_whatsapp, a.client_email,
              u.full_name, a.client_language::text, a.service_interest, null,
+             null::int as wa_stage,
              a.scheduled_at,
              n.last_content, n.last_at, coalesce(n.n, 0)
       from appointments a
@@ -75,7 +77,16 @@ export async function GET() {
           select 1 from call_logs cl
           where cl.source_type = 'appointment' and cl.source_id = a.id::text
         )
-      order by ref_date desc
+      -- Prioridad: una propuesta que agoto el seguimiento automatico (etapa 4)
+      -- no va a recibir nada mas del sistema y depende de que alguien la
+      -- trabaje. Dentro de ese grupo manda el monto. Las que siguen en
+      -- seguimiento van despues, y las citas al final por fecha.
+      order by
+        case when source_type = 'proposal' and coalesce(wa_stage, 0) >= 4 then 0
+             when source_type = 'proposal' then 1
+             else 2 end,
+        coalesce(total, 0) desc,
+        ref_date desc
       limit 2000
     `);
 
@@ -97,6 +108,7 @@ export async function GET() {
       clientLanguage: (r.client_language as string) ?? "es",
       serviceInterest: (r.service_interest as string) ?? null,
       total: r.total != null ? Number(r.total) : null,
+      waStage: r.wa_stage != null ? Number(r.wa_stage) : null,
       refDate: new Date(r.ref_date as string).toISOString(),
       lastNote: (r.last_note as string) ?? null,
       lastNoteAt: r.last_note_at ? new Date(r.last_note_at as string).toISOString() : null,
