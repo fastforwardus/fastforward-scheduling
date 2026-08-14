@@ -26,6 +26,7 @@ export async function GET() {
     // Universo 2: citas completadas sin cierre que no tengan ya una
     // propuesta pendiente — si no, la misma gestion aparece dos veces.
     const res = await db.execute(sql`
+      with ordenado as (
       with notas as (
         select source_type, source_id,
                count(*)::int n,
@@ -77,17 +78,18 @@ export async function GET() {
           select 1 from call_logs cl
           where cl.source_type = 'appointment' and cl.source_id = a.id::text
         )
+      limit 2000
+      )
       -- Prioridad: una propuesta que agoto el seguimiento automatico (etapa 4)
-      -- no va a recibir nada mas del sistema y depende de que alguien la
-      -- trabaje. Dentro de ese grupo manda el monto. Las que siguen en
-      -- seguimiento van despues, y las citas al final por fecha.
+      -- no recibe nada mas del sistema y depende de que alguien la trabaje.
+      -- Dentro de ese grupo manda el monto; las citas van al final.
+      select * from ordenado
       order by
         case when source_type = 'proposal' and coalesce(wa_stage, 0) >= 4 then 0
              when source_type = 'proposal' then 1
              else 2 end,
         coalesce(total, 0) desc,
         ref_date desc
-      limit 2000
     `);
 
     // postgres-js devuelve el array directo; otros drivers, { rows: [...] }.
