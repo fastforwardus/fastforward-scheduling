@@ -149,7 +149,30 @@ export async function POST(req: NextRequest) {
       const waUserId = contacto?.user_id ?? null;
       const waUsername = contacto?.username ?? contacto?.profile?.username ?? null;
 
-      for (const msg of value.messages) {
+      // Mensajes de texto agrupados por remitente: si alguien manda "Hola" y
+      // "Gracias" seguidos, Meta los entrega juntos y el for respondia a cada
+      // uno por separado, mandando dos respuestas casi identicas. Un humano
+      // lee las dos lineas y contesta una vez.
+      const mensajes: typeof value.messages = [];
+      const porRemitente = new Map<string, typeof value.messages>();
+      for (const m of value.messages) {
+        if (m.type !== "text" || !m.text?.body) { mensajes.push(m); continue; }
+        if (!porRemitente.has(m.from)) porRemitente.set(m.from, []);
+        porRemitente.get(m.from)!.push(m);
+      }
+      for (const [, grupo] of porRemitente) {
+        if (grupo.length === 1) { mensajes.push(grupo[0]); continue; }
+        // Se responde al ultimo (su id queda como referencia) con todo el texto
+        const ultimo = grupo[grupo.length - 1];
+        const textoJunto = grupo
+          .map((m) => (m.text?.body ?? "").trim())
+          .filter(Boolean)
+          .join("\n");
+        console.log("[wa-webhook] agrupados", grupo.length, "mensajes de", ultimo.from);
+        mensajes.push({ ...ultimo, text: { ...(ultimo.text ?? {}), body: textoJunto } });
+      }
+
+      for (const msg of mensajes) {
         // Solo procesamos mensajes de texto por ahora
         if (msg.type !== "text" || !msg.text?.body) {
           await sendWhatsAppText(
