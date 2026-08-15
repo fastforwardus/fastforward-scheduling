@@ -182,6 +182,15 @@ export default function RecoveryClient({ user }: {
               </div>
             ) : filtradas.map(r => {
               const key = r.sourceType + ":" + r.sourceId;
+              // Otras propuestas pendientes del mismo cliente: el rep las
+              // trabaja en la misma llamada en vez de llamar dos veces.
+              const otrasDelCliente = r.clientEmail
+                ? rows.filter(o =>
+                    o.sourceType === "proposal" &&
+                    o.clientEmail === r.clientEmail &&
+                    !(o.sourceType === r.sourceType && o.sourceId === r.sourceId))
+                : [];
+              const otrasTotal = otrasDelCliente.reduce((sum, o) => sum + (o.total ?? 0), 0);
               const abierto = abierta === key;
               return (
                 <div key={key} className="border-b last:border-b-0" style={{ borderColor: "#F0F0F0" }}>
@@ -210,6 +219,14 @@ export default function RecoveryClient({ user }: {
                           <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#F1F5F9", color: "#475569" }}>
                             {(r.clientLanguage || "es").toUpperCase()}
                           </span>
+                          {otrasDelCliente.length > 0 && (
+                            <span className="text-xs px-1.5 py-0.5 rounded font-medium"
+                              title="Aprovecha la llamada para cubrir todas. Cada una necesita su resultado cargado."
+                              style={{ background: "rgba(59,130,246,.12)", color: "#2563EB" }}>
+                              +{otrasDelCliente.length} propuesta{otrasDelCliente.length > 1 ? "s" : ""}
+                              {otrasTotal > 0 ? ` · USD ${otrasTotal.toLocaleString("en-US")}` : ""}
+                            </span>
+                          )}
                           {r.noteCount > 0 && (
                             <span className="text-xs flex items-center gap-1" style={{ color: "#16A34A" }}>
                               <Check className="w-3 h-3" /> {r.noteCount}
