@@ -24,6 +24,27 @@ interface Row {
   noteCount: number;
 }
 
+/**
+ * Borrador de email para las propuestas sin telefono. Abre el cliente de
+ * correo del rep: se manda desde su cuenta, no desde el sistema, asi no
+ * afecta la reputacion del dominio que usamos para las confirmaciones.
+ */
+function mailtoDe(r: Row): string {
+  const nombre = (r.clientName || "").split(" ")[0] || "";
+  const monto = r.total != null ? ` por USD ${r.total.toLocaleString("en-US")}` : "";
+  const asunto = `Propuesta FastForward${monto}`;
+  const cuerpo = [
+    `Hola ${nombre},`,
+    "",
+    `Te escribo por la propuesta que te enviamos${monto}.`,
+    "",
+    "Queria saber si pudiste revisarla y si tenes alguna duda que podamos resolver. Si preferis, coordinamos una llamada corta con uno de nuestros consultores.",
+    "",
+    "Quedo atento.",
+  ].join("\n");
+  return `mailto:${r.clientEmail}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+}
+
 export default function RecoveryClient({ user }: {
   user: { id: string; fullName: string; email: string; role: string };
 }) {
@@ -247,7 +268,23 @@ export default function RecoveryClient({ user }: {
                             {r.clientPhone}
                           </a>
                         ) : <span className="text-xs" style={{ color: "#9CA3AF" }}>—</span>}
-                        <p className="text-xs truncate mt-0.5" style={{ color: "#6B7280" }}>{r.clientEmail || ""}</p>
+                        {r.clientEmail ? (
+                          r.clientPhone ? (
+                            // Con telefono el email no se ofrece: primero la
+                            // llamada, que convierte mucho mejor.
+                            <p className="text-xs truncate mt-0.5" style={{ color: "#6B7280" }}
+                              title="Contacta primero por telefono o WhatsApp">
+                              {r.clientEmail}
+                            </p>
+                          ) : (
+                            <a href={mailtoDe(r)}
+                              className="text-xs truncate mt-0.5 block underline"
+                              style={{ color: "#2563EB" }}
+                              title="Sin telefono: abre tu correo con un borrador">
+                              {r.clientEmail}
+                            </a>
+                          )
+                        ) : null}
                       </div>
 
                       <div className="min-w-[130px]">
