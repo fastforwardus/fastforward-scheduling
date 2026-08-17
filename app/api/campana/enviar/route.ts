@@ -59,10 +59,18 @@ export async function GET(req: NextRequest) {
   const cantidad = Math.min(Number(req.nextUrl.searchParams.get("n") || 15), 60);
   const simular = req.nextUrl.searchParams.get("dry") === "1";
 
+  // Override manual: hay que pasarlo en cada llamada, no queda activo. Sirve
+  // para cuando la calidad esta amarilla pero se decide mandar igual un lote
+  // chico. No es un interruptor para apagar el freno.
+  const forzar = req.nextUrl.searchParams.get("forzar") === "1";
+
   const cal = await calidadOk();
-  if (!cal.ok && !simular) {
+  if (forzar && !cal.ok) {
+    console.warn("[campana] FRENO SALTEADO A MANO — calidad:", cal.rating, "| n:", cantidad);
+  }
+  if (!cal.ok && !simular && !forzar) {
     return NextResponse.json({
-      ok: false, frenado: true, rating: cal.rating,
+      ok: false, frenado: true, rating: cal.rating, calidad: cal.rating,
       mensaje: "No se envio nada: el numero no esta en GREEN.",
     });
   }
