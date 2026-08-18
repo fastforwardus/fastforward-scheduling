@@ -74,7 +74,12 @@ export async function GET(req: NextRequest) {
   // Los mas recientes primero: son los que mas chance tienen de recordarnos
   const pendientes = await db.select().from(campanaLeads)
     .where(eq(campanaLeads.estado, "pendiente"))
-    .orderBy(sql`${campanaLeads.antiguedadMeses} asc nulls last`)
+    // LATAM primero: espanol y portugues convierten mejor y el equipo los
+    // atiende en su idioma. El ingles queda al final de la cola.
+    .orderBy(
+      sql`case when coalesce(${campanaLeads.idioma}, 'es') in ('es','pt') then 0 else 1 end`,
+      sql`${campanaLeads.antiguedadMeses} asc nulls last`,
+    )
     .limit(cantidad * 2);
 
   let enviados = 0, saltados = 0, fallidos = 0;
