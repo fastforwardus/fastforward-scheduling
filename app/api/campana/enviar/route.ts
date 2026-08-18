@@ -91,7 +91,12 @@ export async function GET(req: NextRequest) {
       eq(campanaLeads.estado, "pendiente"),
       sql`(${campanaLeads.origen} <> 'expo' or coalesce(${campanaLeads.idioma}, 'es') in ('es','pt','en'))`,
     ))
-    .orderBy(sql`${campanaLeads.antiguedadMeses} asc nulls last`)
+    // LATAM primero: espanol y portugues convierten mejor y el equipo los
+    // atiende en su idioma. El ingles queda al final de la cola.
+    .orderBy(
+      sql`case when coalesce(${campanaLeads.idioma}, 'es') in ('es','pt') then 0 else 1 end`,
+      sql`${campanaLeads.antiguedadMeses} asc nulls last`,
+    )
     .limit(cantidad * 2);
 
   let enviados = 0, saltados = 0, fallidos = 0;
