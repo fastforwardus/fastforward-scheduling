@@ -6,6 +6,11 @@ import { RecoveryTabs } from "@/components/dashboard/RecoveryTabs";
 import { RefreshCw, Phone, PhoneCall, Clock, TrendingUp } from "lucide-react";
 
 interface Datos {
+  propuestas?: {
+    agotadas: { n: number; monto: number };
+    enCurso: { n: number; monto: number };
+    sinArrancar: { n: number; monto: number };
+  };
   resumen: {
     hoy: number; semana: number; mes: number; total: number;
     atendidas: number; minutos: number; sinResultado: number;
@@ -93,6 +98,49 @@ export default function RecoveryMetricsClient({ user }: {
             </p>
           ) : (
             <>
+              {d.propuestas && (
+                <div className="bg-white rounded-2xl border p-5 mb-4" style={{ borderColor: "#E5E7EB" }}>
+                  <p className="text-xs uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>
+                    Propuestas pendientes
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="rounded-xl p-4" style={{ background: "rgba(239,68,68,.08)" }}>
+                      <p className="text-2xl font-bold" style={{ color: "#DC2626" }}>
+                        USD {d.propuestas.agotadas.monto.toLocaleString("en-US")}
+                      </p>
+                      <p className="text-xs font-medium mt-0.5" style={{ color: "#DC2626" }}>
+                        {d.propuestas.agotadas.n} sin seguimiento automatico
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
+                        El sistema ya no les escribe: dependen del equipo
+                      </p>
+                    </div>
+                    <div className="rounded-xl p-4" style={{ background: "rgba(201,168,76,.12)" }}>
+                      <p className="text-2xl font-bold" style={{ color: "#92400E" }}>
+                        USD {d.propuestas.enCurso.monto.toLocaleString("en-US")}
+                      </p>
+                      <p className="text-xs font-medium mt-0.5" style={{ color: "#92400E" }}>
+                        {d.propuestas.enCurso.n} en seguimiento
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
+                        Todavia reciben recordatorios
+                      </p>
+                    </div>
+                    <div className="rounded-xl p-4" style={{ background: "#F8F9FB" }}>
+                      <p className="text-2xl font-bold" style={{ color: "#27295C" }}>
+                        USD {d.propuestas.sinArrancar.monto.toLocaleString("en-US")}
+                      </p>
+                      <p className="text-xs font-medium mt-0.5" style={{ color: "#6B7280" }}>
+                        {d.propuestas.sinArrancar.n} sin primer recordatorio
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
+                        Recien enviadas o sin telefono valido
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                 <Stat icon={Phone} label="Llamadas hoy" value={d.resumen.hoy}
                   sub={`${d.resumen.semana} esta semana`} color="#27295C" bg="rgba(39,41,92,0.08)" />

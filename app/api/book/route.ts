@@ -7,7 +7,7 @@ import { eq, and, gte, sql, notInArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
-import { getSlotCapacity, getAvailableRepIds } from "@/lib/slots";
+import { getSlotCapacity, getAvailableRepIds, elegirRepAutomatico } from "@/lib/slots";
 import { createMeetEvent } from "@/lib/google";
 import { normalizeWhatsAppPhone } from "@/lib/phone";
 import { validarTelefono } from "@/lib/phone-lookup";
@@ -95,6 +95,30 @@ export async function POST(req: NextRequest) {
             console.warn("Owner", owner.fullName, "no disponible en", scheduledAt, "- queda sin asignar");
           }
         }
+      }
+    }
+
+    // Sin link personal ni owner de Zoho: reparto automatico por prioridad.
+    // Tomas y Francisco alternados; si no cubren ese horario, Emiliano y luego
+    // Mauricio. Antes quedaba en pending_assignment y habia que repartir a mano.
+    if (!assignedTo) {
+      try {
+        const elegido = await elegirRepAutomatico(new Date(scheduledAt));
+        if (elegido) {
+          const [rep] = await db.select().from(users).where(eq(users.id, elegido)).limit(1);
+          if (rep) {
+            assignedTo = rep.id;
+            assignedName = rep.fullName;
+            assignedEmail = rep.email;
+            status = "scheduled";
+            console.log("[book] auto-asignada a", rep.fullName, "para", scheduledAt);
+          }
+        } else {
+          console.warn("[book] nadie disponible en", scheduledAt, "- queda sin asignar");
+        }
+      } catch (e) {
+        // Si falla el reparto, la cita se crea igual y queda para reparto manual
+        console.error("[book] error al auto-asignar:", e);
       }
     }
 

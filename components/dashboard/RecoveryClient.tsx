@@ -16,10 +16,33 @@ interface Row {
   clientLanguage: string;
   serviceInterest: string | null;
   total: number | null;
+  /** Etapa del seguimiento por WhatsApp. 4 = ya no recibe mas recordatorios. */
+  waStage: number | null;
   refDate: string;
   lastNote: string | null;
   lastNoteAt: string | null;
   noteCount: number;
+}
+
+/**
+ * Borrador de email para las propuestas sin telefono. Abre el cliente de
+ * correo del rep: se manda desde su cuenta, no desde el sistema, asi no
+ * afecta la reputacion del dominio que usamos para las confirmaciones.
+ */
+function mailtoDe(r: Row): string {
+  const nombre = (r.clientName || "").split(" ")[0] || "";
+  const monto = r.total != null ? ` por USD ${r.total.toLocaleString("en-US")}` : "";
+  const asunto = `Propuesta FastForward${monto}`;
+  const cuerpo = [
+    `Hola ${nombre},`,
+    "",
+    `Te escribo por la propuesta que te enviamos${monto}.`,
+    "",
+    "Queria saber si pudiste revisarla y si tenes alguna duda que podamos resolver. Si preferis, coordinamos una llamada corta con uno de nuestros consultores.",
+    "",
+    "Quedo atento.",
+  ].join("\n");
+  return `mailto:${r.clientEmail}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
 }
 
 export default function RecoveryClient({ user }: {
@@ -180,6 +203,15 @@ export default function RecoveryClient({ user }: {
               </div>
             ) : filtradas.map(r => {
               const key = r.sourceType + ":" + r.sourceId;
+              // Otras propuestas pendientes del mismo cliente: el rep las
+              // trabaja en la misma llamada en vez de llamar dos veces.
+              const otrasDelCliente = r.clientEmail
+                ? rows.filter(o =>
+                    o.sourceType === "proposal" &&
+                    o.clientEmail === r.clientEmail &&
+                    !(o.sourceType === r.sourceType && o.sourceId === r.sourceId))
+                : [];
+              const otrasTotal = otrasDelCliente.reduce((sum, o) => sum + (o.total ?? 0), 0);
               const abierto = abierta === key;
               return (
                 <div key={key} className="border-b last:border-b-0" style={{ borderColor: "#F0F0F0" }}>
@@ -198,9 +230,24 @@ export default function RecoveryClient({ user }: {
                           {r.total != null && (
                             <span className="text-xs font-semibold" style={{ color: "#C9A84C" }}>USD {r.total.toLocaleString("en-US")}</span>
                           )}
+                          {r.sourceType === "proposal" && (r.waStage ?? 0) >= 4 && (
+                            <span className="text-xs px-1.5 py-0.5 rounded font-medium"
+                              title="El sistema ya no le manda recordatorios: depende de que la trabajes vos"
+                              style={{ background: "rgba(239,68,68,.12)", color: "#DC2626" }}>
+                              Sin seguimiento
+                            </span>
+                          )}
                           <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: "#F1F5F9", color: "#475569" }}>
                             {(r.clientLanguage || "es").toUpperCase()}
                           </span>
+                          {otrasDelCliente.length > 0 && (
+                            <span className="text-xs px-1.5 py-0.5 rounded font-medium"
+                              title="Aprovecha la llamada para cubrir todas. Cada una necesita su resultado cargado."
+                              style={{ background: "rgba(59,130,246,.12)", color: "#2563EB" }}>
+                              +{otrasDelCliente.length} propuesta{otrasDelCliente.length > 1 ? "s" : ""}
+                              {otrasTotal > 0 ? ` · USD ${otrasTotal.toLocaleString("en-US")}` : ""}
+                            </span>
+                          )}
                           {r.noteCount > 0 && (
                             <span className="text-xs flex items-center gap-1" style={{ color: "#16A34A" }}>
                               <Check className="w-3 h-3" /> {r.noteCount}
@@ -221,7 +268,23 @@ export default function RecoveryClient({ user }: {
                             {r.clientPhone}
                           </a>
                         ) : <span className="text-xs" style={{ color: "#9CA3AF" }}>—</span>}
-                        <p className="text-xs truncate mt-0.5" style={{ color: "#6B7280" }}>{r.clientEmail || ""}</p>
+                        {r.clientEmail ? (
+                          r.clientPhone ? (
+                            // Con telefono el email no se ofrece: primero la
+                            // llamada, que convierte mucho mejor.
+                            <p className="text-xs truncate mt-0.5" style={{ color: "#6B7280" }}
+                              title="Contacta primero por telefono o WhatsApp">
+                              {r.clientEmail}
+                            </p>
+                          ) : (
+                            <a href={mailtoDe(r)}
+                              className="text-xs truncate mt-0.5 block underline"
+                              style={{ color: "#2563EB" }}
+                              title="Sin telefono: abre tu correo con un borrador">
+                              {r.clientEmail}
+                            </a>
+                          )
+                        ) : null}
                       </div>
 
                       <div className="min-w-[130px]">

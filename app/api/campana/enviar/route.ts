@@ -4,7 +4,7 @@ export const maxDuration = 300;
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { campanaLeads, adrianaConversations } from "@/db/schema";
-import { eq, sql, isNotNull } from "drizzle-orm";
+import { eq, and, sql, isNotNull } from "drizzle-orm";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 import { getOrCreateConversation, appendMessage, updateConversation } from "@/lib/adriana/db-helpers";
 import { renderTemplate } from "@/lib/whatsapp-templates";
@@ -20,7 +20,9 @@ const VARIANTE_ACTIVA = "B";
 const TPL_EXPO = "expo_fancy_food_seguimiento";
 // Idiomas de la plantilla de expo ya aprobados por Meta. Mandar en un idioma
 // no aprobado falla y quema el lead: mejor saltearlo hasta que salga.
-const IDIOMAS_EXPO_LISTOS = ["es", "pt"];
+// Idiomas de la plantilla de expo aprobados por Meta. Al cambiar esto,
+// actualizar tambien el IN de la consulta de pendientes mas abajo.
+const IDIOMAS_EXPO_LISTOS = ["es", "pt", "en"];
 const LANG: Record<string, string> = { es: "es", en: "en", pt: "pt_BR" };
 
 /**
@@ -57,10 +59,18 @@ export async function GET(req: NextRequest) {
   const cantidad = Math.min(Number(req.nextUrl.searchParams.get("n") || 15), 60);
   const simular = req.nextUrl.searchParams.get("dry") === "1";
 
+  // Override manual: hay que pasarlo en cada llamada, no queda activo. Sirve
+  // para cuando la calidad esta amarilla pero se decide mandar igual un lote
+  // chico. No es un interruptor para apagar el freno.
+  const forzar = req.nextUrl.searchParams.get("forzar") === "1";
+
   const cal = await calidadOk();
-  if (!cal.ok && !simular) {
+  if (forzar && !cal.ok) {
+    console.warn("[campana] FRENO SALTEADO A MANO — calidad:", cal.rating, "| n:", cantidad);
+  }
+  if (!cal.ok && !simular && !forzar) {
     return NextResponse.json({
-      ok: false, frenado: true, rating: cal.rating,
+      ok: false, frenado: true, rating: cal.rating, calidad: cal.rating,
       mensaje: "No se envio nada: el numero no esta en GREEN.",
     });
   }
@@ -72,8 +82,15 @@ export async function GET(req: NextRequest) {
   for (const o of outs) { bajas.add(normalizeWhatsAppPhone(o.waPhone)); bajas.add(phoneTail(o.waPhone)); }
 
   // Los mas recientes primero: son los que mas chance tienen de recordarnos
+  // Los de expo en un idioma sin plantilla aprobada se excluyen en la consulta,
+  // no despues: como son los mas recientes encabezan el orden y llenaban el
+  // lote entero de candidatos, dejando casi sin lugar a los que si se pueden
+  // mandar (7 enviados y 113 saltados en una tanda de 60).
   const pendientes = await db.select().from(campanaLeads)
-    .where(eq(campanaLeads.estado, "pendiente"))
+    .where(and(
+      eq(campanaLeads.estado, "pendiente"),
+      sql`(${campanaLeads.origen} <> 'expo' or coalesce(${campanaLeads.idioma}, 'es') in ('es','pt','en'))`,
+    ))
     // LATAM primero: espanol y portugues convierten mejor y el equipo los
     // atiende en su idioma. El ingles queda al final de la cola.
     .orderBy(

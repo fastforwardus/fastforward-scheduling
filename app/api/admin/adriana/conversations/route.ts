@@ -81,5 +81,13 @@ export async function GET(req: NextRequest) {
     })
     .from(adrianaConversations);
 
-  return NextResponse.json({ conversations: rows, stats: stats[0] });
+  // El driver puede devolver los conteos de subconsulta como string y el
+  // front los pintaba como 0. Se normalizan a numero antes de responder.
+  const conversations = rows.map((r) => ({
+    ...r,
+    messageCount: Number(r.messageCount ?? 0),
+    satisfactionScore: r.satisfactionScore == null ? null : Number(r.satisfactionScore),
+  }));
+
+  return NextResponse.json({ conversations, stats: stats[0] });
 }

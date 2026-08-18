@@ -274,6 +274,12 @@ export const adrianaConversations = pgTable("adriana_conversations", {
   id:               uuid("id").primaryKey().defaultRandom(),
   waPhone:          text("wa_phone").notNull().unique(),
   waProfileName:    text("wa_profile_name"),
+  // Identificadores de la transicion de WhatsApp a usernames (2026). Meta manda
+  // el BSUID en user_id en cada webhook, con o sin username activado. Cuando el
+  // usuario adopte username, el telefono puede dejar de venir y este pasa a ser
+  // la unica forma de identificarlo.
+  waUserId:         text("wa_user_id"),
+  waUsername:       text("wa_username"),
   language:         languageEnum("language"),
   timezone:         text("timezone"),
   leadName:         text("lead_name"),

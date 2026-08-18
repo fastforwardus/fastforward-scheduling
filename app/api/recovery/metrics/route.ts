@@ -59,7 +59,24 @@ export async function GET() {
       where ${filtro} and c.created_at >= now() - interval '14 days'
       group by 1 order by 1`));
 
+    // Propuestas pendientes segun el seguimiento automatico de WhatsApp.
+    // La etapa 4 ya no recibe recordatorios: ese dinero depende del equipo.
+    const [prop] = toRows(await db.execute(sql`
+      select
+        count(*) filter (where coalesce(whatsapp_stage,0) >= 4)::int agotadas_n,
+        coalesce(sum(total) filter (where coalesce(whatsapp_stage,0) >= 4), 0)::numeric agotadas_monto,
+        count(*) filter (where coalesce(whatsapp_stage,0) between 1 and 3)::int encurso_n,
+        coalesce(sum(total) filter (where coalesce(whatsapp_stage,0) between 1 and 3), 0)::numeric encurso_monto,
+        count(*) filter (where coalesce(whatsapp_stage,0) = 0)::int sinarrancar_n,
+        coalesce(sum(total) filter (where coalesce(whatsapp_stage,0) = 0), 0)::numeric sinarrancar_monto
+      from proposals where status = 'pending'`));
+
     return NextResponse.json({
+      propuestas: {
+        agotadas:    { n: n(prop?.agotadas_n),    monto: n(prop?.agotadas_monto) },
+        enCurso:     { n: n(prop?.encurso_n),     monto: n(prop?.encurso_monto) },
+        sinArrancar: { n: n(prop?.sinarrancar_n), monto: n(prop?.sinarrancar_monto) },
+      },
       resumen: {
         hoy: n(tot?.hoy), semana: n(tot?.semana), mes: n(tot?.mes), total: n(tot?.total),
         atendidas: n(tot?.atendidas), minutos: Math.round(n(tot?.segundos) / 60),

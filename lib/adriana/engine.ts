@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/db";
-import { adrianaConversations } from "@/db/schema";
+import { adrianaConversations, appointments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import {
   getOrCreateConversation,
@@ -76,6 +76,23 @@ export async function processUserMessage(
   // Propuesta pendiente asociada a este telefono (si respondio un recordatorio)
   const pendingProposal = await getProposalContext(input.waPhone);
 
+
+  // La fecha de la cita vive en appointments, no en la conversacion: hace falta
+  // para saber si la llamada ya ocurrio y recien ahi pedir la encuesta.
+  let citaYaPaso = false;
+  if (conv.appointmentId) {
+    try {
+      const [cita] = await db
+        .select({ scheduledAt: appointments.scheduledAt })
+        .from(appointments)
+        .where(eq(appointments.id, conv.appointmentId))
+        .limit(1);
+      if (cita?.scheduledAt) citaYaPaso = new Date(cita.scheduledAt).getTime() < Date.now();
+    } catch (e) {
+      console.error("[adriana] no se pudo leer la fecha de la cita:", e);
+    }
+  }
+
   const systemPrompt = buildSystemPrompt({
     language: conv.language,
     leadName: conv.leadName,
@@ -88,6 +105,9 @@ export async function processUserMessage(
     timezone: conv.timezone,
     alreadyBooked: !!conv.bookedAt,
     surveyDone: !!conv.surveyDoneAt,
+    // La encuesta se pide despues de la llamada: antes es calificar algo que
+    // todavia no paso y suena a formulario justo cuando el lead ya cerro.
+    appointmentPast: citaYaPaso,
     pendingProposal: pendingProposal
       ? {
           proposalNum: pendingProposal.proposalNum,
