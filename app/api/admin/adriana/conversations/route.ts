@@ -64,8 +64,8 @@ export async function GET(req: NextRequest) {
       lastAssistantMsgAt: adrianaConversations.lastAssistantMsgAt,
       createdAt: adrianaConversations.createdAt,
       updatedAt: adrianaConversations.updatedAt,
-      messageCount: sql<number>`(SELECT COUNT(*)::int FROM ${adrianaMessages} WHERE ${adrianaMessages.conversationId} = ${adrianaConversations.id})`,
-      satisfactionScore: sql<number | null>`(SELECT score FROM ${adrianaSatisfaction} WHERE ${adrianaSatisfaction.conversationId} = ${adrianaConversations.id} ORDER BY created_at DESC LIMIT 1)`,
+      messageCount: sql<number>`(SELECT COUNT(*)::int FROM ${adrianaMessages} WHERE ${adrianaMessages.conversationId} = ${adrianaConversations.id})`.as("message_count"),
+      satisfactionScore: sql<number | null>`(SELECT score FROM ${adrianaSatisfaction} WHERE ${adrianaSatisfaction.conversationId} = ${adrianaConversations.id} ORDER BY created_at DESC LIMIT 1)`.as("satisfaction_score"),
     })
     .from(adrianaConversations)
     .where(where)
