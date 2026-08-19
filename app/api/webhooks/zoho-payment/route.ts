@@ -1,7 +1,7 @@
 export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { proposals } from "@/db/schema";
+import { proposals, proposalEvents } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { Resend } from "resend";
 
@@ -32,6 +32,20 @@ export async function POST(req: NextRequest) {
     if (!proposal) {
       console.log("Propuesta no encontrada para invoices:", invoiceIds);
       return NextResponse.json({ ok: true });
+    }
+
+    // Registrar el pago en la base antes de notificar
+    if (!proposal.paymentConfirmedAt) {
+      await db.update(proposals)
+        .set({ paymentConfirmedAt: new Date() })
+        .where(eq(proposals.id, proposal.id));
+
+      await db.insert(proposalEvents).values({
+        proposalId: proposal.id,
+        kind: "paid",
+        channel: "zoho_books",
+        detail: `Pago recibido - USD ${proposal.total}`,
+      });
     }
 
     // Obtener email del cliente
