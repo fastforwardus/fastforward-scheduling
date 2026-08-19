@@ -21,6 +21,10 @@ const WA_DAILY_CAP = 30;
 // Un cliente con varias propuestas pendientes recibia un mensaje por dia,
 // una por propuesta. El dedupe por telefono solo cubria la misma corrida.
 const WA_COOLDOWN_DIAS = 7;
+// Tope de antiguedad: al encender WhatsApp habia 214 propuestas de meses atras
+// que caian todas en etapa 4 ("tu propuesta vence"). Mandar eso masivamente
+// dispara reportes y el numero es el mismo que usa Adriana.
+const WA_MAX_DIAS = Number(process.env.WA_MAX_DIAS || 30);
 const WA_TPL_RESUMEN = "propuestas_pendientes_resumen";
 
 // Meta usa pt_BR; nuestro enum guarda "pt"
@@ -249,6 +253,7 @@ export async function GET(req: NextRequest) {
     for (const p of rows) {
       if (!p.clientPhone) continue;
       const dias = (now2 - new Date(p.createdAt).getTime()) / 86400000;
+      if (dias > WA_MAX_DIAS) continue;
       const t = dias >= 17 ? 4 : dias >= 15 ? 3 : dias >= 9 ? 2 : dias >= 5 ? 1 : 0;
       if (t === 0 || t <= (p.whatsappStage ?? 0)) continue;
       const tel = normalizeWhatsAppPhone(p.clientPhone);
