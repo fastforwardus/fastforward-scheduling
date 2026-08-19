@@ -8,7 +8,7 @@ import { and, eq, isNull, isNotNull } from "drizzle-orm";
 import { getZohoBooksInvoice } from "@/lib/zohobooks";
 import { getSession } from "@/lib/session";
 
-const CAP = 40;
+const CAP_DEFAULT = 40;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
   if (!okCron && !okAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const dryRun = searchParams.get("apply") !== "1";
+  const CAP = Math.min(Number(searchParams.get("cap")) || CAP_DEFAULT, 40);
 
   const pendientes = await db.select({
     id: proposals.id,
