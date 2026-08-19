@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send, PhoneCall } from "lucide-react";
 import Link from "next/link";
+import PanelDia from "@/components/dashboard/PanelDia";
 
 interface Stats {
   total: number;
@@ -44,7 +45,7 @@ function StatCard({ icon: Icon, label, value, color, bg }: { icon: React.Element
 }
 
 export default function SalesDashboardClient({ user }: {
-  user: { id?: string; fullName: string; email: string; role: string; slug?: string; canRecovery?: boolean };
+  user: { id?: string; fullName: string; email: string; role: string; slug?: string; canRecovery?: boolean; timezone?: string };
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [myProposals, setMyProposals] = useState<MyProposal[]>([]); // eslint-disable-line
@@ -123,6 +124,8 @@ export default function SalesDashboardClient({ user }: {
           <StatCard icon={FileText} label="Propuestas" value={stats.proposalsSent} color="#92400E" bg="rgba(201,168,76,0.12)" />
           <StatCard icon={TrendingUp} label="Cerradas" value={stats.closed} color="#C9A84C" bg="rgba(201,168,76,0.1)" />
         </div>
+
+        <PanelDia timezone={user.timezone || "America/New_York"} />
 
         {/* Today */}
         <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB", boxShadow: "0 1px 4px rgba(39,41,92,0.06)" }}>
