@@ -1,5 +1,5 @@
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
@@ -9,6 +9,7 @@ import { getZohoBooksInvoice } from "@/lib/zohobooks";
 import { getSession } from "@/lib/session";
 
 const CAP_DEFAULT = 40;
+const CAP_MAX = 200;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
   if (!okCron && !okAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const dryRun = searchParams.get("apply") !== "1";
-  const CAP = Math.min(Number(searchParams.get("cap")) || CAP_DEFAULT, 40);
+  const CAP = Math.min(Number(searchParams.get("cap")) || CAP_DEFAULT, CAP_MAX);
 
   const pendientes = await db.select({
     id: proposals.id,
@@ -79,6 +80,6 @@ export async function GET(req: NextRequest) {
     pagadas: pagadas.length,
     impagas: impagas.length,
     errores: errores.length,
-    detalle: { pagadas, impagas: impagas.slice(0, 15), errores },
+    detalle: { pagadas, impagas, errores },
   });
 }
