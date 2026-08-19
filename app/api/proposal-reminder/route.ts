@@ -9,6 +9,7 @@ import { normalizeWhatsAppPhone, isPlausiblePhone, phoneTail } from "@/lib/phone
 import { getOrCreateConversation, appendMessage, updateConversation } from "@/lib/adriana/db-helpers";
 import { renderTemplate } from "@/lib/whatsapp-templates";
 import { Resend } from "resend";
+import { autorizarOps } from "@/lib/ops-auth";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
@@ -186,11 +187,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, test: true, sentTo: testEmail, mails: 4 });
   }
 
-  const manualRun = searchParams.get("run");
-  const auth = req.headers.get("authorization");
-  const okCron = auth === `Bearer ${process.env.CRON_SECRET}`;
-  const okManual = manualRun && manualRun === process.env.MANUAL_RUN_TOKEN;
-  if (!okCron && !okManual) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await autorizarOps(req))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const now = Date.now();
   const DAILY_CAP = 50;
