@@ -5,6 +5,7 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send, PhoneCall } from "lucide-react";
 import Link from "next/link";
 import PanelDia from "@/components/dashboard/PanelDia";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 
 interface Stats {
   total: number;
@@ -66,7 +67,14 @@ export default function SalesDashboardClient({ user }: {
   const now = new Date();
   const todayStr = now.toDateString();
 
-  const todayAppts = appointments.filter(a => new Date(a.scheduledAt).toDateString() === todayStr);
+  const todayAppts = appointments
+    .filter(a => new Date(a.scheduledAt).toDateString() === todayStr)
+    .sort((a, b) => {
+      // Lo que ya paso baja al final; el resto en orden cronologico
+      const ta = new Date(a.scheduledAt).getTime(), tb = new Date(b.scheduledAt).getTime();
+      const pa = ta < now.getTime() ? 1 : 0, pb = tb < now.getTime() ? 1 : 0;
+      return pa !== pb ? pa - pb : ta - tb;
+    });
   const upcoming = appointments.filter(a => new Date(a.scheduledAt) > now && a.status !== "cancelled").slice(0, 5);
 
   const stats: Stats = {
@@ -95,7 +103,9 @@ export default function SalesDashboardClient({ user }: {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: "#F8F9FB" }}>
+    <div className="flex min-h-screen" style={{ background: "#F8F9FB" }}>
+      <Sidebar user={user} />
+      <main className="flex-1 min-w-0 pt-14 lg:pt-0 overflow-auto">
       {/* Header */}
       <div style={{ background: "linear-gradient(135deg, #27295C 0%, #1e2150 100%)" }}>
         <div className="max-w-5xl mx-auto px-6 py-8">
@@ -158,8 +168,10 @@ export default function SalesDashboardClient({ user }: {
                 const minsLeft = Math.round((new Date(appt.scheduledAt).getTime() - now.getTime()) / 60000);
                 const isNow = minsLeft >= -30 && minsLeft <= 0;
                 const isSoon = minsLeft > 0 && minsLeft <= 30;
+                const paso = minsLeft < -30;
                 return (
-                  <div key={appt.id} className="flex items-center gap-4 px-5 py-4">
+                  <div key={appt.id} className="flex items-center gap-4 px-5 py-4"
+                       style={{ opacity: paso ? 0.5 : 1 }}>
                     <div className="text-center flex-shrink-0 w-14">
                       <p className="text-lg font-bold" style={{ color: "#27295C" }}>{time}</p>
                       {isNow && <span className="text-xs font-bold" style={{ color: "#EF4444" }}>AHORA</span>}
@@ -289,6 +301,7 @@ export default function SalesDashboardClient({ user }: {
         </div>
 
       </div>
+      </main>
     </div>
   );
 }

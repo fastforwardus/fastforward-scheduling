@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
 
@@ -89,6 +89,14 @@ export async function POST(req: NextRequest) {
 </div>`,
     }).catch(console.error);
   }
+
+  // Cerrar el recordatorio de "cargar resultado" si existia
+  await db.execute(sql`
+    update reminders set done_at = now(), done_by_user_id = ${session.id}
+    where source_type in ('appointment_outcome','outcome_escalado')
+      and source_id = ${appt.id}
+      and done_at is null
+  `);
 
   // Sync outcome to Zoho CRM
   await createOrUpdateZohoLead({
