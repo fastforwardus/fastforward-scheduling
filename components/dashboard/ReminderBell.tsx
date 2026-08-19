@@ -107,8 +107,7 @@ export function ReminderBell() {
 
       {abierto && (
         <div className="absolute left-3 right-3 bottom-full mb-2 z-50 rounded-xl overflow-hidden"
-          style={{ maxWidth: "calc(100% - 1.5rem)" }}
-          style={{ background: "white", boxShadow: "0 -4px 28px rgba(0,0,0,0.28)" }}>
+          style={{ background: "white", boxShadow: "0 -4px 28px rgba(0,0,0,0.28)", maxWidth: "calc(100% - 1.5rem)" }}>
           <div className="px-4 py-2.5 flex items-center justify-between"
             style={{ background: "#F8F9FB", borderBottom: "1px solid #E5E7EB" }}>
             <span className="text-xs font-semibold" style={{ color: "#27295C" }}>
