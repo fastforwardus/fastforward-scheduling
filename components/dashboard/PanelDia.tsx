@@ -16,11 +16,21 @@ function parseFecha(iso: string): Date {
 function relativo(iso: string, tz: string) {
   const d = parseFecha(iso);
   const diff = Date.now() - d.getTime();
-  const dias = Math.floor(diff / 86400000);
-  if (diff > 0 && dias >= 1) return `hace ${dias} d`;
-  if (diff > 0 && diff > 3600000) return `hace ${Math.floor(diff / 3600000)} h`;
-  if (diff > 0) return `hace ${Math.max(1, Math.floor(diff / 60000))} m`;
-  return d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: tz });
+  const hora = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: tz });
+
+  if (diff > 0) {
+    const dias = Math.floor(diff / 86400000);
+    if (dias >= 1) return `hace ${dias} d`;
+    if (diff > 3600000) return `hace ${Math.floor(diff / 3600000)} h`;
+    return `hace ${Math.max(1, Math.floor(diff / 60000))} m`;
+  }
+
+  const hoy = new Date();
+  const manana = new Date(hoy.getTime() + 86400000);
+  if (d.toDateString() === hoy.toDateString()) return hora;
+  if (d.toDateString() === manana.toDateString()) return `man ${hora}`;
+  const fecha = d.toLocaleDateString("es-ES", { day: "2-digit", month: "short", timeZone: tz });
+  return `${fecha} ${hora}`;
 }
 
 const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
@@ -98,7 +108,7 @@ export default function PanelDia({ timezone = "America/New_York" }: {
               return (
                 <div key={r.id}
                   className="grid gap-3 px-5 py-3 border-b last:border-b-0 items-start"
-                  style={{ gridTemplateColumns: "22px 76px minmax(0,1fr)", borderColor: "#F0F0F0",
+                  style={{ gridTemplateColumns: "22px 104px minmax(0,1fr)", borderColor: "#F0F0F0",
                            background: venc ? "#FEF2F2" : "white",
                            borderLeft: venc ? "2px solid #DC2626" : "2px solid transparent" }}>
                   <button onClick={() => completar(r.id)} aria-label="Marcar hecho">
