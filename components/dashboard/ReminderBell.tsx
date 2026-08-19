@@ -107,6 +107,7 @@ export function ReminderBell() {
 
       {abierto && (
         <div className="absolute left-3 right-3 bottom-full mb-2 z-50 rounded-xl overflow-hidden"
+          style={{ maxWidth: "calc(100% - 1.5rem)" }}
           style={{ background: "white", boxShadow: "0 -4px 28px rgba(0,0,0,0.28)" }}>
           <div className="px-4 py-2.5 flex items-center justify-between"
             style={{ background: "#F8F9FB", borderBottom: "1px solid #E5E7EB" }}>
@@ -127,9 +128,9 @@ export function ReminderBell() {
                   borderLeft: i.vencido ? "2px solid #DC2626" : "2px solid transparent",
                 }}>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate"
-                     style={{ color: i.vencido ? "#7F1D1D" : "#27295C" }}>{i.titulo}</p>
-                  <p className="text-xs" style={{ color: i.vencido ? "#991B1B" : "#9CA3AF" }}>
+                  <p className="text-xs font-semibold" style={{ overflowWrap: "anywhere" }}
+                  >{i.titulo}</p>
+                  <p className="text-xs" style={{ color: i.vencido ? "#991B1B" : "#9CA3AF", overflowWrap: "anywhere" }}>
                     {i.tipo === "llamada" ? "Volver a llamar · " : ""}
                     {i.detalle ? i.detalle + " · " : ""}{fmt(i.cuando)}
                   </p>
