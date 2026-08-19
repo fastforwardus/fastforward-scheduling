@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, users, proposals } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { randomBytes } from "crypto";
 import { getSession } from "@/lib/session";
 import { Resend } from "resend";
@@ -42,11 +42,13 @@ export async function POST(req: NextRequest) {
     directClientName,
     directClientCompany,
     directClientEmail,
+    force,
   } = await req.json();
 
   if (!services?.length) {
     return NextResponse.json({ error: "Faltan campos" }, { status: 400 });
   }
+
   if (!appointmentId && (!directClientName || !directClientEmail)) {
     return NextResponse.json({ error: "Faltan datos del cliente" }, { status: 400 });
   }
@@ -68,6 +70,32 @@ export async function POST(req: NextRequest) {
       serviceInterest: null,
       scheduledAt: new Date(),
     };
+  }
+
+  // Aviso de posible duplicado: misma persona, mismo monto, ultimos 30 dias
+  const emailChequeo = (clientEmailOverride || appt!.clientEmail || "").trim().toLowerCase();
+  const totalChequeo = services.reduce(
+    (acc: number, s: { price: number }) => acc + Number(s.price || 0), 0) - Number(discount || 0);
+
+  if (!force && emailChequeo) {
+    const previas = await db.select({
+      proposalNum: proposals.proposalNum,
+      total: proposals.total,
+      createdAt: proposals.createdAt,
+      pagada: proposals.paymentConfirmedAt,
+    }).from(proposals).where(and(
+      sql`lower(trim(${proposals.clientEmail})) = ${emailChequeo}`,
+      eq(proposals.total, totalChequeo),
+      sql`${proposals.createdAt} > now() - interval '30 days'`,
+    ));
+
+    if (previas.length > 0) {
+      return NextResponse.json({
+        error: "posible_duplicado",
+        mensaje: `Ya existe una propuesta por USD ${totalChequeo} para este cliente en los ultimos 30 dias.`,
+        previas,
+      }, { status: 409 });
+    }
   }
 
   const [rep] = await db.select({
