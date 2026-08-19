@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Sync outcome to Zoho CRM
-  createOrUpdateZohoLead({
+  await createOrUpdateZohoLead({
     clientName: appt.clientName,
     clientEmail: appt.clientEmail,
     clientCompany: appt.clientCompany,
