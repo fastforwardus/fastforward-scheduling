@@ -6,6 +6,7 @@ import { OutcomeModal } from "@/components/dashboard/OutcomeModal";
 import { NotesPanel } from "@/components/dashboard/NotesPanel";
 import { ArrowLeft, Video, MessageCircle, Phone, ChevronDown, ChevronUp, Star } from "lucide-react";
 import Link from "next/link";
+import MovimientosFeed from "@/components/dashboard/MovimientosFeed";
 
 interface Appt {
   id: string; clientName: string; clientCompany: string; clientWhatsapp: string;
@@ -256,6 +257,8 @@ export default function ClientHistoryClient({ user, clientEmail }: {
                   </div>
                 )}
               </div>
+
+              <MovimientosFeed email={clientEmail} />
 
               {/* Surveys */}
               {data.surveys.length > 0 && (

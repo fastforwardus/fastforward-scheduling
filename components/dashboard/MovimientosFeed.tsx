@@ -47,6 +47,13 @@ function fechaTitulo(iso: string, tz: string) {
   return d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: tz });
 }
 
+function servicios(detail: string): string {
+  try {
+    const arr = JSON.parse(detail) as { name: string; price: number }[];
+    return arr.map(s => `${s.name} — USD ${s.price}`).join(" · ");
+  } catch { return detail; }
+}
+
 export default function MovimientosFeed({ email, timezone = "America/New_York" }: {
   email: string; timezone?: string;
 }) {
@@ -111,24 +118,25 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
             {movs.map((m, i) => {
               const st = ESTILO[m.kind] || { bg: "#F1EFE8", color: "#5F5E5A", label: m.kind };
               const id = m.src_type + m.src_id + m.occurred_at + i;
-              const largo = (m.description || "").length >= 195;
               const hora = parseFecha(m.occurred_at)
                 .toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: timezone });
               return (
                 <div key={id}
-                  onClick={() => largo && setAbierto(abierto === id ? null : id)}
+
                   className="grid gap-3 px-5 py-2.5 border-b items-start hover:bg-gray-50 transition-colors"
-                  style={{ gridTemplateColumns: "46px 96px minmax(0,1fr)", borderColor: "#F0F0F0", cursor: largo ? "pointer" : "default" }}>
+                  style={{ gridTemplateColumns: "46px 96px minmax(0,1fr)", borderColor: "#F0F0F0" }}>
                   <span className="text-xs" style={{ color: "#9CA3AF", fontFamily: "ui-monospace, monospace" }}>{hora}</span>
                   <span className="text-xs px-2 py-0.5 rounded text-center truncate"
                         style={{ background: st.bg, color: st.color }}>{st.label}</span>
                   <div className="min-w-0">
                     <p className="text-sm" style={{ color: "#111827", whiteSpace: "pre-wrap" }}>
                       {m.actor && <span style={{ color: "#6B7280" }}>{m.actor}: </span>}
-                      {abierto === id || !largo ? m.description : (m.description || "").slice(0, 150) + "…"}
+                      {m.description}
                     </p>
-                    {m.detail && m.kind !== "propuesta_enviada" && (
-                      <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{m.detail}</p>
+                    {m.detail && (
+                      <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>
+                        {m.kind === "propuesta_enviada" ? servicios(m.detail) : m.detail}
+                      </p>
                     )}
                   </div>
                 </div>
