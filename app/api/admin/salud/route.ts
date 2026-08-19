@@ -20,6 +20,15 @@ const PROCESOS = [
   { nombre: "Encuestas",              consulta: sql`select max(submitted_at) t from surveys`,                                       horas: 336, ruta: "/api/survey" },
 ];
 
+function parseFecha(v: unknown): Date {
+  if (v instanceof Date) return v;
+  let t = String(v).trim().replace(" ", "T");
+  // Postgres devuelve el offset como "+00"; sin los minutos, Date lo rechaza
+  if (/([+-])(\d{2})$/.test(t)) t += ":00";
+  const d = new Date(t);
+  return isNaN(d.getTime()) ? new Date(0) : d;
+}
+
 export async function GET() {
   const session = await getSession();
   if (!session || session.role !== "admin")
@@ -36,8 +45,8 @@ export async function GET() {
       ultimo = filas[0]?.t ?? null;
     } catch { /* si la tabla no existe, queda null */ }
 
-    const ms = ultimo ? ahora - new Date(String(ultimo).replace(" ", "T")).getTime() : null;
-    const horas = ms === null ? null : ms / 3600000;
+    const ms = ultimo ? ahora - parseFecha(ultimo).getTime() : null;
+    const horas = ms === null || !isFinite(ms) ? null : ms / 3600000;
     const estado = horas === null ? "nunca"
       : horas > p.horas ? "frenado"
       : horas > p.horas * 0.6 ? "lento"
