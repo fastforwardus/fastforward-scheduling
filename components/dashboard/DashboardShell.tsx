@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { AssignModal } from "@/components/dashboard/AssignModal";
 import { OutcomeModal } from "@/components/dashboard/OutcomeModal";
 import { NotesPanel } from "@/components/dashboard/NotesPanel";
+import { UltimosMovimientos } from "@/components/dashboard/UltimosMovimientos";
 import { RefreshCw, ChevronDown, ChevronUp, Video, MessageCircle, Phone, ExternalLink, FileText, MoreHorizontal, Pencil, Check, X } from "lucide-react";
 
 
@@ -111,7 +112,8 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
         {expanded && (
           <div className="px-5 pb-5 pt-1" onClick={e => e.stopPropagation()}>
             <div className="ml-[74px] space-y-4">
-              <div className="flex gap-8 items-start flex-wrap">
+              <div className="flex gap-6 items-start">
+                <div style={{ width: 300, flexShrink: 0 }}>
 
                 {/* Columna izquierda: datos */}
                 <div className="space-y-1.5" style={{ minWidth: 260, maxWidth: 380 }}>
@@ -251,8 +253,8 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   </div>
                 </div>
 
-                {/* Columna derecha: acciones */}
-                <div className="flex flex-col gap-1.5" style={{ width: 190, flexShrink: 0 }}>
+                {/* Acciones */}
+                <div className="flex gap-1.5 flex-wrap mt-3">
 
                   {appt.platform !== "whatsapp" && appt.meetingLink && (
                     <a href={appt.meetingLink} target="_blank" rel="noreferrer"
@@ -361,6 +363,8 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   </div>
 
                 </div>
+                </div>
+                <UltimosMovimientos email={appt.clientEmail} timezone={userTimezone} />
               </div>
               {showNotes && (
                 <NotesPanel appointmentId={appt.id} currentUserId={currentUserId} currentRole={currentRole} />
