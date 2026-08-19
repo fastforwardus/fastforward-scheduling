@@ -146,13 +146,8 @@ export async function createOrUpdateZohoLead(params: {
     Company: params.clientCompany,
     Lead_Source: "Web Site",
     Lead_Status: params.outcome ? (OUTCOME_TO_STATUS[params.outcome] || "Not Contacted") : "Not Contacted",
-    Description: [
-      params.clientNotes ? `Consulta del cliente: ${params.clientNotes}` : "",
-      params.exportVolume ? `Volumen de exportacion: ${params.exportVolume}` : "",
-      params.repName ? `Rep asignado: ${params.repName}` : "",
-      params.scheduledAt ? `Fecha de cita: ${new Date(params.scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York" })}` : "",
-      params.appointmentId ? `ID Cita: ${params.appointmentId}` : "",
-    ].filter(Boolean).join("\n"),
+    // El contexto operativo va como Nota, no en Description: Description lo
+    // escribe el equipo a mano y cada update lo pisaba entero.
   };
 
   if (params.serviceInterest) leadData.Industry = SERVICE_TO_INDUSTRY[params.serviceInterest] || "Other";
@@ -196,9 +191,18 @@ export async function createOrUpdateZohoLead(params: {
     console.log("Zoho lead created:", leadId);
   }
 
-  // Add note if provided
-  if (params.noteToAdd && leadId) {
-    await addZohoNote(leadId, params.noteToAdd);
+  // Contexto operativo como nota (aditivo, con fecha)
+  const contexto = [
+    params.clientNotes ? `Consulta del cliente: ${params.clientNotes}` : "",
+    params.exportVolume ? `Volumen de exportacion: ${params.exportVolume}` : "",
+    params.repName ? `Rep asignado: ${params.repName}` : "",
+    params.scheduledAt ? `Fecha de cita: ${new Date(params.scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York" })}` : "",
+    params.appointmentId ? `ID Cita: ${params.appointmentId}` : "",
+  ].filter(Boolean).join("\n");
+
+  const nota = [params.noteToAdd, contexto].filter(Boolean).join("\n\n");
+  if (nota && leadId) {
+    await addZohoNote(leadId, nota);
   }
 
   return { id: leadId, action: existingId ? "updated" : "created" };
