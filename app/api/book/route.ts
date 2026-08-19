@@ -500,7 +500,7 @@ export async function POST(req: NextRequest) {
 
     // Zoho CRM sync
     try {
-      await createOrUpdateZohoLead({
+      const zohoRes = await createOrUpdateZohoLead({
         clientName,
         clientEmail: clientEmail.toLowerCase().trim(),
         clientCompany,
@@ -511,9 +511,18 @@ export async function POST(req: NextRequest) {
         clientNotes,
         repName: assignedName || undefined,
         repEmail: assignedEmail || undefined,
+        appointmentId: appointment.id,
+        scheduledAt,
         noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Nueva cita agendada — Plataforma: ${platform}`,
       });
-      console.log("ZOHO OK:", clientEmail);
+
+      // Guardar el vinculo: sin esto no hay forma de cruzar la cita con el lead de Zoho
+      if (zohoRes?.id) {
+        await db.update(appointments)
+          .set({ zohoLeadId: zohoRes.id })
+          .where(eq(appointments.id, appointment.id));
+      }
+      console.log("ZOHO OK:", clientEmail, zohoRes?.id);
       // Notify rep of new lead
       if (assignedEmail && assignedName) {
         const apptDate = new Date(scheduledAt).toLocaleString("es-ES", { timeZone: "America/New_York", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
