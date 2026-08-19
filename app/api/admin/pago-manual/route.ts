@@ -9,7 +9,8 @@ import { registerZohoBooksPayment, getZohoBooksInvoice } from "@/lib/zohobooks";
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get("x-manual-token") || new URL(req.url).searchParams.get("t");
-  const okToken = !!process.env.MANUAL_RUN_TOKEN && token === process.env.MANUAL_RUN_TOKEN;
+  const okToken = (!!process.env.OPS_TOKEN && token === process.env.OPS_TOKEN)
+    || (!!process.env.MANUAL_RUN_TOKEN && token === process.env.MANUAL_RUN_TOKEN);
   const session = await getSession();
   const okSession = !!session && session.role !== "sales_rep";
   if (!okToken && !okSession)
