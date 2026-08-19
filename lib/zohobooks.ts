@@ -230,3 +230,26 @@ export async function listZohoBooksInvoices() {
 export async function markZohoBooksInvoiceSent(invoiceId: string): Promise<void> {
   await booksReq("POST", `/invoices/${invoiceId}/status/sent`);
 }
+
+export async function registerZohoBooksPayment(params: {
+  contactId: string;
+  invoiceId: string;
+  amount: number;
+  date: string;
+  mode?: string;
+  reference?: string;
+  description?: string;
+}): Promise<{ payment_id: string }> {
+  const data = await booksReq("POST", "/customerpayments", {
+    customer_id: params.contactId,
+    payment_mode: params.mode ?? "banktransfer",
+    amount: params.amount,
+    date: params.date,
+    reference_number: params.reference ?? "",
+    description: params.description ?? "",
+    invoices: [{ invoice_id: params.invoiceId, amount_applied: params.amount }],
+  });
+  const id = data?.payment?.payment_id;
+  if (!id) throw new Error(`No se pudo registrar el pago: ${JSON.stringify(data)}`);
+  return { payment_id: id };
+}
