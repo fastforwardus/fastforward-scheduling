@@ -25,8 +25,8 @@ function relativo(iso: string, tz: string) {
 
 const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
-export default function PanelDia({ userId, timezone = "America/New_York" }: {
-  userId: string; timezone?: string;
+export default function PanelDia({ timezone = "America/New_York" }: {
+  timezone?: string;
 }) {
   const [rems, setRems] = useState<Rem[]>([]);
   const [mes, setMes] = useState(() => { const d = new Date(); return { a: d.getFullYear(), m: d.getMonth() }; });
