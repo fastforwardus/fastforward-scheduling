@@ -60,7 +60,6 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
   const [items, setItems] = useState<Mov[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState("todo");
-  const [abierto, setAbierto] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
     setLoading(true);
