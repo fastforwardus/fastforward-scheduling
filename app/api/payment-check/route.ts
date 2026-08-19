@@ -4,7 +4,7 @@ export const maxDuration = 300;
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { proposals, proposalEvents } from "@/db/schema";
-import { and, eq, isNull, isNotNull } from "drizzle-orm";
+import { and, eq, isNull, isNotNull, sql } from "drizzle-orm";
 import { getZohoBooksInvoice } from "@/lib/zohobooks";
 import { getSession } from "@/lib/session";
 
@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
   }).from(proposals).where(and(
     isNotNull(proposals.zohoInvoiceId),
     isNull(proposals.paymentConfirmedAt),
+    isNull(proposals.zohoInvoiceMissingAt),
   )).limit(CAP);
 
   const pagadas: Record<string, unknown>[] = [];
@@ -40,7 +41,13 @@ export async function GET(req: NextRequest) {
   for (const p of pendientes) {
     try {
       const inv = await getZohoBooksInvoice(p.zohoInvoiceId!);
-      if (!inv) { errores.push({ num: p.proposalNum, error: "factura inexistente" }); continue; }
+      if (!inv) {
+        errores.push({ num: p.proposalNum, error: "factura inexistente" });
+        if (!dryRun) {
+          await db.execute(sql`update proposals set zoho_invoice_missing_at = now() where id = ${p.id}`);
+        }
+        continue;
+      }
 
       const balance = Number(inv.balance ?? 0);
       const estaPaga = inv.status === "paid" || (balance === 0 && Number(inv.total ?? 0) > 0);

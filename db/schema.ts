@@ -260,6 +260,7 @@ export const proposals = pgTable("proposals", {
   invoiceSentAt: timestamp("invoice_sent_at"),
   clientAddress:  text("client_address"),
   sentById:       uuid("sent_by_id").references(() => users.id),
+  zohoInvoiceMissingAt: timestamp("zoho_invoice_missing_at", { withTimezone: true }),
 });
 
 // ── System Config
