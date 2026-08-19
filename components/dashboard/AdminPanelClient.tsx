@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import ProposalTimelineModal from "@/components/dashboard/ProposalTimelineModal";
 import { Users, BarChart2, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronUp, Clock, Trash2 } from "lucide-react";
 import ActividadClient from "@/components/dashboard/ActividadClient";
+import SaludClient from "@/components/dashboard/SaludClient";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -646,7 +647,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
 export default function AdminPanelClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string }
 }) {
-  const [tab, setTab] = useState<"users" | "metrics" | "holidays" | "partners" | "finanzas" | "actividad">("users");
+  const [tab, setTab] = useState<"users" | "metrics" | "holidays" | "partners" | "finanzas" | "actividad" | "salud">("users");
   const [users, setUsers] = useState<User[]>([]);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loadingUsers, setLoadingUsers] = useState(true);
@@ -805,6 +806,7 @@ export default function AdminPanelClient({ user }: {
               { key: "partners",  label: "Partners",  icon: Users },
               { key: "finanzas", label: "Finanzas",  icon: BarChart2 },
               { key: "actividad", label: "Actividad", icon: Clock },
+              { key: "salud", label: "Sistema", icon: BarChart2 },
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
                 className="flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-all"
@@ -815,6 +817,8 @@ export default function AdminPanelClient({ user }: {
           </div>
 
           {tab === "actividad" && <ActividadClient />}
+
+          {tab === "salud" && <SaludClient />}
 
           {/* Users tab */}
           {tab === "users" && (
