@@ -22,8 +22,16 @@ const ESTILO: Record<string, { bg: string; color: string; label: string }> = {
   lead_web:           { bg: "#F1EFE8", color: "#5F5E5A", label: "web" },
 };
 
+function parseFecha(iso: string): Date {
+  let t = iso.trim().replace(" ", "T");
+  const m = t.match(/([+-])(\d{2})$/);
+  if (m) t = t + ":00";
+  return new Date(t);
+}
+
 function cuando(iso: string, tz: string) {
-  const d = new Date(iso.replace(" ", "T"));
+  const d = parseFecha(iso);
+  if (isNaN(d.getTime())) return "";
   const ahora = new Date();
   const dias = Math.floor((ahora.getTime() - d.getTime()) / 86400000);
   const hora = d.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: tz });

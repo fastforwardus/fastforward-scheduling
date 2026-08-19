@@ -31,8 +31,14 @@ const FILTROS = [
   { key: "telefono", label: "Llamadas" },
 ];
 
+function parseFecha(iso: string): Date {
+  let t = iso.trim().replace(" ", "T");
+  if (/([+-])(\d{2})$/.test(t)) t += ":00";
+  return new Date(t);
+}
+
 function fechaTitulo(iso: string, tz: string) {
-  const d = new Date(iso.replace(" ", "T"));
+  const d = parseFecha(iso);
   const hoy = new Date();
   const mismo = (a: Date, b: Date) => a.toDateString() === b.toDateString();
   const ayer = new Date(hoy.getTime() - 86400000);
@@ -106,7 +112,7 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
               const st = ESTILO[m.kind] || { bg: "#F1EFE8", color: "#5F5E5A", label: m.kind };
               const id = m.src_type + m.src_id + m.occurred_at + i;
               const largo = (m.description || "").length >= 195;
-              const hora = new Date(m.occurred_at.replace(" ", "T"))
+              const hora = parseFecha(m.occurred_at)
                 .toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: timezone });
               return (
                 <div key={id}
