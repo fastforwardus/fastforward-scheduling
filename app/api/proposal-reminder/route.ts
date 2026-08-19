@@ -233,7 +233,7 @@ export async function GET(req: NextRequest) {
       .select({ phone: appointments.clientWhatsapp })
       .from(proposals)
       .leftJoin(appointments, sql`${appointments.id}::text = ${proposals.appointmentId}`)
-      .where(sql`${proposals.whatsappLastSentAt} >= ${desde}`);
+      .where(sql`${proposals.whatsappLastSentAt} >= ${desde.toISOString()}::timestamptz`);
     for (const r of recientes) {
       if (!r.phone) continue;
       enfriamiento.add(normalizeWhatsAppPhone(r.phone));
