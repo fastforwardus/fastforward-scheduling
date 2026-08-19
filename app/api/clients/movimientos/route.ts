@@ -27,6 +27,11 @@ export async function GET(req: NextRequest) {
     limit 500
   `);
 
-  const items = (rows as unknown as { rows: Record<string, unknown>[] }).rows ?? [];
-  return NextResponse.json({ total: items.length, items });
+  const r = rows as unknown as Record<string, unknown>;
+  const items = (Array.isArray(rows) ? rows : (r.rows as unknown[]) ?? []) as Record<string, unknown>[];
+  return NextResponse.json({
+    total: items.length,
+    debug: { esArray: Array.isArray(rows), llaves: Object.keys(r || {}).slice(0, 5) },
+    items,
+  });
 }
