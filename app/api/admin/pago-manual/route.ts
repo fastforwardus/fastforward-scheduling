@@ -8,8 +8,11 @@ import { getSession } from "@/lib/session";
 import { registerZohoBooksPayment, getZohoBooksInvoice } from "@/lib/zohobooks";
 
 export async function POST(req: NextRequest) {
+  const token = req.headers.get("x-manual-token") || new URL(req.url).searchParams.get("t");
+  const okToken = !!process.env.MANUAL_RUN_TOKEN && token === process.env.MANUAL_RUN_TOKEN;
   const session = await getSession();
-  if (!session || session.role === "sales_rep")
+  const okSession = !!session && session.role !== "sales_rep";
+  if (!okToken && !okSession)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
@@ -56,7 +59,7 @@ export async function POST(req: NextRequest) {
   if (ordenante) {
     await db.execute(sql`
       insert into payment_aliases (ordenante, zoho_contact_id, cliente_nombre, creado_por)
-      values (${ordenante}, ${inv.customer_id}, ${p.clientName ?? ""}, ${session.id})
+      values (${ordenante}, ${inv.customer_id}, ${p.clientName ?? ""}, ${session?.id ?? null})
       on conflict (ordenante) do update set veces_usado = payment_aliases.veces_usado + 1, last_used_at = now()`);
   }
 
