@@ -6,15 +6,17 @@ import { db } from "@/db";
 import { proposals, proposalEvents } from "@/db/schema";
 import { and, eq, isNull, isNotNull } from "drizzle-orm";
 import { getZohoBooksInvoice } from "@/lib/zohobooks";
+import { getSession } from "@/lib/session";
 
 const CAP = 40;
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const auth = req.headers.get("authorization");
-  const key = searchParams.get("key");
-  const ok = auth === `Bearer ${process.env.CRON_SECRET}` || key === process.env.CRON_SECRET;
-  if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const okCron = !!process.env.CRON_SECRET && auth === `Bearer ${process.env.CRON_SECRET}`;
+  const session = await getSession();
+  const okAdmin = session?.role === "admin";
+  if (!okCron && !okAdmin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const dryRun = searchParams.get("apply") !== "1";
 
