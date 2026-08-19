@@ -41,3 +41,4 @@ next-env.d.ts
 *.xlsx
 ff-importar.js
 ff-resolver.js
+.env*
