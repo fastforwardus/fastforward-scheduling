@@ -1,10 +1,11 @@
 export const runtime = "nodejs";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { autorizarOps } from "@/lib/ops-auth";
 import { getSession } from "@/lib/session";
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -24,7 +25,7 @@ export async function GET() {
       LEFT JOIN appointments a ON a.id::text = p.appointment_id::text
       LEFT JOIN users u ON u.id::text = a.assigned_to::text
       LEFT JOIN users us ON us.id::text = p.sent_by_id::text
-      WHERE ${isAdmin ? sql`1=1` : sql`(p.sent_by_id::text = ${session.id} OR a.assigned_to::text = ${session.id})`}
+      WHERE ${isAdmin ? sql`1=1` : sql`(p.sent_by_id::text = ${session!.id} OR a.assigned_to::text = ${session!.id})`}
       ORDER BY p.created_at DESC
       LIMIT 100
     `) as unknown as { rows: Record<string, unknown>[] };
