@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   // Tomamos 5 leads que ya tenemos vinculados y miramos que cuelga de ellos
   const filas = await db.execute(sql`
     select distinct zoho_lead_id, client_company, client_name
-    from appointments where zoho_lead_id is not null limit 5
+    from appointments where zoho_lead_id is not null limit 25
   `);
   const leads = (Array.isArray(filas) ? filas : []) as Record<string, string>[];
 
