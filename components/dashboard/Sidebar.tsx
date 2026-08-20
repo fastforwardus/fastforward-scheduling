@@ -22,7 +22,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/recovery", icon: PhoneCall, label: "Recupero", roles: ["admin","sales_manager","recovery"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
     { href: "/dashboard/admin", icon: Shield, label: "Administracion", roles: ["admin"] },
-    { href: "/dashboard/admin/adriana", icon: MessageCircle, label: "Adriana", roles: ["admin"] },
+    { href: "/dashboard/admin/adriana", icon: MessageCircle, label: "Conversaciones", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
   ];
 

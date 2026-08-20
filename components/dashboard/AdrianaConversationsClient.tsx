@@ -6,6 +6,7 @@ import {
   MessageCircle, Search, ChevronLeft, Mail, Building2,
   Globe, Calendar, Star, Loader2, User, Bot, RefreshCw,
 } from "lucide-react";
+import ConversacionAcciones from "@/components/dashboard/ConversacionAcciones";
 
 interface SessionUser {
   id: string;
@@ -294,6 +295,15 @@ export default function AdrianaConversationsClient({ user }: { user: SessionUser
                   </span>
                 )}
               </div>
+
+              <ConversacionAcciones
+                conversationId={detail.conversation.id}
+                ownerUserId={(detail.conversation as unknown as { ownerUserId?: string | null }).ownerUserId ?? null}
+                lastUserMsgAt={detail.conversation.lastUserMsgAt}
+                optedOut={!!(detail.conversation as unknown as { optedOutAt?: string | null }).optedOutAt}
+                sessionUser={{ id: user.id, role: user.role }}
+                onCambio={() => { fetchDetail(detail.conversation.id); fetchList(); }}
+              />
 
               {/* Panel datos del lead (colapsable en mobile) */}
               <details className="border-b border-slate-200" open>

@@ -5,6 +5,6 @@ import AdrianaConversationsClient from "@/components/dashboard/AdrianaConversati
 export default async function AdrianaPage() {
   const session = await getSession();
   if (!session) redirect("/login");
-  if (session.role !== "admin") redirect("/dashboard");
+  if (session.role === "recovery") redirect("/dashboard");
   return <AdrianaConversationsClient user={session} />;
 }
