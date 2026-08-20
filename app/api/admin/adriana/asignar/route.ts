@@ -8,6 +8,15 @@ import { sendWhatsAppText } from "@/lib/adriana/whatsapp-sender";
 
 const VENTANA_HS = 24;
 
+function parseFecha(v: unknown): Date {
+  if (v instanceof Date) return v;
+  let t = String(v).trim().replace(" ", "T");
+  // Postgres devuelve el offset como "+00"; sin minutos, Date lo rechaza
+  if (/([+-])(\d{2})$/.test(t)) t += ":00";
+  const d = new Date(t);
+  return isNaN(d.getTime()) ? new Date(0) : d;
+}
+
 /** Asignar la conversacion a alguien del equipo. Solo admin y managers. */
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -75,7 +84,7 @@ export async function PUT(req: NextRequest) {
   if (c.owner_user_id !== session.id && session.role !== "admin")
     return NextResponse.json({ error: "La conversacion tiene otro responsable" }, { status: 403 });
 
-  const ultimo = c.last_user_msg_at ? new Date(String(c.last_user_msg_at).replace(" ", "T")).getTime() : 0;
+  const ultimo = c.last_user_msg_at ? parseFecha(c.last_user_msg_at).getTime() : 0;
   const horas = (Date.now() - ultimo) / 3600000;
   if (!ultimo || horas > VENTANA_HS)
     return NextResponse.json({
