@@ -59,7 +59,7 @@ export default function ConversacionAcciones({
     const d = await r.json().catch(() => ({}));
     setEnviando(false);
     if (r.ok) { setTexto(""); onCambio(); }
-    else setError(d.mensaje || d.error || "No se pudo enviar");
+    else setError(d.mensaje || (d.detalle ? `${d.error}: ${d.detalle}` : d.error) || "No se pudo enviar");
   }
 
   return (
