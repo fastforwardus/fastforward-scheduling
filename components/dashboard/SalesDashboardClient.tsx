@@ -2,7 +2,7 @@
 import type { Appt } from "@/types/appointments";
 import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send, PhoneCall } from "lucide-react";
+import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, PhoneCall } from "lucide-react";
 import Link from "next/link";
 import PanelDia from "@/components/dashboard/PanelDia";
 import { Sidebar } from "@/components/dashboard/Sidebar";
