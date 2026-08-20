@@ -5,17 +5,10 @@ import { db } from "@/db";
 import { sql } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { sendWhatsAppText } from "@/lib/adriana/whatsapp-sender";
+import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
 const VENTANA_HS = 24;
 
-function parseFecha(v: unknown): Date {
-  if (v instanceof Date) return v;
-  let t = String(v).trim().replace(" ", "T");
-  // Postgres devuelve el offset como "+00"; sin minutos, Date lo rechaza
-  if (/([+-])(\d{2})$/.test(t)) t += ":00";
-  const d = new Date(t);
-  return isNaN(d.getTime()) ? new Date(0) : d;
-}
 
 /** Asignar la conversacion a alguien del equipo. Solo admin y managers. */
 export async function POST(req: NextRequest) {

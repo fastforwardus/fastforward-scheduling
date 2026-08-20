@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
 interface Mov {
   occurred_at: string; source: string; kind: string; actor: string | null;
@@ -23,11 +24,6 @@ const ESTILO: Record<string, { bg: string; color: string; label: string }> = {
   lead_web:           { bg: "#F1EFE8", color: "#5F5E5A", label: "web" },
 };
 
-function parseFecha(iso: string): Date {
-  let t = String(iso).trim().replace(" ", "T");
-  if (/([+-])(\d{2})$/.test(t)) t += ":00";
-  return new Date(t);
-}
 
 function dia(iso: string, tz: string) {
   const d = parseFecha(iso);

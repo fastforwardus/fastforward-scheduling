@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
 interface Mov {
   occurred_at: string; source: string; kind: string; actor: string | null;
@@ -31,11 +32,6 @@ const FILTROS = [
   { key: "telefono", label: "Llamadas" },
 ];
 
-function parseFecha(iso: string): Date {
-  let t = iso.trim().replace(" ", "T");
-  if (/([+-])(\d{2})$/.test(t)) t += ":00";
-  return new Date(t);
-}
 
 function fechaTitulo(iso: string, tz: string) {
   const d = parseFecha(iso);

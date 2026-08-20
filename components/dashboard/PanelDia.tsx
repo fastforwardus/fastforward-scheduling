@@ -1,17 +1,13 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { Circle, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
 interface Rem {
   id: string; title: string; due_at: string; snooze_count: number;
   lead_email: string | null; done_at: string | null;
 }
 
-function parseFecha(iso: string): Date {
-  let t = String(iso).trim().replace(" ", "T");
-  if (/([+-])(\d{2})$/.test(t)) t += ":00";
-  return new Date(t);
-}
 
 function relativo(iso: string, tz: string) {
   const d = parseFecha(iso);

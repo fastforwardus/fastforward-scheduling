@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
 import { getSession } from "@/lib/session";
+import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
 // Cada proceso declara donde deja rastro y cada cuanto deberia dejarlo.
 // Si el ultimo rastro es mas viejo que el umbral, algo se rompio.
@@ -20,14 +21,6 @@ const PROCESOS = [
   { nombre: "Encuestas",              consulta: sql`select max(submitted_at) t from surveys`,                                       horas: 336, ruta: "/api/survey" },
 ];
 
-function parseFecha(v: unknown): Date {
-  if (v instanceof Date) return v;
-  let t = String(v).trim().replace(" ", "T");
-  // Postgres devuelve el offset como "+00"; sin los minutos, Date lo rechaza
-  if (/([+-])(\d{2})$/.test(t)) t += ":00";
-  const d = new Date(t);
-  return isNaN(d.getTime()) ? new Date(0) : d;
-}
 
 export async function GET() {
   const session = await getSession();

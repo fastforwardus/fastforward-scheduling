@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Bell, X, Check } from "lucide-react";
 import Link from "next/link";
+import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
 interface Item {
   id: string;
@@ -12,11 +13,6 @@ interface Item {
   vencido: boolean;
 }
 
-function parseFecha(iso: string): Date {
-  let t = String(iso).trim().replace(" ", "T");
-  if (/([+-])(\d{2})$/.test(t)) t += ":00";
-  return new Date(t);
-}
 
 export function ReminderBell() {
   const [items, setItems] = useState<Item[]>([]);
