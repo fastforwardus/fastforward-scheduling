@@ -8,6 +8,25 @@ import { getZohoTokenPublico } from "@/lib/zoho";
 
 const BASE = "https://www.zohoapis.com/crm/v2";
 
+// Zoho devuelve el owner como email, como usuario ("dguastella") o como nombre
+// completo ("Carlos Bisio"). Dos no coinciden con su email, asi que van a mano.
+const OWNER_A_EMAIL: Record<string, string> = {
+  "carlos bisio": "info@fastfwdus.com",
+  "emiliano caracciolo": "renewals@fastfwdus.com",
+  "emiliano": "renewals@fastfwdus.com",
+  "mauricio": "mx@fastfwdus.com",
+  "mauricio lobaton": "mx@fastfwdus.com",
+};
+
+function emailDeOwner(v: string): string {
+  const x = v.toLowerCase().trim();
+  if (!x) return "";
+  if (x.includes("@")) return x;
+  if (OWNER_A_EMAIL[x]) return OWNER_A_EMAIL[x];
+  // El resto usa el alias del email: dguastella, tmarino, flogarzo
+  return `${x.replace(/\s+/g, "")}@fastfwdus.com`;
+}
+
 interface TareaZoho {
   id: string; Subject: string; Status: string; Due_Date: string | null;
   Priority: string | null; Description: string | null;
@@ -38,8 +57,10 @@ export async function GET(req: NextRequest) {
     const abiertas = crudas.filter(t =>
       t.Status !== "Completed" && t.Status !== "Deferred");
 
-    const mias = todos ? abiertas
-      : abiertas.filter(t => t.Owner?.email?.toLowerCase() === session.email.toLowerCase());
+    const mias = todos ? abiertas : abiertas.filter(t => {
+      const owner = (t.Owner?.email || t.Owner?.name || "").toLowerCase().trim();
+      return emailDeOwner(owner) === session.email.toLowerCase();
+    });
 
     // Cruzar con nuestros leads para saber de que cliente es cada tarea
     const ids = [...new Set(mias.map(t => t.Who_Id?.id).filter(Boolean))] as string[];
@@ -64,6 +85,7 @@ export async function GET(req: NextRequest) {
       prioridad: t.Priority,
       notas: t.Description,
       owner: t.Owner?.name ?? null,
+      ownerEmail: emailDeOwner(t.Owner?.email || t.Owner?.name || ""),
       cliente: t.Who_Id?.name ?? t.What_Id?.name ?? null,
       leadEmail: t.Who_Id?.id ? mapa.get(t.Who_Id.id) ?? null : null,
       url: t.id ? `https://crm.zoho.com/crm/tab/Tasks/${t.id}` : null,
