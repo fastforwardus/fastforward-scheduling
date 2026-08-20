@@ -20,7 +20,10 @@ export async function GET(req: NextRequest) {
   if (!(await autorizarOps(req)))
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const dryRun = new URL(req.url).searchParams.get("apply") !== "1";
+  const params = new URL(req.url).searchParams;
+  const dryRun = params.get("apply") !== "1";
+  // Para probar sin molestar a nadie: manda todos los digest a una sola casilla
+  const forzarA = params.get("to");
 
   // Vencidos + lo que vence hoy, de gente activa, que no se aviso en 20 h
   const filas = await db.execute(sql`
@@ -93,14 +96,14 @@ ${hoy.length ? `<tr><td style="padding:14px 28px 6px;">
     if (!dryRun) {
       await resend.emails.send({
         from: "FastForward <info@fastfwdus.com>",
-        to: u.email,
-        subject: vencidos.length
+        to: forzarA || u.email,
+        subject: (forzarA ? `[${u.full_name}] ` : "") + (vencidos.length
           ? `${vencidos.length} pendiente${vencidos.length === 1 ? "" : "s"} vencido${vencidos.length === 1 ? "" : "s"}`
-          : `Tenés ${hoy.length} pendiente${hoy.length === 1 ? "" : "s"} para hoy`,
+          : `Tenés ${hoy.length} pendiente${hoy.length === 1 ? "" : "s"} para hoy`),
         html,
       }).catch(e => console.error("digest error:", u.email, e));
 
-      await db.execute(sql`
+      if (!forzarA) await db.execute(sql`
         update reminders set last_notified_at = now()
         where id in ${sql.raw("(" + lista.map(r => `'${r.id}'`).join(",") + ")")}
       `);
