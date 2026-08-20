@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { db } from "@/db";
 import { adrianaMessages, adrianaConversations, systemConfig, proposals, proposalEvents } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { processUserMessage } from "@/lib/adriana/engine";
 import { isOptOutMessage, OPT_OUT_REPLY } from "@/lib/adriana/opt-out";
 import { sendWhatsAppText, markAsRead } from "@/lib/adriana/whatsapp-sender";
@@ -229,6 +229,57 @@ export async function POST(req: NextRequest) {
             console.error("[wa-webhook] opt-out error:", err);
           }
           continue;
+        }
+
+        // ── 3.5. Conversacion tomada por un humano ──
+        // Si alguien del equipo la tiene asignada, Adriana no contesta:
+        // guardamos el mensaje, avisamos al responsable y salimos.
+        try {
+          const asignada = await db.execute(sql`
+            select c.id, c.owner_user_id, c.lead_name, c.lead_company, c.lead_email
+            from adriana_conversations c
+            where c.wa_phone = ${msg.from} and c.owner_user_id is not null
+            limit 1
+          `);
+          const conv2 = (Array.isArray(asignada) ? asignada[0] : null) as Record<string, unknown> | null;
+
+          if (conv2?.owner_user_id) {
+            await db.execute(sql`
+              insert into adriana_messages (conversation_id, role, content, wa_message_id)
+              values (${String(conv2.id)}, 'user',
+                      ${JSON.stringify([{ type: "text", text: msg.text.body }])}::jsonb,
+                      ${msg.id})
+            `);
+            await db.execute(sql`
+              update adriana_conversations
+              set last_user_msg_at = now(), updated_at = now()
+              where id = ${String(conv2.id)}
+            `);
+
+            const quien = String(conv2.lead_company || conv2.lead_name || msg.from);
+            // Un solo pendiente abierto por conversacion, aunque manden varios mensajes
+            await db.execute(sql`
+              insert into reminders (title, notes, due_at, original_due_at,
+                                     created_by_user_id, assigned_to_user_id,
+                                     lead_email, lead_phone, source_type, source_id, notify_channels)
+              select ${"Respondio " + quien}, ${msg.text.body.slice(0, 200)},
+                     now(), now(),
+                     ${String(conv2.owner_user_id)}, ${String(conv2.owner_user_id)},
+                     ${String(conv2.lead_email || "").toLowerCase() || null},
+                     ${msg.from}, 'conversacion_respuesta', ${String(conv2.id)},
+                     ARRAY['app']::text[]
+              where not exists (
+                select 1 from reminders r
+                where r.source_type = 'conversacion_respuesta'
+                  and r.source_id = ${String(conv2.id)}
+                  and r.done_at is null
+              )
+            `);
+            console.log("[wa-webhook] conversacion asignada, Adriana no responde:", msg.from);
+            continue;
+          }
+        } catch (err) {
+          console.error("[wa-webhook] error en chequeo de asignacion:", err);
         }
 
         // ── 4. Llamar al engine ──
