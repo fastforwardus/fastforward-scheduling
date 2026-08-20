@@ -1,6 +1,13 @@
 const ZOHO_BASE = "https://www.zohoapis.com/crm/v2";
 
+// El token dura 1 h. Sin cache, cada llamada pedia uno nuevo y Zoho corta el
+// endpoint de auth por exceso de pedidos ("too many requests continuously").
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
 async function getZohoToken(): Promise<string> {
+  if (cachedToken && Date.now() < cachedToken.expiresAt - 60000) {
+    return cachedToken.token;
+  }
   const res = await fetch("https://accounts.zoho.com/oauth/v2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -16,6 +23,7 @@ async function getZohoToken(): Promise<string> {
   let data: { access_token?: string; error?: string };
   try { data = JSON.parse(text); } catch { throw new Error(`Zoho auth invalid JSON: ${text.substring(0, 100)}`); }
   if (!data.access_token) throw new Error(`Zoho auth failed: ${JSON.stringify(data)}`);
+  cachedToken = { token: data.access_token, expiresAt: Date.now() + 3600 * 1000 };
   return data.access_token;
 }
 
