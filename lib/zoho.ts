@@ -235,3 +235,9 @@ export async function findZohoLead(clientEmail: string): Promise<{ id: string; o
     return null;
   }
 }
+
+
+/** Igual que getZohoToken pero exportado, para rutas de inspeccion. */
+export async function getZohoTokenPublico(): Promise<string> {
+  return getZohoToken();
+}
