@@ -207,3 +207,23 @@ export async function createOrUpdateZohoLead(params: {
 
   return { id: leadId, action: existingId ? "updated" : "created" };
 }
+
+/** Busca un lead por email y devuelve su id y el email del owner. */
+export async function findZohoLead(clientEmail: string): Promise<{ id: string; ownerEmail: string | null } | null> {
+  try {
+    const token = await getZohoToken();
+    const res = await fetch(ZOHO_BASE + "/Leads/search?email=" + encodeURIComponent(clientEmail), {
+      headers: { Authorization: "Zoho-oauthtoken " + token },
+    });
+    if (res.status === 204) return null;
+    const text = await res.text();
+    if (!text) return null;
+    const data = JSON.parse(text);
+    const lead = data?.data?.[0];
+    if (!lead?.id) return null;
+    return { id: lead.id, ownerEmail: lead.Owner?.email || null };
+  } catch (err) {
+    console.error("Zoho lead lookup error:", err);
+    return null;
+  }
+}
