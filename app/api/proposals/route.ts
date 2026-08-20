@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     }).from(proposals).where(and(
       sql`lower(trim(${proposals.clientEmail})) = ${emailChequeo}`,
       eq(proposals.total, totalChequeo),
-      sql`${proposals.createdAt} > now() - interval '30 days'`,
+      sql`${proposals.createdAt} > now() - interval '2 hours'`,
     ));
 
     if (previas.length > 0) {
