@@ -8,6 +8,7 @@ import PanelDia from "@/components/dashboard/PanelDia";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import TrabajoEnCurso from "@/components/dashboard/TrabajoEnCurso";
 import AccionesPropuesta from "@/components/dashboard/AccionesPropuesta";
+import ProposalModal from "@/components/dashboard/ProposalModal";
 
 interface Stats {
   total: number;
@@ -52,6 +53,7 @@ export default function SalesDashboardClient({ user }: {
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
   const [myProposals, setMyProposals] = useState<MyProposal[]>([]);
+  const [editandoProp, setEditandoProp] = useState<MyProposal | null>(null);
   const [loadingProposals, setLoadingProposals] = useState(true);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"home" | "all">("home");
@@ -273,6 +275,7 @@ export default function SalesDashboardClient({ user }: {
                     {new Date(prop.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short" })}
                   </p>
                   <AccionesPropuesta id={prop.id} pagada={!!prop.payment_confirmed_at}
+                    onEditar={() => setEditandoProp(prop)}
                     onListo={() => { setLoadingProposals(true); fetch("/api/proposals/my").then(r => r.json()).then(d => { setMyProposals(d.proposals || []); setLoadingProposals(false); }); }} />
                 </div>
               ))}
@@ -321,6 +324,22 @@ export default function SalesDashboardClient({ user }: {
 
       </div>
       </main>
+
+      {editandoProp && (
+        <ProposalModal
+          appointmentId=""
+          clientName={editandoProp.client_name || ""}
+          clientCompany={editandoProp.client_company || ""}
+          clientEmail={editandoProp.client_email || ""}
+          editarId={editandoProp.id}
+          descuentoInicial={Number(editandoProp.discount || 0)}
+          onClose={() => setEditandoProp(null)}
+          onSuccess={() => {
+            setEditandoProp(null);
+            fetch("/api/proposals/my").then(r => r.json()).then(d => setMyProposals(d.proposals || []));
+          }}
+        />
+      )}
     </div>
   );
 }

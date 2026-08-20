@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import { Send, X, Loader2 } from "lucide-react";
+import { Send, X, Loader2, Pencil } from "lucide-react";
 
-export default function AccionesPropuesta({ id, pagada, onListo }: {
-  id: string; pagada: boolean; onListo: () => void;
+export default function AccionesPropuesta({ id, pagada, onListo, onEditar }: {
+  id: string; pagada: boolean; onListo: () => void; onEditar?: () => void;
 }) {
   const [cargando, setCargando] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -39,6 +39,14 @@ export default function AccionesPropuesta({ id, pagada, onListo }: {
           ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#6B7280" }} />
           : <Send className="w-3.5 h-3.5" style={{ color: "#27295C" }} />}
       </button>
+
+      {!pagada && onEditar && (
+        <button onClick={e => { e.stopPropagation(); onEditar(); }}
+          title="Editar y reenviar"
+          className="p-1.5 rounded-md" style={{ background: "#F3F4F6" }}>
+          <Pencil className="w-3.5 h-3.5" style={{ color: "#27295C" }} />
+        </button>
+      )}
 
       {!pagada && (
         <button onClick={e => {

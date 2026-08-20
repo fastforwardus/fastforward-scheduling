@@ -21,9 +21,12 @@ interface ProposalModalProps {
   repSlug?: string;
   onClose: () => void;
   onSuccess: () => void;
+  editarId?: string;
+  serviciosIniciales?: { name: string; description?: string; price: number }[];
+  descuentoInicial?: number;
 }
 
-export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", clientLanguage = "es", onClose, onSuccess }: ProposalModalProps) {
+export default function ProposalModal({ appointmentId, clientName, clientCompany, clientEmail: initialClientEmail = "", clientLanguage = "es", onClose, onSuccess, editarId, serviciosIniciales, descuentoInicial }: ProposalModalProps) {
   const [selectedCat, setSelectedCat] = useState<string | null>(null);
   const [selected, setSelected] = useState<SelectedService[]>([]);
   const [discount, setDiscount] = useState(0);
@@ -53,6 +56,24 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
   const [clientTaxId, setClientTaxId] = useState("");
   const [sent, setSent] = useState(false);
   const [searchQ, setSearchQ] = useState("");
+
+  // Modo edicion: precargar lo que ya tenia la propuesta
+  useEffect(() => {
+    if (!editarId || !serviciosIniciales?.length) return;
+    setSelected(serviciosIniciales.map(x => ({
+      category: "", name: x.name, description: x.description || "", price: x.price, qty: 1,
+    })) as SelectedService[]);
+    setDiscount(descuentoInicial || 0);
+  }, [editarId, serviciosIniciales, descuentoInicial]);
+
+  // Modo edicion: precargar lo que ya tenia la propuesta
+  useEffect(() => {
+    if (!editarId || !serviciosIniciales?.length) return;
+    setSelected(serviciosIniciales.map(s => ({
+      category: "", name: s.name, description: s.description || "", price: s.price, qty: 1,
+    })) as SelectedService[]);
+    setDiscount(descuentoInicial || 0);
+  }, [editarId, serviciosIniciales, descuentoInicial]);
 
   // Autopopulado: direccion y tax id de la ultima propuesta de este cliente
   useEffect(() => {
@@ -112,10 +133,14 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
     if (!selected.length) return;
     setSending(true);
     try {
-      const res = await fetch("/api/proposals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const cuerpo = editarId
+        ? {
+            id: editarId,
+            accion: "editar",
+            servicios: selected.map(s => ({ name: s.name, description: s.description, price: s.price * s.qty })),
+            discount,
+          }
+        : {
           appointmentId,
           services: selected.map(s => ({ name: s.name, description: s.description, price: s.price * s.qty })),
           discount,
@@ -125,7 +150,12 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           clientEmail: clientEmail || undefined,
           clientAddress: clientAddress || undefined,
           clientTaxId: clientTaxId || undefined,
-        }),
+        };
+
+      const res = await fetch(editarId ? "/api/proposals/acciones" : "/api/proposals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cuerpo),
       });
       const data = await res.json();
       if (data.ok) {
