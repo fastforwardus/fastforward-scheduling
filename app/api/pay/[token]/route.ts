@@ -20,10 +20,10 @@ export async function GET(_req: NextRequest, { params }: { params: { token: stri
   if (!clientEmail && proposal.appointmentId && !proposal.appointmentId.startsWith("direct-")) {
     const rows = await db.execute(
       sql`SELECT client_name, client_email, client_company FROM appointments WHERE id::text = ${proposal.appointmentId} LIMIT 1`
-    ) as unknown as { rows: { client_name: string; client_email: string; client_company: string }[] };
-    clientName = rows.rows?.[0]?.client_name || clientName;
-    clientEmail = rows.rows?.[0]?.client_email || clientEmail;
-    clientCompany = rows.rows?.[0]?.client_company || "";
+    );
+    clientName = ((Array.isArray(rows) ? rows[0] : undefined) as Record<string, string> | undefined)?.client_name || clientName;
+    clientEmail = ((Array.isArray(rows) ? rows[0] : undefined) as Record<string, string> | undefined)?.client_email || clientEmail;
+    clientCompany = ((Array.isArray(rows) ? rows[0] : undefined) as Record<string, string> | undefined)?.client_company || "";
   }
 
   const inv = await getZohoBooksInvoice(proposal.zohoInvoiceId);
