@@ -29,9 +29,10 @@ export async function GET(req: NextRequest) {
       WHERE ${isAdmin ? sql`1=1` : sql`(p.sent_by_id::text = ${session!.id} OR a.assigned_to::text = ${session!.id})`}
       ORDER BY p.created_at DESC
       LIMIT 100
-    `) as unknown as { rows: Record<string, unknown>[] };
+    `);
 
-    return NextResponse.json({ proposals: rows.rows });
+    const items = (Array.isArray(rows) ? rows : []) as Record<string, unknown>[];
+    return NextResponse.json({ proposals: items });
   } catch (err) {
     console.error("My proposals error:", err);
     return NextResponse.json({ error: String(err) }, { status: 500 });
