@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
                                created_by_user_id, assigned_to_user_id,
                                lead_email, source_type, source_id, notify_channels)
         values (${titulo},
-                ${"Cita del " + new Date(String(a.scheduled_at)).toLocaleString("es-ES", { timeZone: "America/New_York" })},
+                ${"Cita del " + new Date(String(a.scheduled_at).replace(" ", "T")).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "America/New_York" })},
                 now(), now(),
                 ${a.assigned_to}, ${a.assigned_to},
                 ${String(a.client_email || "").toLowerCase() || null},
