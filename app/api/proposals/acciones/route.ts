@@ -12,7 +12,9 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id, accion, servicios, discount, motivo } = await req.json();
+  const body = await req.json();
+  const { id, servicios, discount, motivo } = body;
+  let accion: string = body.accion;
   if (!id || !accion) return NextResponse.json({ error: "Faltan id o accion" }, { status: 400 });
 
   const filas = await db.execute(sql`
@@ -74,7 +76,12 @@ export async function POST(req: NextRequest) {
       values (${id}, 'revisada', 'panel',
               ${"Revisada por " + session.fullName + " — nuevo total USD " + nuevoTotal})
     `);
-    return NextResponse.json({ ok: true, total: nuevoTotal });
+
+    // Al editar siempre se reenvia: el cliente tiene que ver la version nueva
+    p.services = JSON.stringify(servicios);
+    p.discount = Number(discount || 0);
+    p.total = nuevoTotal;
+    accion = "reenviar";
   }
 
   // ── REENVIAR ──
@@ -140,7 +147,7 @@ export async function POST(req: NextRequest) {
       values (${id}, 'reenviada', 'email',
               ${"Reenviada por " + session.fullName + " a " + String(p.cli_email || "")})
     `);
-    return NextResponse.json({ ok: true, a: p.cli_email });
+    return NextResponse.json({ ok: true, a: p.cli_email, total: Number(p.total) });
   }
 
   return NextResponse.json({ error: "Accion invalida" }, { status: 400 });
