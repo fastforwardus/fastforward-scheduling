@@ -106,8 +106,8 @@ export default function ConversacionAcciones({
       ) : (
         <div className="px-4 pb-3 flex gap-2 items-end">
           <textarea value={texto} onChange={e => setTexto(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) responder(); }}
-            rows={2} placeholder="Escribí tu respuesta…"
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); responder(); } }}
+            rows={2} placeholder="Escribí tu respuesta… (Enter para enviar)"
             className="flex-1 text-sm px-3 py-2 rounded-lg border resize-none"
             style={{ borderColor: "#E5E7EB", color: "#1F2937" }} />
           <button onClick={responder} disabled={!texto.trim() || enviando}
