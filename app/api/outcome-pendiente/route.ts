@@ -88,5 +88,35 @@ export async function GET(req: NextRequest) {
     escalados = (Array.isArray(esc) ? esc.length : 0);
   }
 
-  return NextResponse.json({ dryRun, encontradas: filas.length, creados, escalados });
+  // Liberar conversaciones sin actividad: si pasaron 2 dias sin que nadie
+  // hable, vuelve a manos de Adriana para que atienda una consulta nueva.
+  let liberadas = 0;
+  if (!dryRun) {
+    const libres = await db.execute(sql`
+      update adriana_conversations
+      set owner_user_id = null, asignada_at = null, asignada_por = null
+      where owner_user_id is not null
+        and greatest(
+              coalesce(last_user_msg_at, asignada_at),
+              coalesce(last_assistant_msg_at, asignada_at)
+            ) < now() - interval '2 days'
+      returning id
+    `);
+    liberadas = Array.isArray(libres) ? libres.length : 0;
+
+    // Cerrar los pendientes de esas conversaciones: ya no son de nadie
+    if (liberadas > 0) {
+      await db.execute(sql`
+        update reminders r set done_at = now()
+        where r.source_type in ('conversacion','conversacion_respuesta')
+          and r.done_at is null
+          and not exists (
+            select 1 from adriana_conversations c
+            where c.id::text = r.source_id and c.owner_user_id is not null
+          )
+      `);
+    }
+  }
+
+  return NextResponse.json({ dryRun, encontradas: filas.length, creados, escalados, liberadas });
 }
