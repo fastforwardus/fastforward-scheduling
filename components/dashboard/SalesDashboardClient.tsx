@@ -251,7 +251,9 @@ export default function SalesDashboardClient({ user }: {
         <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
           <div className="px-5 py-3.5 border-b flex items-center justify-between" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
             <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Mis propuestas ({myProposals.length})</p>
-            <Send className="w-4 h-4" style={{ color: "#C9A84C" }} />
+            <a href="/dashboard/propuestas" className="text-xs font-medium" style={{ color: "#C9A84C" }}>
+              Ver todas →
+            </a>
           </div>
           {loadingProposals ? (
             <div className="text-center py-8"><Clock className="w-5 h-5 animate-spin mx-auto" style={{ color: "#C9A84C" }} /></div>

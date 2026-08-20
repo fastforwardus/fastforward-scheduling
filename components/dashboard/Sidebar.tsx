@@ -18,6 +18,7 @@ export function Sidebar({ user }: SidebarProps) {
   const allLinks = [
     { href: "/dashboard", icon: LayoutDashboard, label: "Inicio", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/appointments", icon: Calendar, label: "Todas las citas", roles: ["admin","sales_manager","sales_rep"] },
+    { href: "/dashboard/propuestas", icon: FileText, label: "Propuestas", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/propuesta", icon: FileText, label: "Enviar propuesta", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/recovery", icon: PhoneCall, label: "Recupero", roles: ["admin","sales_manager","recovery"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
