@@ -8,9 +8,10 @@ import { sql } from "drizzle-orm";
 export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const porToken = !session && (await autorizarOps(req));
 
-    const isAdmin = session.role === "admin";
+    if (!session && !porToken) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const isAdmin = porToken || session?.role === "admin";
 
     const rows = await db.execute(sql`
       SELECT 
