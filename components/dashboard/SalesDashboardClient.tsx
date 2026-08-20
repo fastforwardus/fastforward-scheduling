@@ -7,6 +7,7 @@ import Link from "next/link";
 import PanelDia from "@/components/dashboard/PanelDia";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import TrabajoEnCurso from "@/components/dashboard/TrabajoEnCurso";
+import AccionesPropuesta from "@/components/dashboard/AccionesPropuesta";
 
 interface Stats {
   total: number;
@@ -271,6 +272,8 @@ export default function SalesDashboardClient({ user }: {
                   <p className="text-xs shrink-0" style={{ color: "#D1D5DB" }}>
                     {new Date(prop.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short" })}
                   </p>
+                  <AccionesPropuesta id={prop.id} pagada={!!prop.payment_confirmed_at}
+                    onListo={() => { setLoadingProposals(true); fetch("/api/proposals/my").then(r => r.json()).then(d => { setMyProposals(d.proposals || []); setLoadingProposals(false); }); }} />
                 </div>
               ))}
             </div>
