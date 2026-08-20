@@ -6,6 +6,7 @@ import { Calendar, CheckCircle, TrendingUp, FileText, Clock, ChevronRight, Send,
 import Link from "next/link";
 import PanelDia from "@/components/dashboard/PanelDia";
 import { Sidebar } from "@/components/dashboard/Sidebar";
+import TrabajoEnCurso from "@/components/dashboard/TrabajoEnCurso";
 
 interface Stats {
   total: number;
@@ -227,6 +228,8 @@ export default function SalesDashboardClient({ user }: {
             </div>
           </div>
         )}
+
+        <TrabajoEnCurso />
 
         {/* Mis Propuestas */}
         <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
