@@ -19,11 +19,12 @@ export async function GET() {
         COALESCE(a.client_name, p.client_name) as client_name,
         COALESCE(a.client_company, '') as client_company,
         COALESCE(a.client_email, p.client_email) as client_email,
-        u.full_name as rep_name
+        COALESCE(us.full_name, u.full_name) as rep_name
       FROM proposals p
       LEFT JOIN appointments a ON a.id::text = p.appointment_id::text
       LEFT JOIN users u ON u.id::text = a.assigned_to::text
-      WHERE ${isAdmin ? sql`1=1` : sql`a.assigned_to::text = ${session.id} OR (p.appointment_id LIKE 'direct-%' AND p.client_email IS NOT NULL)`}
+      LEFT JOIN users us ON us.id::text = p.sent_by_id::text
+      WHERE ${isAdmin ? sql`1=1` : sql`(p.sent_by_id::text = ${session.id} OR a.assigned_to::text = ${session.id})`}
       ORDER BY p.created_at DESC
       LIMIT 100
     `) as unknown as { rows: Record<string, unknown>[] };

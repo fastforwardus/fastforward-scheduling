@@ -50,8 +50,8 @@ export default function SalesDashboardClient({ user }: {
   user: { id?: string; fullName: string; email: string; role: string; slug?: string; canRecovery?: boolean; timezone?: string };
 }) {
   const [appointments, setAppointments] = useState<Appt[]>([]);
-  const [myProposals, setMyProposals] = useState<MyProposal[]>([]); // eslint-disable-line
-  const [loadingProposals, setLoadingProposals] = useState(false); // eslint-disable-line
+  const [myProposals, setMyProposals] = useState<MyProposal[]>([]);
+  const [loadingProposals, setLoadingProposals] = useState(true);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<"home" | "all">("home");
 
@@ -64,6 +64,19 @@ export default function SalesDashboardClient({ user }: {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    let vivo = true;
+    (async () => {
+      try {
+        const r = await fetch("/api/proposals/my");
+        const d = await r.json();
+        if (vivo) setMyProposals(d.proposals || []);
+      } catch { if (vivo) setMyProposals([]); }
+      if (vivo) setLoadingProposals(false);
+    })();
+    return () => { vivo = false; };
+  }, []);
 
   const now = new Date();
   const todayStr = now.toDateString();
@@ -82,7 +95,7 @@ export default function SalesDashboardClient({ user }: {
     total: appointments.length,
     completed: appointments.filter(a => a.outcome === "completed" || a.status === "completed").length,
     noShow: appointments.filter(a => a.status === "no_show").length,
-    proposalsSent: appointments.filter(a => a.outcome === "proposal_sent").length,
+    proposalsSent: myProposals.length,
     closed: appointments.filter(a => a.outcome === "closed").length,
     todayCount: todayAppts.length,
   };
