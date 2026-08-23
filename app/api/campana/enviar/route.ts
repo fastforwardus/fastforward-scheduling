@@ -94,7 +94,9 @@ export async function GET(req: NextRequest) {
     // LATAM primero: espanol y portugues convierten mejor y el equipo los
     // atiende en su idioma. El ingles queda al final de la cola.
     .orderBy(
-      sql`case when coalesce(${campanaLeads.idioma}, 'es') in ('es','pt') then 0 else 1 end`,
+      // Espanol primero, despues portugues, el ingles al final: es el orden
+      // de conversion observado y de comodidad para el equipo.
+      sql`case coalesce(${campanaLeads.idioma}, 'es') when 'es' then 0 when 'pt' then 1 else 2 end`,
       sql`${campanaLeads.antiguedadMeses} asc nulls last`,
     )
     .limit(cantidad * 2);
