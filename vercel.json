@@ -1,6 +1,14 @@
 {
   "crons": [
     {
+      "path": "/api/sync-cobros",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/informe-semanal",
+      "schedule": "0 21 * * 5"
+    },
+    {
       "path": "/api/reminders",
       "schedule": "0 * * * *"
     },
