@@ -88,7 +88,8 @@ export async function GET(req: NextRequest) {
   `));
 
   const resultados = filas(await db.execute(sql`
-    select coalesce(a.outcome, 'sin_cargar') outcome, count(*)::int n
+    -- outcome es enum: hay que castear antes del coalesce
+    select coalesce(a.outcome::text, 'sin_cargar') outcome, count(*)::int n
     from appointments a
     where (a.scheduled_at at time zone 'America/New_York') >= ${desde}
       and (a.scheduled_at at time zone 'America/New_York') < now() at time zone 'America/New_York'
