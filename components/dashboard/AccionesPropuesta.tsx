@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Send, X, Loader2, Pencil } from "lucide-react";
+import { Send, X, Loader2, Pencil, Check } from "lucide-react";
 
 export default function AccionesPropuesta({ id, pagada, onListo, onEditar }: {
   id: string; pagada: boolean; onListo: () => void; onEditar?: () => void;
@@ -17,7 +17,9 @@ export default function AccionesPropuesta({ id, pagada, onListo, onEditar }: {
       });
       const d = await r.json();
       if (r.ok) {
-        setMsg(accion === "reenviar" ? `Reenviada a ${d.a}` : "Anulada");
+        setMsg(accion === "reenviar" ? `Reenviada a ${d.a}`
+             : accion === "aceptar_manual" ? "Marcada como aceptada"
+             : "Anulada");
         onListo();
       } else {
         setMsg(d.error || "No se pudo");
@@ -48,6 +50,36 @@ export default function AccionesPropuesta({ id, pagada, onListo, onEditar }: {
         </button>
       )}
 
+      {!pagada && (
+        <button onClick={e => {
+            e.stopPropagation();
+            // El cliente cerro por fuera del boton: pago directo, pidio factura
+            // o confirmo en la llamada. Sin esto la propuesta seguia pendiente.
+            const m = prompt(
+              "¿Como se cerro?\n\n" +
+              "1 = Pagó directo\n" +
+              "2 = Pidió factura\n" +
+              "3 = Cerró en la llamada\n" +
+              "4 = Otro\n\n" +
+              "Escribí el número:");
+            if (m === null) return;
+            const MOTIVOS: Record<string, string> = {
+              "1": "pago_directo", "2": "pidio_factura",
+              "3": "cerro_llamada", "4": "otro",
+            };
+            const motivo = MOTIVOS[m.trim()];
+            if (!motivo) { setMsg("Número inválido"); return; }
+            if (confirm("Se marca como aceptada y deja de recibir recordatorios. ¿Confirmás?")) {
+              ejecutar("aceptar_manual", motivo);
+            }
+          }}
+          disabled={!!cargando} title="Marcar como aceptada"
+          className="p-1.5 rounded-md" style={{ background: "#F0FDF4" }}>
+          {cargando === "aceptar_manual"
+            ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#166534" }} />
+            : <Check className="w-3.5 h-3.5" style={{ color: "#16A34A" }} />}
+        </button>
+      )}
       {!pagada && (
         <button onClick={e => {
             e.stopPropagation();

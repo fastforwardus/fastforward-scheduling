@@ -37,6 +37,35 @@ export async function POST(req: NextRequest) {
   if (p.payment_confirmed_at && accion !== "reenviar")
     return NextResponse.json({ error: "Ya esta pagada, no se puede modificar" }, { status: 409 });
 
+  // ── ACEPTAR A MANO ──
+  // Muchos clientes cierran sin tocar el boton: pagan por transferencia, piden
+  // la factura o confirman en la llamada. Sin esta accion la propuesta seguia
+  // figurando pendiente, recibiendo recordatorios y sin contar en el revenue.
+  if (accion === "aceptar_manual") {
+    const MOTIVOS: Record<string, string> = {
+      pago_directo: "Pagó directo",
+      pidio_factura: "Pidió factura",
+      cerro_llamada: "Cerró en la llamada",
+      otro: "Otro",
+    };
+    const etiqueta = MOTIVOS[String(motivo || "")] || "Confirmado por el equipo";
+
+    await db.execute(sql`
+      update proposals
+      set status = 'accepted',
+          accepted_at = coalesce(accepted_at, now()),
+          whatsapp_stage = 4
+      where id = ${id}
+    `);
+    await db.execute(sql`
+      insert into proposal_events (proposal_id, kind, channel, detail)
+      values (${id}, 'accepted', 'panel',
+              ${etiqueta + " — marcada por " + session.fullName})
+    `);
+    console.log("[propuestas] aceptada a mano:", p.proposal_num, "|", etiqueta, "|", session.fullName);
+    return NextResponse.json({ ok: true, estado: "aceptada", motivo: etiqueta });
+  }
+
   // ── ANULAR ──
   if (accion === "anular") {
     await db.execute(sql`
