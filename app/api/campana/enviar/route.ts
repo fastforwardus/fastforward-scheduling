@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const cantidad = Math.min(Number(req.nextUrl.searchParams.get("n") || 15), 60);
+  const cantidad = Math.min(Number(req.nextUrl.searchParams.get("n") || 15), 100);
   const simular = req.nextUrl.searchParams.get("dry") === "1";
 
   // Override manual: hay que pasarlo en cada llamada, no queda activo. Sirve
@@ -96,7 +96,9 @@ export async function GET(req: NextRequest) {
     .orderBy(
       // Espanol primero, despues portugues, el ingles al final: es el orden
       // de conversion observado y de comodidad para el equipo.
-      sql`case coalesce(${campanaLeads.idioma}, 'es') when 'es' then 0 when 'pt' then 1 else 2 end`,
+      // Espanol primero, ingles despues, portugues al final: las plantillas
+      // pt_BR estan sin acentos y hay que esperar la reaprobacion de Meta.
+      sql`case coalesce(${campanaLeads.idioma}, 'es') when 'es' then 0 when 'en' then 1 else 2 end`,
       sql`${campanaLeads.antiguedadMeses} asc nulls last`,
     )
     .limit(cantidad * 2);
@@ -116,10 +118,19 @@ export async function GET(req: NextRequest) {
     }
 
     const nombre = (p.nombre || "").split(" ")[0] || "";
+    // El relleno del hueco {{2}} tiene que ir en el idioma de la plantilla:
+    // a 2.527 brasilenos les llego una frase en espanol dentro de un mensaje
+    // en portugues, y no respondio ninguno.
+    const TEMA_POR_IDIOMA: Record<string, string> = {
+      es: "entrada al mercado de Estados Unidos",
+      pt: "entrada no mercado dos Estados Unidos",
+      en: "entering the U.S. market",
+    };
+    const idi = p.idioma || "es";
     const tema = p.servicio && p.servicio.trim()
       ? p.servicio.trim()
-      : "entrada al mercado de Estados Unidos";
-    const lang = LANG[p.idioma || "es"] || "es";
+      : (TEMA_POR_IDIOMA[idi] || TEMA_POR_IDIOMA.es);
+    const lang = LANG[idi] || "es";
 
     // Los de feria llevan su propia plantilla: mencionan al vendedor que los
     // atendio en el stand, que es el gancho real. La generica les diria
