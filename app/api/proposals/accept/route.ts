@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
   const services = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
 
   // ── Zoho Books: crear contacto + factura ──────────────────────────
+  let errorFactura: string | null = null;
   let zohoInvoiceId = "";
   let zohoContactId = "";
   let zohoPaymentLink = "";
@@ -71,6 +72,9 @@ export async function POST(req: NextRequest) {
     console.log("Zoho Books invoice creado y marcado sent:", zohoInvoiceId);
   } catch (err) {
     console.error("Zoho Books invoice error:", err);
+    // Sin esto la propuesta queda aceptada, sin factura y sin que nadie se
+    // entere: el cliente acepto y el cobro nunca se emitio.
+    errorFactura = String(err).slice(0, 400);
   }
 
   // ── Update proposal status ───────────────────────────────────────
@@ -80,12 +84,38 @@ export async function POST(req: NextRequest) {
     zohoContactId: zohoContactId || null,
     zohoPaymentLink: zohoPaymentLink || null,
     zohoInvoiceId: zohoInvoiceId || null,
+    zohoInvoiceMissingAt: zohoInvoiceId ? null : new Date(),
   }).where(eq(proposals.id, proposal.id));
 
   await db.insert(proposalEvents).values({
     proposalId: proposal.id, kind: "accepted", channel: "web",
-    detail: `Aceptada — invoice ${zohoInvoiceId || "pendiente"}`,
+    detail: zohoInvoiceId
+      ? `Aceptada — invoice ${zohoInvoiceId}`
+      : `Aceptada — LA FACTURA NO SE GENERO: ${errorFactura || "motivo desconocido"}`,
   }).catch(() => {});
+
+  // Aviso al equipo: una propuesta aceptada sin factura es plata que se
+  // cobra tarde o no se cobra.
+  if (!zohoInvoiceId) {
+    resend.emails.send({
+      from: "FastForward Sistema <info@fastfwdus.com>",
+      to: (process.env.AVISO_FACTURA_EMAIL || "info@fastfwdus.com").split(","),
+      subject: `Falta la factura — ${proposal.proposalNum} (${proposal.clientName ?? ""})`,
+      html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;max-width:520px;">
+<p style="margin:0 0 14px;font-size:16px;"><b>El cliente aceptó pero la factura no se generó</b></p>
+<div style="border-left:3px solid #DC2626;padding-left:14px;margin-bottom:16px;">
+<p style="margin:0 0 4px;"><b>Propuesta:</b> ${proposal.proposalNum}</p>
+<p style="margin:0 0 4px;"><b>Cliente:</b> ${proposal.clientName ?? "—"}</p>
+<p style="margin:0 0 4px;"><b>Total:</b> USD ${proposal.total}</p>
+</div>
+<p style="margin:0 0 8px;color:#5b6472;">Error de Zoho Books:</p>
+<div style="background:#f6f8fb;border-radius:8px;padding:12px;font-size:12px;white-space:pre-wrap;">${
+  (errorFactura || "sin detalle").replace(/</g, "&lt;")
+}</div>
+<p style="margin:16px 0 0;font-size:13px;color:#5b6472;">Hay que emitirla a mano en Zoho Books y avisarle al cliente.</p>
+</div>`,
+    }).catch((e) => console.error("[accept] no se pudo avisar del fallo:", e));
+  }
 
   // ── Marcar la cita como ganada ───────────────────────────────────
   // appointment_id es TEXT y puede ser "direct-xxxx" (propuesta sin cita),
