@@ -94,6 +94,27 @@ export async function POST(req: NextRequest) {
       : `Aceptada — LA FACTURA NO SE GENERO: ${errorFactura || "motivo desconocido"}`,
   }).catch(() => {});
 
+  // Recordatorio en Pendientes: un aviso por email se pierde entre otros, y
+  // habia USD 6.754 aceptados sin facturar sin que nadie lo viera.
+  if (!zohoInvoiceId) {
+    db.execute(sql`
+      insert into reminders
+        (title, notes, due_at, original_due_at, created_by_user_id,
+         assigned_to_user_id, lead_email, source_type, source_id, notify_channels)
+      select
+        ${"Falta facturar — " + (proposal.clientName ?? "cliente") + " · USD " + proposal.total},
+        ${"La propuesta " + proposal.proposalNum + " fue aceptada pero Zoho Books no emitió la factura. Generala desde Propuestas con el botón amarillo."},
+        now(), now(),
+        coalesce(${proposal.sentById ?? null}::uuid, (select id from users where role = 'admin' limit 1)),
+        coalesce(${proposal.sentById ?? null}::uuid, (select id from users where role = 'admin' limit 1)),
+        ${proposal.clientEmail ?? null},
+        'factura_faltante', ${proposal.id}, '{app,email}'
+      where not exists (
+        select 1 from reminders
+        where source_type = 'factura_faltante' and source_id = ${proposal.id}
+      )`).catch((e) => console.error("[accept] no se pudo crear el recordatorio:", e));
+  }
+
   // Aviso al equipo: una propuesta aceptada sin factura es plata que se
   // cobra tarde o no se cobra.
   if (!zohoInvoiceId) {
