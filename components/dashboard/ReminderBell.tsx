@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Bell, X, Check } from "lucide-react";
+import { Bell, X, Check, FileText, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
@@ -11,12 +11,43 @@ interface Item {
   detalle: string | null;
   cuando: string;
   vencido: boolean;
+  /** id de la propuesta cuando el pendiente es una factura que falta emitir */
+  propuestaId?: string;
 }
 
 
 export function ReminderBell() {
   const [items, setItems] = useState<Item[]>([]);
   const [abierto, setAbierto] = useState(false);
+  const [facturando, setFacturando] = useState<string | null>(null);
+
+  // Facturar desde el mismo pendiente: mandar al usuario a buscar la propuesta
+  // en otra pantalla es la razon por la que esto quedaba sin hacer.
+  async function facturar(i: Item) {
+    if (!i.propuestaId) return;
+    if (!confirm("Se va a generar la factura en Zoho Books. ¿Confirmás?")) return;
+    setFacturando(i.id);
+    try {
+      const r = await fetch("/api/proposals/acciones", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: i.propuestaId, accion: "generar_factura" }),
+      });
+      const d = await r.json();
+      if (r.ok) {
+        // La factura salio: el pendiente ya no tiene razon de existir
+        await fetch("/api/reminders-personales", {
+          method: "PATCH", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: i.id, accion: "completar" }),
+        }).catch(() => {});
+        await cargar();
+      } else {
+        alert("No se pudo generar: " + (d.error || "error desconocido"));
+      }
+    } catch {
+      alert("Error de conexión");
+    }
+    setFacturando(null);
+  }
 
   const cargar = useCallback(async () => {
     const salida: Item[] = [];
@@ -46,6 +77,7 @@ export function ReminderBell() {
           detalle: i.lead_email || null,
           cuando: i.due_at,
           vencido: parseFecha(i.due_at).getTime() < ahora,
+          propuestaId: i.source_type === "factura_faltante" ? i.source_id : undefined,
         });
       }
     } catch { /* silencioso */ }
@@ -130,6 +162,16 @@ export function ReminderBell() {
                     {i.detalle ? i.detalle + " · " : ""}{fmt(i.cuando)}
                   </p>
                 </div>
+                {i.propuestaId && (
+                  <button onClick={() => facturar(i)} disabled={facturando === i.id}
+                    className="px-2 py-1 rounded-md flex-shrink-0 flex items-center gap-1 text-xs font-semibold"
+                    style={{ background: "#FEF3C7", color: "#B45309" }}
+                    aria-label="Generar la factura">
+                    {facturando === i.id
+                      ? <Loader2 className="w-3 h-3 animate-spin" />
+                      : <><FileText className="w-3 h-3" /> Facturar</>}
+                  </button>
+                )}
                 <button onClick={() => completar(i)}
                   className="p-1 rounded-md flex-shrink-0" style={{ background: "rgba(34,197,94,0.12)" }}
                   aria-label="Marcar como hecho">

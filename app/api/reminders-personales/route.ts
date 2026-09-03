@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
   const rows = await db.execute(sql`
     select r.id, r.title, r.notes, r.due_at, r.original_due_at, r.snooze_count,
            r.lead_email, r.lead_phone, r.done_at, r.notify_channels,
+           r.source_type, r.source_id,
            u.full_name as asignado
     from reminders r
     left join users u on u.id = r.assigned_to_user_id
