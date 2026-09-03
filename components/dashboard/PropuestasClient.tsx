@@ -144,6 +144,7 @@ export default function PropuestasClient({ user }: {
                     {new Date(p.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short" })}
                   </p>
                   <AccionesPropuesta id={p.id} pagada={!!p.payment_confirmed_at}
+                    sinFactura={p.status === "accepted" && !p.zoho_invoice_id}
                     onEditar={() => setEditando(p)} onListo={cargar} />
                 </div>
               );
