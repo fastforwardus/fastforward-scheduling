@@ -51,8 +51,16 @@ export async function POST(req: NextRequest) {
         email: String(p.cli_email || p.client_email || ""),
         company: String(p.cli_empresa || ""),
       });
-      const servicios = JSON.parse(String(p.services || "[]")) as
-        { name: string; price: number; description?: string }[];
+      // services puede venir ya parseado (jsonb) o como texto: String() sobre un
+      // objeto da "[object Object]" y el parse revienta.
+      const crudo = p.services;
+      const servicios = (Array.isArray(crudo)
+        ? crudo
+        : typeof crudo === "string" ? JSON.parse(crudo || "[]") : []
+      ) as { name: string; price: number; description?: string }[];
+      if (!servicios.length) {
+        return NextResponse.json({ error: "La propuesta no tiene servicios cargados" }, { status: 400 });
+      }
       const inv = await createZohoBooksInvoice({
         contactId: contacto.contact_id,
         invoiceNumber: String(p.proposal_num),
