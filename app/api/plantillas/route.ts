@@ -56,7 +56,13 @@ export async function GET(req: NextRequest) {
         }),
       });
       const d = await r.json();
-      hechas.push({ idioma: idi, ok: !d.error, detalle: d.error?.message ?? d.id ?? d.status });
+      hechas.push({
+        idioma: idi, ok: !d.error,
+        detalle: d.error?.error_user_msg ?? d.error?.error_user_title
+          ?? d.error?.message ?? d.id ?? d.status,
+        // Meta devuelve el motivo real acá; "Invalid parameter" no dice nada
+        crudo: d.error ? JSON.stringify(d.error).slice(0, 300) : undefined,
+      });
     }
     return NextResponse.json({ ok: true, creadas: hechas });
   }
