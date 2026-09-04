@@ -22,16 +22,17 @@ const ESTILO: Record<string, { bg: string; color: string; label: string }> = {
   propuesta_paid:     { bg: "#EAF3DE", color: "#3B6D11", label: "pago" },
   nota:               { bg: "#F1EFE8", color: "#5F5E5A", label: "nota" },
   lead_web:           { bg: "#F1EFE8", color: "#5F5E5A", label: "web" },
+  email:              { bg: "#FEF3C7", color: "#92400E", label: "email" },
 };
 
 const FILTROS = [
   { key: "todo", label: "Todo" },
   { key: "whatsapp", label: "WhatsApp" },
+  { key: "email", label: "Emails" },
   { key: "scheduling", label: "Citas" },
   { key: "propuestas", label: "Propuestas" },
   { key: "telefono", label: "Llamadas" },
 ];
-
 
 function fechaTitulo(iso: string, tz: string) {
   const d = parseFecha(iso);
@@ -50,12 +51,35 @@ function servicios(detail: string): string {
   } catch { return detail; }
 }
 
+/**
+ * Junta los mensajes de WhatsApp seguidos en un bloque desplegable: veinte
+ * mensajes de una conversacion tapaban la propuesta y el pago en el feed.
+ */
+function colapsarChat(movs: Mov[]): { tipo: "chat" | "uno"; movs: Mov[] }[] {
+  const out: { tipo: "chat" | "uno"; movs: Mov[] }[] = [];
+  for (const m of movs) {
+    const ult = out[out.length - 1];
+    if (m.kind === "mensaje" && ult?.tipo === "chat") ult.movs.push(m);
+    else out.push({ tipo: m.kind === "mensaje" ? "chat" : "uno", movs: [m] });
+  }
+  // Un solo mensaje no necesita desplegable
+  return out.map(b => (b.tipo === "chat" && b.movs.length === 1)
+    ? { tipo: "uno" as const, movs: b.movs } : b);
+}
+
 export default function MovimientosFeed({ email, timezone = "America/New_York" }: {
   email: string; timezone?: string;
 }) {
   const [items, setItems] = useState<Mov[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState("todo");
+  const [chatAbierto, setChatAbierto] = useState<Set<string>>(new Set());
+
+  const alternarChat = (k: string) => setChatAbierto(p => {
+    const n = new Set(p);
+    if (n.has(k)) n.delete(k); else n.add(k);
+    return n;
+  });
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -78,6 +102,33 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
     if (ult && ult[0] === t) ult[1].push(m);
     else grupos.push([t, [m]]);
   });
+
+  const hs = (m: Mov) => parseFecha(m.occurred_at)
+    .toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: timezone });
+
+  const fila = (m: Mov, i: number, pref: string) => {
+    const st = ESTILO[m.kind] || { bg: "#F1EFE8", color: "#5F5E5A", label: m.kind };
+    return (
+      <div key={pref + m.src_type + m.src_id + m.occurred_at + i}
+        className="grid gap-3 px-5 py-2.5 border-b items-start hover:bg-gray-50 transition-colors"
+        style={{ gridTemplateColumns: "46px 96px minmax(0,1fr)", borderColor: "#F0F0F0" }}>
+        <span className="text-xs" style={{ color: "#9CA3AF", fontFamily: "ui-monospace, monospace" }}>{hs(m)}</span>
+        <span className="text-xs px-2 py-0.5 rounded text-center truncate"
+              style={{ background: st.bg, color: st.color }}>{st.label}</span>
+        <div className="min-w-0">
+          <p className="text-sm" style={{ color: "#111827", whiteSpace: "pre-wrap" }}>
+            {m.actor && <span style={{ color: "#6B7280" }}>{m.actor}: </span>}
+            {m.description}
+          </p>
+          {m.detail && (
+            <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>
+              {m.kind === "propuesta_enviada" ? servicios(m.detail) : m.detail}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
@@ -110,30 +161,35 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
             <div className="px-5 py-1.5 border-b" style={{ background: "#FAFAFA", borderColor: "#F0F0F0" }}>
               <span className="text-xs uppercase tracking-wider" style={{ color: "#9CA3AF", fontFamily: "ui-monospace, monospace" }}>{titulo}</span>
             </div>
-            {movs.map((m, i) => {
-              const st = ESTILO[m.kind] || { bg: "#F1EFE8", color: "#5F5E5A", label: m.kind };
-              const id = m.src_type + m.src_id + m.occurred_at + i;
-              const hora = parseFecha(m.occurred_at)
-                .toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", timeZone: timezone });
-              return (
-                <div key={id}
+            {colapsarChat(movs).map((bloque, bi) => {
+              if (bloque.tipo === "uno") return fila(bloque.movs[0], bi, titulo);
 
-                  className="grid gap-3 px-5 py-2.5 border-b items-start hover:bg-gray-50 transition-colors"
-                  style={{ gridTemplateColumns: "46px 96px minmax(0,1fr)", borderColor: "#F0F0F0" }}>
-                  <span className="text-xs" style={{ color: "#9CA3AF", fontFamily: "ui-monospace, monospace" }}>{hora}</span>
-                  <span className="text-xs px-2 py-0.5 rounded text-center truncate"
-                        style={{ background: st.bg, color: st.color }}>{st.label}</span>
-                  <div className="min-w-0">
-                    <p className="text-sm" style={{ color: "#111827", whiteSpace: "pre-wrap" }}>
-                      {m.actor && <span style={{ color: "#6B7280" }}>{m.actor}: </span>}
-                      {m.description}
-                    </p>
-                    {m.detail && (
-                      <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>
-                        {m.kind === "propuesta_enviada" ? servicios(m.detail) : m.detail}
-                      </p>
-                    )}
-                  </div>
+              const k = titulo + "-chat-" + bi;
+              const abierto = chatAbierto.has(k);
+              const desde = hs(bloque.movs[bloque.movs.length - 1]);
+              const hasta = hs(bloque.movs[0]);
+
+              return (
+                <div key={k}>
+                  <button onClick={() => alternarChat(k)}
+                    className="w-full grid gap-3 px-5 py-2.5 border-b items-center text-left hover:bg-gray-50 transition-colors"
+                    style={{ gridTemplateColumns: "46px 96px minmax(0,1fr) 20px", borderColor: "#F0F0F0" }}>
+                    <span className="text-xs" style={{ color: "#9CA3AF", fontFamily: "ui-monospace, monospace" }}>{desde}</span>
+                    <span className="text-xs px-2 py-0.5 rounded text-center"
+                          style={{ background: "#EEEDFE", color: "#3C3489" }}>whatsapp</span>
+                    <span className="text-sm" style={{ color: "#27295C" }}>
+                      Chat con Adriana
+                      <span className="text-xs ml-2" style={{ color: "#9CA3AF" }}>
+                        {bloque.movs.length} mensajes · {desde}–{hasta}
+                      </span>
+                    </span>
+                    <span className="text-xs text-center" style={{ color: "#9CA3AF" }}>{abierto ? "▲" : "▼"}</span>
+                  </button>
+                  {abierto && (
+                    <div style={{ background: "#FCFCFD" }}>
+                      {bloque.movs.map((m, i) => fila(m, i, k))}
+                    </div>
+                  )}
                 </div>
               );
             })}
