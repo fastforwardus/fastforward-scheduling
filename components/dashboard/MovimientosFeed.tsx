@@ -70,15 +70,20 @@ function servicios(detail: string): string {
  * mensajes de una conversacion tapaban la propuesta y el pago en el feed.
  */
 function colapsarChat(movs: Mov[]): { tipo: "chat" | "uno"; movs: Mov[] }[] {
-  const out: { tipo: "chat" | "uno"; movs: Mov[] }[] = [];
-  for (const m of movs) {
-    const ult = out[out.length - 1];
-    if (m.kind === "mensaje" && ult?.tipo === "chat") ult.movs.push(m);
-    else out.push({ tipo: m.kind === "mensaje" ? "chat" : "uno", movs: [m] });
-  }
-  // Un solo mensaje no necesita desplegable
-  return out.map(b => (b.tipo === "chat" && b.movs.length === 1)
-    ? { tipo: "uno" as const, movs: b.movs } : b);
+  // Un solo bloque de chat por dia: agrupar solo los mensajes consecutivos
+  // partia la misma conversacion en tres o cuatro pedazos cada vez que habia
+  // una cita o un pendiente en el medio.
+  const mensajes = movs.filter(m => m.kind === "mensaje");
+  const otros = movs.filter(m => m.kind !== "mensaje");
+
+  const out: { tipo: "chat" | "uno"; movs: Mov[] }[] =
+    otros.map(m => ({ tipo: "uno" as const, movs: [m] }));
+
+  if (mensajes.length === 1) out.push({ tipo: "uno", movs: mensajes });
+  else if (mensajes.length > 1) out.push({ tipo: "chat", movs: mensajes });
+
+  const cuando = (b: { movs: Mov[] }) => new Date(String(b.movs[0].occurred_at)).getTime();
+  return out.sort((a, b) => cuando(b) - cuando(a));
 }
 
 export default function MovimientosFeed({ email, timezone = "America/New_York" }: {
