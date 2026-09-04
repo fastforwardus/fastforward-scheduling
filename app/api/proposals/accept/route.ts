@@ -100,7 +100,8 @@ export async function POST(req: NextRequest) {
   try {
     const [duenio] = await db.select({ email: users.email, fullName: users.fullName })
       .from(users).where(eq(users.id, proposal.sentById ?? "")).limit(1);
-    if (duenio?.email?.toLowerCase().includes("emiliano")) {
+    // Su casilla es renewals@, no lleva su nombre: el match va por nombre
+    if (duenio?.fullName?.toLowerCase().includes("emiliano")) {
       crearTareaZoho({
         asunto: `Propuesta aceptada — ${proposal.clientName ?? "cliente"} · USD ${proposal.total}`,
         descripcion:
