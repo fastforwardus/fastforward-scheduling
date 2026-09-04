@@ -58,10 +58,15 @@ export async function GET(req: NextRequest) {
   // La unidad va como literal, no como parametro: concatenar el intervalo con
   // un $n hace que Postgres compare el timestamp contra texto y falle.
   const uSql = sql.raw(`'${u}'`);
-  const unMes = sql.raw(`interval '1 ${u}'`);
+  // Postgres acepta 'quarter' en date_trunc pero no como intervalo: ahi va
+  // '3 months'.
+  const RETROCESO: Record<string, string> = {
+    week: "1 week", month: "1 month", quarter: "3 months", year: "1 year",
+  };
+  const unPeriodo = sql.raw(`interval '${RETROCESO[u] ?? "1 month"}'`);
   const desde = enCurso
     ? sql`date_trunc(${uSql}, ${ahora})`
-    : sql`date_trunc(${uSql}, ${ahora}) - ${unMes}`;
+    : sql`date_trunc(${uSql}, ${ahora}) - ${unPeriodo}`;
   const hasta = enCurso ? ahora : sql`date_trunc(${uSql}, ${ahora})`;
 
   const porRep = filas(await db.execute(sql`
