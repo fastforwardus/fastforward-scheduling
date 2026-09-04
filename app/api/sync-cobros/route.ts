@@ -18,7 +18,9 @@ import { getZohoBooksInvoice } from "@/lib/zohobooks";
  * Solo marca pagos: nunca borra uno ya registrado.
  */
 export async function GET(req: NextRequest) {
-  const esCron = req.headers.get("x-vercel-cron") !== null;
+  // Vercel autentica los crons con Authorization: Bearer CRON_SECRET,
+  // no con x-vercel-cron: por eso estos dos nunca se ejecutaron.
+  const esCron = req.headers.get("authorization") === `Bearer ${process.env.CRON_SECRET}`;
   if (!esCron && req.nextUrl.searchParams.get("run") !== process.env.MANUAL_RUN_TOKEN) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
