@@ -37,8 +37,28 @@ export async function GET(req: NextRequest) {
   }
   const soloVer = req.nextUrl.searchParams.get("ver") === "1";
 
-  // Lunes de esta semana, en hora Miami
-  const desde = sql`date_trunc('week', now() at time zone 'America/New_York')`;
+  // Cada periodo define su ventana. El cron corre el dia 1 y el endpoint mira
+  // el periodo ya cerrado: el mes/trimestre/año anterior al actual.
+  const periodo = (req.nextUrl.searchParams.get("periodo") || "semana") as
+    "semana" | "mes" | "trimestre" | "anio";
+
+  const PERIODOS = {
+    semana:    { unidad: "week",    titulo: "Informe de la semana",     pie: "Semana desde el lunes" },
+    mes:       { unidad: "month",   titulo: "Informe del mes",          pie: "Mes cerrado" },
+    trimestre: { unidad: "quarter", titulo: "Informe del trimestre",    pie: "Trimestre cerrado" },
+    anio:      { unidad: "year",    titulo: "Informe del año",          pie: "Año cerrado" },
+  } as const;
+  const cfg = PERIODOS[periodo] ?? PERIODOS.semana;
+  const u = cfg.unidad;
+
+  // La semana corre en curso; los demas informan el periodo ya terminado
+  const enCurso = periodo === "semana";
+
+  const ahora = sql`now() at time zone 'America/New_York'`;
+  const desde = enCurso
+    ? sql`date_trunc(${u}, ${ahora})`
+    : sql`date_trunc(${u}, ${ahora}) - interval '1 ' || ${u}`;
+  const hasta = enCurso ? ahora : sql`date_trunc(${u}, ${ahora})`;
 
   const porRep = filas(await db.execute(sql`
     with citas as (
@@ -49,7 +69,7 @@ export async function GET(req: NextRequest) {
         count(*) filter (where a.status = 'cancelled')::int canceladas
       from appointments a
       where (a.scheduled_at at time zone 'America/New_York') >= ${desde}
-        and (a.scheduled_at at time zone 'America/New_York') < now() at time zone 'America/New_York'
+        and (a.scheduled_at at time zone 'America/New_York') < ${hasta}
         and a.assigned_to is not null
       group by 1
     ),
@@ -61,6 +81,7 @@ export async function GET(req: NextRequest) {
         coalesce(sum(p.total) filter (where p.status = 'accepted'), 0)::int monto_aceptado
       from proposals p
       where (p.created_at at time zone 'America/New_York') >= ${desde}
+        and (p.created_at at time zone 'America/New_York') < ${hasta}
         and p.sent_by_id is not null
       group by 1
     ),
@@ -71,6 +92,7 @@ export async function GET(req: NextRequest) {
       from proposals p
       where p.payment_confirmed_at is not null
         and (p.payment_confirmed_at at time zone 'America/New_York') >= ${desde}
+        and (p.payment_confirmed_at at time zone 'America/New_York') < ${hasta}
         and p.sent_by_id is not null
       group by 1
     )
@@ -94,7 +116,7 @@ export async function GET(req: NextRequest) {
     select coalesce(a.outcome::text, 'sin_cargar') outcome, count(*)::int n
     from appointments a
     where (a.scheduled_at at time zone 'America/New_York') >= ${desde}
-      and (a.scheduled_at at time zone 'America/New_York') < now() at time zone 'America/New_York'
+      and (a.scheduled_at at time zone 'America/New_York') < ${hasta}
       and a.status = 'completed'
     group by 1 order by 2 desc
   `));
@@ -103,7 +125,7 @@ export async function GET(req: NextRequest) {
     select
       (select count(*)::int from appointments a
         where (a.scheduled_at at time zone 'America/New_York') >= ${desde}
-          and (a.scheduled_at at time zone 'America/New_York') < now() at time zone 'America/New_York') citas,
+          and (a.scheduled_at at time zone 'America/New_York') < ${hasta}) citas,
       (select count(*)::int from proposals p
         where (p.created_at at time zone 'America/New_York') >= ${desde}) enviadas,
       (select coalesce(sum(total),0)::int from proposals p
@@ -134,7 +156,7 @@ export async function GET(req: NextRequest) {
   const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:720px;color:#1a1a1a;">
 <div style="background:#27295C;border-radius:12px 12px 0 0;padding:22px 26px;">
   <p style="margin:0;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;">FastForward</p>
-  <h1 style="margin:5px 0 0;font-size:20px;color:#fff;">Informe de la semana</h1>
+  <h1 style="margin:5px 0 0;font-size:20px;color:#fff;">${cfg.titulo}</h1>
 </div>
 
 <div style="background:#fff;border:1px solid #E5E7EB;border-top:none;padding:22px 26px;">
@@ -182,7 +204,7 @@ export async function GET(req: NextRequest) {
     ? `<p style="margin:10px 0 0;padding:9px 13px;background:#FEF9C3;border-radius:8px;font-size:12px;color:#854D0E;">Hay citas completadas sin resultado cargado. Sin eso no se puede medir qué funciona.</p>` : ""}
 
   <p style="margin:20px 0 0;font-size:11px;color:#9CA3AF;">
-    Semana desde el lunes, hora de Miami. Cobrado es lo que tiene pago confirmado.
+    ${cfg.pie}, hora de Miami. Cobrado es lo que tiene pago confirmado.
   </p>
 </div></div>`;
 
@@ -193,7 +215,7 @@ export async function GET(req: NextRequest) {
   await resend.emails.send({
     from: "FastForward <info@fastfwdus.com>",
     to: (process.env.INFORME_EMAIL || "info@fastfwdus.com").split(","),
-    subject: `Informe de la semana — ${usd(n(tot?.revenue))} cobrado`,
+    subject: `${cfg.titulo} — ${usd(n(tot?.revenue))} cobrado`,
     html,
   });
 
