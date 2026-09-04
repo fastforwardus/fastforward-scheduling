@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/noshow",
+      "schedule": "*/30 * * * *"
+    },
+    {
       "path": "/api/sync-cobros",
       "schedule": "0 12 * * *"
     },

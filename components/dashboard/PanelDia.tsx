@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Circle, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Circle, CheckCircle2, ChevronLeft, ChevronRight, FileText, Loader2 } from "lucide-react";
 import { parseFechaSegura as parseFecha } from "@/lib/fechas";
 
 interface Rem {
   id: string; title: string; due_at: string; snooze_count: number;
+  /** Cuando es factura_faltante, source_id apunta a la propuesta a facturar */
+  source_type?: string | null; source_id?: string | null;
   lead_email: string | null; done_at: string | null;
 }
 
@@ -78,6 +80,28 @@ export default function PanelDia({ timezone = "America/New_York" }: {
   const celdas: (number | null)[] = Array(primero.getDay()).fill(null);
   for (let i = 1; i <= dias; i++) celdas.push(i);
 
+  // Facturar sin salir de Inicio: mandar a buscar la propuesta a otra pantalla
+  // es la razon por la que estas quedaban sin hacer.
+  const [facturando, setFacturando] = useState<string | null>(null);
+
+  async function facturar(r: { id: string; source_id?: string | null }) {
+    if (!r.source_id) return;
+    if (!confirm("Se va a generar la factura en Zoho Books. ¿Confirmás?")) return;
+    setFacturando(r.id);
+    try {
+      const res = await fetch("/api/proposals/acciones", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: r.source_id, accion: "generar_factura" }),
+      });
+      const d = await res.json();
+      if (res.ok) { await completar(r.id); }
+      else { alert("No se pudo generar: " + (d.error || "error desconocido")); }
+    } catch {
+      alert("Error de conexión");
+    }
+    setFacturando(null);
+  }
+
   const vencidos = rems.filter(r => parseFecha(r.due_at).getTime() < Date.now());
   const proximos = rems.filter(r => parseFecha(r.due_at).getTime() >= Date.now()).slice(0, 4);
 
@@ -104,7 +128,7 @@ export default function PanelDia({ timezone = "America/New_York" }: {
               return (
                 <div key={r.id}
                   className="grid gap-3 px-5 py-3 border-b last:border-b-0 items-start"
-                  style={{ gridTemplateColumns: "22px 104px minmax(0,1fr)", borderColor: "#F0F0F0",
+                  style={{ gridTemplateColumns: "22px 104px minmax(0,1fr) auto", borderColor: "#F0F0F0",
                            background: venc ? "#FEF2F2" : "white",
                            borderLeft: venc ? "2px solid #DC2626" : "2px solid transparent" }}>
                   <button onClick={() => completar(r.id)} aria-label="Marcar hecho">
@@ -121,6 +145,15 @@ export default function PanelDia({ timezone = "America/New_York" }: {
                       </span>
                     )}
                   </span>
+                  {r.source_type === "factura_faltante" && r.source_id && (
+                    <button onClick={() => facturar(r)} disabled={facturando === r.id}
+                      className="px-2.5 py-1 rounded-md flex items-center gap-1.5 text-xs font-semibold self-center"
+                      style={{ background: "#FEF3C7", color: "#B45309" }}>
+                      {facturando === r.id
+                        ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        : <><FileText className="w-3.5 h-3.5" /> Facturar</>}
+                    </button>
+                  )}
                 </div>
               );
             })}

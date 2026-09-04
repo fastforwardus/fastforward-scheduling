@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
-import { Send, X, Loader2, Pencil, Check } from "lucide-react";
+import { Send, X, Loader2, Pencil, Check, FileText } from "lucide-react";
 
-export default function AccionesPropuesta({ id, pagada, onListo, onEditar }: {
-  id: string; pagada: boolean; onListo: () => void; onEditar?: () => void;
+export default function AccionesPropuesta({ id, pagada, sinFactura, onListo, onEditar }: {
+  id: string; pagada: boolean; sinFactura?: boolean;
+  onListo: () => void; onEditar?: () => void;
 }) {
   const [cargando, setCargando] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -17,7 +18,8 @@ export default function AccionesPropuesta({ id, pagada, onListo, onEditar }: {
       });
       const d = await r.json();
       if (r.ok) {
-        setMsg(accion === "reenviar" ? `Reenviada a ${d.a}`
+        setMsg(accion === "generar_factura" ? "Factura generada"
+             : accion === "reenviar" ? `Reenviada a ${d.a}`
              : accion === "aceptar_manual" ? "Marcada como aceptada"
              : "Anulada");
         onListo();
@@ -50,6 +52,21 @@ export default function AccionesPropuesta({ id, pagada, onListo, onEditar }: {
         </button>
       )}
 
+      {sinFactura && (
+        <button onClick={e => {
+            e.stopPropagation();
+            // Aceptada pero Zoho fallo al facturar: sin esto queda sin cobrar
+            if (confirm("Se va a generar la factura en Zoho Books. ¿Confirmás?")) {
+              ejecutar("generar_factura");
+            }
+          }}
+          disabled={!!cargando} title="Falta la factura — generarla ahora"
+          className="p-1.5 rounded-md" style={{ background: "#FEF3C7" }}>
+          {cargando === "generar_factura"
+            ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#92400E" }} />
+            : <FileText className="w-3.5 h-3.5" style={{ color: "#B45309" }} />}
+        </button>
+      )}
       {!pagada && (
         <button onClick={e => {
             e.stopPropagation();

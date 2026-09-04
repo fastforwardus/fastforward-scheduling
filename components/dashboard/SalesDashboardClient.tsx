@@ -277,6 +277,7 @@ export default function SalesDashboardClient({ user }: {
                     {new Date(prop.created_at).toLocaleDateString("es-AR", { day: "2-digit", month: "short" })}
                   </p>
                   <AccionesPropuesta id={prop.id} pagada={!!prop.payment_confirmed_at}
+                    sinFactura={prop.status === "accepted" && !prop.zoho_invoice_id}
                     onEditar={() => setEditandoProp(prop)}
                     onListo={() => { setLoadingProposals(true); fetch("/api/proposals/my").then(r => r.json()).then(d => { setMyProposals(d.proposals || []); setLoadingProposals(false); }); }} />
                 </div>

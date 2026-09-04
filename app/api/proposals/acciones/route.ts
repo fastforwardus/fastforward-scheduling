@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { sql } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { enviarPropuestaPorEmail } from "@/lib/proposal-email";
+import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent } from "@/lib/zohobooks";
 import { ProposalData } from "@/lib/proposal-pdf";
 
 export async function POST(req: NextRequest) {
@@ -36,6 +37,55 @@ export async function POST(req: NextRequest) {
 
   if (p.payment_confirmed_at && accion !== "reenviar")
     return NextResponse.json({ error: "Ya esta pagada, no se puede modificar" }, { status: 409 });
+
+  // ── REINTENTAR LA FACTURA ──
+  // Si Zoho falla al aceptar, la propuesta queda aceptada y sin factura. Habia
+  // USD 6.754 en ese estado, el mas viejo de hace cinco meses.
+  if (accion === "generar_factura") {
+    if (p.zoho_invoice_id) {
+      return NextResponse.json({ error: "Ya tiene factura" }, { status: 409 });
+    }
+    try {
+      const contacto = await findOrCreateZohoBooksContact({
+        name: String(p.cli_nombre || p.client_name || "Cliente"),
+        email: String(p.cli_email || p.client_email || ""),
+        company: String(p.cli_empresa || ""),
+      });
+      // services puede venir ya parseado (jsonb) o como texto: String() sobre un
+      // objeto da "[object Object]" y el parse revienta.
+      const crudo = p.services;
+      const servicios = (Array.isArray(crudo)
+        ? crudo
+        : typeof crudo === "string" ? JSON.parse(crudo || "[]") : []
+      ) as { name: string; price: number; description?: string }[];
+      if (!servicios.length) {
+        return NextResponse.json({ error: "La propuesta no tiene servicios cargados" }, { status: 400 });
+      }
+      const inv = await createZohoBooksInvoice({
+        contactId: contacto.contact_id,
+        invoiceNumber: String(p.proposal_num),
+        lineItems: servicios.map((x) => ({
+          name: x.name, rate: Number(x.price), quantity: 1,
+        })),
+      });
+      await markZohoBooksInvoiceSent(inv.invoice_id);
+      await db.execute(sql`
+        update proposals
+        set zoho_invoice_id = ${inv.invoice_id},
+            zoho_contact_id = ${contacto.contact_id},
+            zoho_payment_link = ${inv.invoice_url ?? null},
+            zoho_invoice_missing_at = null
+        where id = ${id}`);
+      await db.execute(sql`
+        insert into proposal_events (proposal_id, kind, channel, detail)
+        values (${id}, 'accepted', 'panel',
+                ${"Factura generada a mano por " + session.fullName + " — " + inv.invoice_id})`);
+      return NextResponse.json({ ok: true, invoice: inv.invoice_id });
+    } catch (e) {
+      console.error("[propuestas] reintento de factura fallo:", e);
+      return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 500 });
+    }
+  }
 
   // ── ACEPTAR A MANO ──
   // Muchos clientes cierran sin tocar el boton: pagan por transferencia, piden
