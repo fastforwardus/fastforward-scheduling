@@ -55,10 +55,14 @@ export async function GET(req: NextRequest) {
   const enCurso = periodo === "semana";
 
   const ahora = sql`now() at time zone 'America/New_York'`;
+  // La unidad va como literal, no como parametro: concatenar el intervalo con
+  // un $n hace que Postgres compare el timestamp contra texto y falle.
+  const uSql = sql.raw(`'${u}'`);
+  const unMes = sql.raw(`interval '1 ${u}'`);
   const desde = enCurso
-    ? sql`date_trunc(${u}, ${ahora})`
-    : sql`date_trunc(${u}, ${ahora}) - interval '1 ' || ${u}`;
-  const hasta = enCurso ? ahora : sql`date_trunc(${u}, ${ahora})`;
+    ? sql`date_trunc(${uSql}, ${ahora})`
+    : sql`date_trunc(${uSql}, ${ahora}) - ${unMes}`;
+  const hasta = enCurso ? ahora : sql`date_trunc(${uSql}, ${ahora})`;
 
   const porRep = filas(await db.execute(sql`
     with citas as (
