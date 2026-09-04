@@ -19,7 +19,7 @@ type Mov = Record<string, unknown>;
 async function emailsDeZoho(email: string): Promise<Mov[]> {
   try {
     const lead = await findZohoLead(email);
-    if (!lead) return [];
+    if (!lead) { console.log("[movimientos] sin lead en Zoho para", email); return []; }
 
     const token = await getZohoTokenPublico();
     const region = process.env.ZOHO_REGION || "com";
@@ -27,8 +27,12 @@ async function emailsDeZoho(email: string): Promise<Mov[]> {
       `https://www.zohoapis.${region}/crm/v6/Leads/${lead.id}/Emails`,
       { headers: { Authorization: `Zoho-oauthtoken ${token}` } });
 
-    if (!r.ok) return [];
+    if (!r.ok) {
+      console.log("[movimientos] Zoho Emails respondio", r.status, (await r.text()).slice(0, 200));
+      return [];
+    }
     const d = await r.json() as { Emails?: Record<string, unknown>[] };
+    console.log("[movimientos] Zoho devolvio", (d.Emails || []).length, "emails para", email);
 
     return (d.Emails || []).map((e) => {
       const from = (e.from ?? {}) as { user_name?: string; email?: string };

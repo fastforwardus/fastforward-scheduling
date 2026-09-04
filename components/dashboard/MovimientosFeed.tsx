@@ -1,6 +1,10 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { parseFechaSegura as parseFecha } from "@/lib/fechas";
+import {
+  MessageCircle, Bot, Mail, Calendar, CalendarCheck, Phone,
+  FileText, BellRing, CheckCircle2, DollarSign, StickyNote, Globe, AlertCircle,
+} from "lucide-react";
 
 interface Mov {
   occurred_at: string; source: string; kind: string; actor: string | null;
@@ -23,6 +27,16 @@ const ESTILO: Record<string, { bg: string; color: string; label: string }> = {
   nota:               { bg: "#F1EFE8", color: "#5F5E5A", label: "nota" },
   lead_web:           { bg: "#F1EFE8", color: "#5F5E5A", label: "web" },
   email:              { bg: "#FEF3C7", color: "#92400E", label: "email" },
+};
+
+/** Icono por tipo de movimiento: la etiqueta de texto sola no se distingue
+ *  de un vistazo cuando el feed tiene cuarenta lineas. */
+const ICONO: Record<string, React.ElementType> = {
+  mensaje: MessageCircle, pendiente: AlertCircle, cita: Calendar,
+  cita_agendada: CalendarCheck, llamada: Phone, propuesta_call: Phone,
+  propuesta_enviada: FileText, propuesta_reminder: BellRing,
+  propuesta_accepted: CheckCircle2, pago: DollarSign, propuesta_paid: DollarSign,
+  nota: StickyNote, lead_web: Globe, email: Mail,
 };
 
 const FILTROS = [
@@ -113,8 +127,11 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
         className="grid gap-3 px-5 py-2.5 border-b items-start hover:bg-gray-50 transition-colors"
         style={{ gridTemplateColumns: "46px 96px minmax(0,1fr)", borderColor: "#F0F0F0" }}>
         <span className="text-xs" style={{ color: "#9CA3AF", fontFamily: "ui-monospace, monospace" }}>{hs(m)}</span>
-        <span className="text-xs px-2 py-0.5 rounded text-center truncate"
-              style={{ background: st.bg, color: st.color }}>{st.label}</span>
+        <span className="text-xs px-2 py-0.5 rounded flex items-center gap-1 justify-center"
+              style={{ background: st.bg, color: st.color }}>
+          {(() => { const I = ICONO[m.kind]; return I ? <I className="w-3 h-3 flex-shrink-0" /> : null; })()}
+          <span className="truncate">{st.label}</span>
+        </span>
         <div className="min-w-0">
           <p className="text-sm" style={{ color: "#111827", whiteSpace: "pre-wrap" }}>
             {m.actor && <span style={{ color: "#6B7280" }}>{m.actor}: </span>}
@@ -175,9 +192,13 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
                     className="w-full grid gap-3 px-5 py-2.5 border-b items-center text-left hover:bg-gray-50 transition-colors"
                     style={{ gridTemplateColumns: "46px 96px minmax(0,1fr) 20px", borderColor: "#F0F0F0" }}>
                     <span className="text-xs" style={{ color: "#9CA3AF", fontFamily: "ui-monospace, monospace" }}>{desde}</span>
-                    <span className="text-xs px-2 py-0.5 rounded text-center"
-                          style={{ background: "#EEEDFE", color: "#3C3489" }}>whatsapp</span>
-                    <span className="text-sm" style={{ color: "#27295C" }}>
+                    <span className="text-xs px-2 py-0.5 rounded flex items-center gap-1 justify-center"
+                          style={{ background: "#EEEDFE", color: "#3C3489" }}>
+                      <Bot className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">whatsapp</span>
+                    </span>
+                    <span className="text-sm flex items-center gap-1.5" style={{ color: "#27295C" }}>
+                      <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#3C3489" }} />
                       Chat con Adriana
                       <span className="text-xs ml-2" style={{ color: "#9CA3AF" }}>
                         {bloque.movs.length} mensajes · {desde}–{hasta}
