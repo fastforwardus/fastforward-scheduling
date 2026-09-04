@@ -6,7 +6,7 @@ import { proposals, appointments, users, proposalEvents } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { Resend } from "resend";
 import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, getZohoBooksInvoicePdf } from "@/lib/zohobooks";
-import { createOrUpdateZohoLead } from "@/lib/zoho";
+import { createOrUpdateZohoLead, crearTareaZoho } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -93,6 +93,27 @@ export async function POST(req: NextRequest) {
       ? `Aceptada — invoice ${zohoInvoiceId}`
       : `Aceptada — LA FACTURA NO SE GENERO: ${errorFactura || "motivo desconocido"}`,
   }).catch(() => {});
+
+  // Tarea en Zoho al aceptarse: solo para Emiliano, que la pidio porque
+  // trabaja desde Zoho y el email de aviso se le pasa. El resto del equipo no
+  // la quiere, asi que va acotada a el.
+  try {
+    const [duenio] = await db.select({ email: users.email, fullName: users.fullName })
+      .from(users).where(eq(users.id, proposal.sentById ?? "")).limit(1);
+    if (duenio?.email?.toLowerCase().includes("emiliano")) {
+      crearTareaZoho({
+        asunto: `Propuesta aceptada — ${proposal.clientName ?? "cliente"} · USD ${proposal.total}`,
+        descripcion:
+          `La propuesta ${proposal.proposalNum} fue aceptada por el cliente.\n` +
+          `Total: USD ${proposal.total}\n` +
+          `Email: ${proposal.clientEmail ?? "—"}\n` +
+          (zohoInvoiceId ? `Factura: ${zohoInvoiceId}` : "ATENCION: la factura no se genero."),
+        ownerEmail: duenio.email,
+      }).catch(() => {});
+    }
+  } catch (e) {
+    console.error("[accept] no se pudo crear la tarea en Zoho:", e);
+  }
 
   // Recordatorio en Pendientes: un aviso por email se pierde entre otros, y
   // habia USD 6.754 aceptados sin facturar sin que nadie lo viera.

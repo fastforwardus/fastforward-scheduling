@@ -241,3 +241,65 @@ export async function findZohoLead(clientEmail: string): Promise<{ id: string; o
 export async function getZohoTokenPublico(): Promise<string> {
   return getZohoToken();
 }
+
+/**
+ * Crea una tarea en Zoho CRM al aceptarse una propuesta.
+ *
+ * El email de aviso existe, pero el equipo vive en Zoho y una tarea queda en su
+ * lista de trabajo en vez de depender de que abran el correo.
+ *
+ * Falla en silencio: el cierre de la propuesta no puede depender de esto.
+ */
+export async function crearTareaZoho(params: {
+  asunto: string;
+  descripcion?: string;
+  ownerEmail?: string | null;
+  leadId?: string | null;
+  vence?: Date;
+}): Promise<string | null> {
+  try {
+    const token = await getZohoTokenPublico();
+
+    // La tarea se asigna por id de usuario, asi que primero hay que resolverlo
+    let ownerId: string | null = null;
+    if (params.ownerEmail) {
+      const r = await fetch(
+        `${ZOHO_BASE}/users?type=ActiveUsers`,
+        { headers: { Authorization: `Zoho-oauthtoken ${token}` } });
+      if (r.ok) {
+        const d = await r.json() as { users?: { id: string; email: string }[] };
+        ownerId = d.users?.find(u =>
+          u.email?.toLowerCase() === params.ownerEmail!.toLowerCase())?.id ?? null;
+      }
+    }
+
+    const vence = params.vence ?? new Date();
+    const registro: Record<string, unknown> = {
+      Subject: params.asunto.slice(0, 250),
+      Status: "Not Started",
+      Priority: "High",
+      Due_Date: vence.toISOString().slice(0, 10),
+    };
+    if (params.descripcion) registro.Description = params.descripcion.slice(0, 3000);
+    if (ownerId) registro.Owner = ownerId;
+    if (params.leadId) registro.What_Id = params.leadId;
+    if (params.leadId) registro.$se_module = "Leads";
+
+    const r = await fetch(`${ZOHO_BASE}/Tasks`, {
+      method: "POST",
+      headers: { Authorization: `Zoho-oauthtoken ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ data: [registro] }),
+    });
+    const d = await r.json() as { data?: { code?: string; details?: { id?: string }; message?: string }[] };
+    const res = d.data?.[0];
+    if (res?.code !== "SUCCESS") {
+      console.error("[zoho] no se pudo crear la tarea:", res?.message ?? JSON.stringify(d).slice(0, 200));
+      return null;
+    }
+    console.log("[zoho] tarea creada:", res.details?.id, "—", params.asunto);
+    return res.details?.id ?? null;
+  } catch (err) {
+    console.error("[zoho] error al crear la tarea:", err);
+    return null;
+  }
+}
