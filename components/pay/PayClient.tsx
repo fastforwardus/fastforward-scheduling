@@ -109,7 +109,7 @@ export default function PayClient({ token }: { token: string }) {
       <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "14px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://fastfwdus.com/wp-content/uploads/2025/05/logoR.png" alt="FastForward" height={26} style={{ objectFit: "contain" }} />
+          <img src="/brand/FF_Logo_02.png" alt="FastForward" style={{ height: 30, width: "auto", maxWidth: 200, objectFit: "contain" }} />
         </div>
         <div style={{ display: "flex", gap: 2 }}>
           {(["es","en","pt"] as Lang[]).map(l => (

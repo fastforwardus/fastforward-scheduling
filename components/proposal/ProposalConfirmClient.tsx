@@ -14,11 +14,11 @@ const T = {
     discount: "Descuento",
     total: "Total",
     currency: "USD",
-    pending_title: "Revisá tu propuesta",
-    pending_sub: "Al confirmar, generaremos tu factura automáticamente.",
+    pending_title: "Revise su propuesta",
+    pending_sub: "Al confirmar, generaremos su factura automáticamente.",
     confirm_btn: "✅ Confirmo y acepto la propuesta",
     accepted_title: "¡Propuesta aceptada!",
-    accepted_sub: "Recibirás tu factura por email en los próximos minutos. Nuestro equipo se pondrá en contacto contigo para coordinar los próximos pasos.",
+    accepted_sub: "Recibirá su factura por email en los próximos minutos. Nuestro equipo se pondrá en contacto para coordinar los próximos pasos.",
     already_title: "Propuesta ya aceptada",
     already_sub: "Esta propuesta ya fue confirmada anteriormente.",
     loading: "Procesando...",
@@ -113,7 +113,7 @@ export default function ProposalConfirmClient({
           <span style={{ fontSize: 32 }}>📋</span>
         </div>
         <p className="text-xl font-bold mb-2" style={{ color: "#000000" }}>Propuesta ya aceptada</p>
-        <p className="text-sm" style={{ color: "#6B7280" }}>Esta propuesta ya fue aceptada anteriormente. Si tenés alguna consulta, contactá a tu asesor de FastForward.</p>
+        <p className="text-sm" style={{ color: "#6B7280" }}>Esta propuesta ya fue aceptada anteriormente. Ante cualquier consulta, contacte a su asesor de FastForward.</p>
         <p className="text-sm mt-4 font-medium" style={{ color: "#0183FF" }}>info@fastfwdus.com</p>
       </div>
     </div>

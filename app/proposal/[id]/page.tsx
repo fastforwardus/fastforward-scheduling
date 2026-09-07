@@ -18,5 +18,12 @@ export default async function ProposalPage({ params }: { params: { id: string } 
     clientEmail: appointments.clientEmail,
   }).from(appointments).where(eq(appointments.id, proposal.appointmentId)).limit(1);
 
-  return <AcceptProposalClient proposal={{...proposal, services: proposal.services || "[]"}} client={appt} />;
+  // Las propuestas directas no tienen cita: los datos del cliente viven en la
+  // propia propuesta. Sin este respaldo el bloque "Para" salia vacio.
+  const cliente = {
+    clientName: appt?.clientName || proposal.clientName || "",
+    clientCompany: appt?.clientCompany || "",
+    clientEmail: appt?.clientEmail || proposal.clientEmail || "",
+  };
+  return <AcceptProposalClient proposal={{...proposal, services: proposal.services || "[]"}} client={cliente} />;
 }
