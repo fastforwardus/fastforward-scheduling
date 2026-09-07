@@ -39,6 +39,18 @@ export async function GET(req: NextRequest) {
 
   const crear = req.nextUrl.searchParams.get("crear");
 
+  // Estado del numero: la calidad y el limite de mensajes. El token es
+  // sensitive en Vercel y no baja a las maquinas locales, asi que se consulta
+  // desde la app.
+  if (req.nextUrl.searchParams.get("numero") === "1") {
+    const tel = process.env.META_WHATSAPP_PHONE_NUMBER_ID;
+    const r = await fetch(
+      `${API}/${tel}?fields=display_phone_number,quality_rating,messaging_limit_tier,status,throughput,name_status`,
+      { headers: { Authorization: `Bearer ${token}` } });
+    const d = await r.json();
+    return NextResponse.json(d);
+  }
+
   if (crear === "noshow") {
     const hechas: Record<string, unknown>[] = [];
     for (const [idi, t] of Object.entries(NOSHOW)) {
