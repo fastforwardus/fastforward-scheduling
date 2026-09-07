@@ -160,15 +160,27 @@ export default function FacturarPage() {
                   {ed?.clientTaxId && <div className="text-sm text-gray-600">Tax ID: {ed.clientTaxId}</div>}
                 </>
               ) : (
-                <div className="space-y-2 max-w-md">
-                  <input className={inp} placeholder="Nombre del cliente" value={ed?.clientName ?? ""}
-                    onChange={(e) => ed && setEd({ ...ed, clientName: e.target.value })} />
-                  <input className={inp} placeholder="Email" value={ed?.clientEmail ?? ""}
-                    onChange={(e) => ed && setEd({ ...ed, clientEmail: e.target.value })} />
-                  <input className={inp} placeholder="Direccion" value={ed?.clientAddress ?? ""}
-                    onChange={(e) => ed && setEd({ ...ed, clientAddress: e.target.value })} />
-                  <input className={inp} placeholder="Tax ID" value={ed?.clientTaxId ?? ""}
-                    onChange={(e) => ed && setEd({ ...ed, clientTaxId: e.target.value })} />
+                <div className="space-y-3 max-w-md">
+                  <div>
+                    <label className="block text-xs uppercase text-gray-400 mb-1">Nombre del cliente</label>
+                    <input className={inp} value={ed?.clientName ?? ""}
+                      onChange={(e) => ed && setEd({ ...ed, clientName: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase text-gray-400 mb-1">Email (recibe la factura)</label>
+                    <input className={inp} value={ed?.clientEmail ?? ""}
+                      onChange={(e) => ed && setEd({ ...ed, clientEmail: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase text-gray-400 mb-1">Direccion</label>
+                    <input className={inp} value={ed?.clientAddress ?? ""}
+                      onChange={(e) => ed && setEd({ ...ed, clientAddress: e.target.value })} />
+                  </div>
+                  <div>
+                    <label className="block text-xs uppercase text-gray-400 mb-1">Tax ID (opcional)</label>
+                    <input className={inp} value={ed?.clientTaxId ?? ""}
+                      onChange={(e) => ed && setEd({ ...ed, clientTaxId: e.target.value })} />
+                  </div>
                 </div>
               )}
             </div>
