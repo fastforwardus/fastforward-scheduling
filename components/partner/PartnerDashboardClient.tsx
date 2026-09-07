@@ -199,7 +199,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
   return (
     <div className="min-h-screen" style={{ background: "#F8F9FB" }}>
       {/* Header */}
-      <div style={{ background: "#27295C" }}>
+      <div style={{ background: "#000000" }}>
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Image src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
@@ -213,7 +213,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
           <div className="flex items-center gap-3">
             <a href={bookingUrl} target="_blank" rel="noreferrer"
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all"
-              style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+              style={{ background: "#0183FF", color: "#000000" }}>
               🔗 Mi link de referidos
             </a>
           </div>
@@ -225,7 +225,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { label: "Total referidos", value: total, color: "#27295C" },
+            { label: "Total referidos", value: total, color: "#000000" },
             { label: "En proceso", value: pending, color: "#3B82F6" },
             { label: "Completadas", value: completed, color: "#8B5CF6" },
             { label: "Cerradas", value: closed, color: "#22C55E" },
@@ -242,11 +242,11 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
              style={{ borderColor: "#E5E7EB" }}>
           <div>
             <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Tu link exclusivo de referidos</p>
-            <p className="text-sm font-mono font-semibold" style={{ color: "#27295C" }}>{bookingUrl}</p>
+            <p className="text-sm font-mono font-semibold" style={{ color: "#000000" }}>{bookingUrl}</p>
           </div>
           <button onClick={() => navigator.clipboard.writeText(bookingUrl)}
             className="flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold"
-            style={{ background: "#27295C", color: "white" }}>
+            style={{ background: "#000000", color: "white" }}>
             Copiar
           </button>
         </div>
@@ -259,7 +259,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
           ].map(t => (
             <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
               className="flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-all"
-              style={{ borderBottomColor: tab === t.key ? "#27295C" : "transparent", color: tab === t.key ? "#27295C" : "#9CA3AF" }}>
+              style={{ borderBottomColor: tab === t.key ? "#000000" : "transparent", color: tab === t.key ? "#000000" : "#9CA3AF" }}>
               {t.label}
             </button>
           ))}
@@ -278,7 +278,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
             ) : appts.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-3xl mb-3">📭</p>
-                <p className="font-semibold text-sm" style={{ color: "#27295C" }}>Sin referidos aun</p>
+                <p className="font-semibold text-sm" style={{ color: "#000000" }}>Sin referidos aun</p>
                 <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>Compartí tu link para empezar a recibir consultas</p>
               </div>
             ) : (
@@ -317,7 +317,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
             <div className="flex flex-wrap gap-2 mb-6">
               <button onClick={() => setSelectedCat(null)}
                 className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
-                style={{ background: !selectedCat ? "#27295C" : "#F3F4F6", color: !selectedCat ? "white" : "#6B7280" }}>
+                style={{ background: !selectedCat ? "#000000" : "#F3F4F6", color: !selectedCat ? "white" : "#6B7280" }}>
                 Todos
               </button>
               {categories.map(cat => {
@@ -326,7 +326,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
                   <button key={cat} onClick={() => setSelectedCat(selectedCat === cat ? null : cat)}
                     className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                     style={{
-                      background: selectedCat === cat ? `#${colors?.border || "27295C"}` : `#${colors?.bg || "F3F4F6"}`,
+                      background: selectedCat === cat ? `#${colors?.border || "000000"}` : `#${colors?.bg || "F3F4F6"}`,
                       color: selectedCat === cat ? "white" : `#${colors?.text || "374151"}`,
                     }}>
                     {colors?.icon} {cat}
@@ -348,10 +348,10 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
                               style={{ background: `#${colors.bg}`, color: `#${colors.text}` }}>
                           {colors.icon} {service.category}
                         </span>
-                        <h3 className="text-sm font-semibold leading-snug" style={{ color: "#27295C" }}>{service.name}</h3>
+                        <h3 className="text-sm font-semibold leading-snug" style={{ color: "#000000" }}>{service.name}</h3>
                       </div>
                       <div className="flex-shrink-0 text-right">
-                        <p className="text-lg font-bold" style={{ color: "#C9A84C" }}>${service.price.toLocaleString()}</p>
+                        <p className="text-lg font-bold" style={{ color: "#0183FF" }}>${service.price.toLocaleString()}</p>
                         <p className="text-xs" style={{ color: "#9CA3AF" }}>USD</p>
                       </div>
                     </div>
@@ -364,7 +364,7 @@ export default function PartnerDashboardClient({ slug }: { slug: string }) {
             <div className="mt-8 p-4 rounded-2xl text-center" style={{ background: "rgba(39,41,92,0.04)", border: "1px solid rgba(39,41,92,0.08)" }}>
               <p className="text-xs" style={{ color: "#6B7280" }}>
                 Los precios son en USD e incluyen honorarios profesionales. No incluyen tasas gubernamentales.
-                Para consultas especiales contacta a <a href="mailto:info@fastfwdus.com" style={{ color: "#C9A84C", fontWeight: 600 }}>info@fastfwdus.com</a>
+                Para consultas especiales contacta a <a href="mailto:info@fastfwdus.com" style={{ color: "#0183FF", fontWeight: 600 }}>info@fastfwdus.com</a>
               </p>
             </div>
           </div>

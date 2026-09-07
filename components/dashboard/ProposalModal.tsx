@@ -191,7 +191,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#DCFCE7" }}>
           <Check className="w-8 h-8" style={{ color: "#22C55E" }} />
         </div>
-        <p className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>Propuesta enviada</p>
+        <p className="text-xl font-bold mb-2" style={{ color: "#000000" }}>Propuesta enviada</p>
         <p className="text-sm" style={{ color: "#6B7280" }}>El cliente recibio el PDF por email y el lead fue actualizado en Zoho.</p>
       </div>
     </div>
@@ -205,10 +205,10 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
         <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "#E5E7EB" }}>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(39,41,92,0.08)" }}>
-              <FileText className="w-5 h-5" style={{ color: "#27295C" }} />
+              <FileText className="w-5 h-5" style={{ color: "#000000" }} />
             </div>
             <div>
-              <p className="font-bold text-sm" style={{ color: "#27295C" }}>Generar propuesta</p>
+              <p className="font-bold text-sm" style={{ color: "#000000" }}>Generar propuesta</p>
               <p className="text-xs" style={{ color: "#9CA3AF" }}>{clientName} · {clientCompany}</p>
             </div>
           </div>
@@ -223,21 +223,21 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
             <label className="text-xs font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: "#9CA3AF" }}>Email</label>
             <input type="email" value={clientEmail} onChange={e => setClientEmail(e.target.value)}
               className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
-              style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
+              style={{ borderColor: "#E5E7EB", color: "#000000", background: "white" }}
               placeholder="email@empresa.com" />
           </div>
           <div className="flex items-center gap-3 mt-2">
             <label className="text-xs font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: "#9CA3AF" }}>Dirección</label>
             <input type="text" value={clientAddress} onChange={e => setClientAddress(e.target.value)}
               className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
-              style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
+              style={{ borderColor: "#E5E7EB", color: "#000000", background: "white" }}
               placeholder="Calle 123, Ciudad, País (opcional)" />
           </div>
           <div className="flex items-center gap-3 mt-2">
             <label className="text-xs font-semibold uppercase tracking-widest whitespace-nowrap" style={{ color: "#9CA3AF" }}>ID Tributario</label>
             <input type="text" value={clientTaxId} onChange={e => setClientTaxId(e.target.value)}
               className="flex-1 px-3 py-1.5 rounded-lg border text-sm outline-none"
-              style={{ borderColor: "#E5E7EB", color: "#27295C", background: "white" }}
+              style={{ borderColor: "#E5E7EB", color: "#000000", background: "white" }}
               placeholder="EIN, RFC, CUIT... (opcional)" />
           </div>
         </div>
@@ -250,7 +250,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
           ].map(t => (
             <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
               className="px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-all"
-              style={{ borderBottomColor: tab === t.key ? "#27295C" : "transparent", color: tab === t.key ? "#27295C" : "#9CA3AF" }}>
+              style={{ borderBottomColor: tab === t.key ? "#000000" : "transparent", color: tab === t.key ? "#000000" : "#9CA3AF" }}>
               {t.label}
             </button>
           ))}
@@ -268,7 +268,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                   value={searchQ} onChange={e => setSearchQ(e.target.value)}
                   placeholder="Buscar servicio..."
                   className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none mb-4"
-                  style={{ borderColor: "#E5E7EB", color: "#27295C" }}
+                  style={{ borderColor: "#E5E7EB", color: "#000000" }}
                 />
 
                 {/* Language selector */}
@@ -276,7 +276,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                   {([["es","Español"],["en","English"],["pt","Português"]] as const).map(([l, label]) => (
                     <button key={l} onClick={() => handleLangChange(l)}
                       className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                      style={{ background: lang === l ? "#27295C" : "#F3F4F6", color: lang === l ? "white" : "#6B7280" }}>
+                      style={{ background: lang === l ? "#000000" : "#F3F4F6", color: lang === l ? "white" : "#6B7280" }}>
                       {label}
                     </button>
                   ))}
@@ -285,7 +285,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   <button onClick={() => setSelectedCat(null)}
                     className="px-3 py-1 rounded-full text-xs font-semibold"
-                    style={{ background: !selectedCat ? "#27295C" : "#F3F4F6", color: !selectedCat ? "white" : "#6B7280" }}>
+                    style={{ background: !selectedCat ? "#000000" : "#F3F4F6", color: !selectedCat ? "white" : "#6B7280" }}>
                     Todos
                   </button>
                   {categories.map(cat => (
@@ -318,11 +318,11 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                           {isSelected && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate" style={{ color: "#27295C" }}>{svc.name}</p>
+                          <p className="text-sm font-semibold truncate" style={{ color: "#000000" }}>{svc.name}</p>
                           <p className="text-xs truncate" style={{ color: "#9CA3AF" }}>{svc.description}</p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-sm font-bold" style={{ color: isSelected ? catColor : "#27295C" }}>${svc.price.toLocaleString("en-US")}</p>
+                          <p className="text-sm font-bold" style={{ color: isSelected ? catColor : "#000000" }}>${svc.price.toLocaleString("en-US")}</p>
                           <p className="text-xs" style={{ color: "#9CA3AF" }}>USD</p>
                         </div>
                       </div>
@@ -368,7 +368,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                   {selected.map(svc => (
                     <div key={svc.name} className="bg-white rounded-xl p-3" style={{ border: "1px solid #E5E7EB" }}>
                       <div className="flex items-start justify-between gap-2 mb-2">
-                        <p className="text-xs font-semibold leading-tight flex-1" style={{ color: "#27295C" }}>{svc.name}</p>
+                        <p className="text-xs font-semibold leading-tight flex-1" style={{ color: "#000000" }}>{svc.name}</p>
                         <button onClick={e => { e.stopPropagation(); toggleService({ name: svc.name, price: svc.price, description: svc.description, category: "" }); }}
                           className="text-gray-400 hover:text-red-500 flex-shrink-0">
                           <X className="w-3 h-3" />
@@ -378,7 +378,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                         <span className="text-xs" style={{ color: "#9CA3AF" }}>$</span>
                         <input type="number" value={svc.price} onChange={e => updatePrice(svc.name, Number(e.target.value))} min={0}
                           className="flex-1 px-2 py-1 rounded border text-xs text-right outline-none"
-                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                          style={{ borderColor: "#E5E7EB", color: "#000000" }} />
                         <span className="text-xs" style={{ color: "#9CA3AF" }}>c/u</span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -395,7 +395,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                             <Plus className="w-2.5 h-2.5" />
                           </button>
                         </div>
-                        <p className="text-sm font-bold" style={{ color: "#27295C" }}>${(svc.price * svc.qty).toLocaleString("en-US")}</p>
+                        <p className="text-sm font-bold" style={{ color: "#000000" }}>${(svc.price * svc.qty).toLocaleString("en-US")}</p>
                       </div>
                     </div>
                   ))}
@@ -409,7 +409,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                 </label>
                 <input type="number" value={discount} onChange={e => setDiscount(Number(e.target.value))}
                   min={0} className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
-                  style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                  style={{ borderColor: "#E5E7EB", color: "#000000" }} />
               </div>
             </div>
 
@@ -417,7 +417,7 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
             <div className="p-4 border-t" style={{ borderColor: "#E5E7EB" }}>
               <div className="flex justify-between mb-1">
                 <span className="text-xs" style={{ color: "#9CA3AF" }}>Subtotal</span>
-                <span className="text-xs font-semibold" style={{ color: "#27295C" }}>${subtotal.toLocaleString("en-US")}</span>
+                <span className="text-xs font-semibold" style={{ color: "#000000" }}>${subtotal.toLocaleString("en-US")}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between mb-1">
@@ -426,14 +426,14 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
                 </div>
               )}
               <div className="flex justify-between mb-4 pt-2 border-t" style={{ borderColor: "#E5E7EB" }}>
-                <span className="text-sm font-bold" style={{ color: "#27295C" }}>Total</span>
-                <span className="text-lg font-bold" style={{ color: "#C9A84C" }}>USD ${total.toLocaleString("en-US")}</span>
+                <span className="text-sm font-bold" style={{ color: "#000000" }}>Total</span>
+                <span className="text-lg font-bold" style={{ color: "#0183FF" }}>USD ${total.toLocaleString("en-US")}</span>
               </div>
 
               <button onClick={handleSend} disabled={sending || selected.length === 0}
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm transition-all"
                 style={{
-                  background: selected.length > 0 ? "#27295C" : "#E5E7EB",
+                  background: selected.length > 0 ? "#000000" : "#E5E7EB",
                   color: selected.length > 0 ? "white" : "#9CA3AF",
                 }}>
                 {sending

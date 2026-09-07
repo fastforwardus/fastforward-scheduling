@@ -4,10 +4,10 @@
 
 :root {
   color-scheme: light only;
-  --navy: #27295C;
-  --navy-dark: #1A1C3E;
-  --gold: #C9A84C;
-  --gold-light: #E5BA52;
+  --navy: #000000;
+  --navy-dark: #000000;
+  --gold: #0183FF;
+  --gold-light: #01BCFE;
 }
 
 @layer base {

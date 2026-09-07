@@ -63,12 +63,12 @@ export default function ActividadClient({ timezone = "America/New_York" }: { tim
   return (
     <div className="rounded-2xl overflow-hidden" style={{ background: "white", border: "1px solid #E5E7EB" }}>
       <div className="px-5 py-3 border-b flex items-center gap-3 flex-wrap" style={{ borderColor: "#F0F0F0" }}>
-        <span className="text-sm font-semibold" style={{ color: "#27295C" }}>Actividad del equipo</span>
+        <span className="text-sm font-semibold" style={{ color: "#000000" }}>Actividad del equipo</span>
         <button onClick={() => setActor("")} className="text-xs"
-          style={{ color: !actor ? "#27295C" : "#9CA3AF", fontWeight: !actor ? 600 : 400 }}>Todos</button>
+          style={{ color: !actor ? "#000000" : "#9CA3AF", fontWeight: !actor ? 600 : 400 }}>Todos</button>
         {actores.slice(0, 8).map(a => (
           <button key={a.actor} onClick={() => setActor(a.actor)} className="text-xs"
-            style={{ color: actor === a.actor ? "#27295C" : "#9CA3AF", fontWeight: actor === a.actor ? 600 : 400 }}>
+            style={{ color: actor === a.actor ? "#000000" : "#9CA3AF", fontWeight: actor === a.actor ? 600 : 400 }}>
             {a.actor} <span style={{ color: "#D1D5DB" }}>{a.n}</span>
           </button>
         ))}

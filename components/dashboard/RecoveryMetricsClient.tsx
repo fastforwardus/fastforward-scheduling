@@ -25,7 +25,7 @@ interface Datos {
 const LABEL: Record<string, [string, string]> = {
   recuperado: ["Recuperado", "#16A34A"],
   interesado: ["Interesado", "#3B82F6"],
-  pidio_tiempo: ["Pidio tiempo", "#C9A84C"],
+  pidio_tiempo: ["Pidio tiempo", "#0183FF"],
   no_interesa: ["No le interesa", "#6B7280"],
   no_contesta: ["No contesta", "#9CA3AF"],
   numero_equivocado: ["Numero equivocado", "#EF4444"],
@@ -41,7 +41,7 @@ function Stat({ icon: Icon, label, value, sub, color, bg }: {
         <Icon className="w-5 h-5" style={{ color }} />
       </div>
       <div className="min-w-0">
-        <p className="text-2xl font-bold" style={{ color: "#27295C" }}>{value}</p>
+        <p className="text-2xl font-bold" style={{ color: "#000000" }}>{value}</p>
         <p className="text-xs font-medium" style={{ color: "#9CA3AF" }}>{label}</p>
         {sub && <p className="text-xs" style={{ color }}>{sub}</p>}
       </div>
@@ -78,7 +78,7 @@ export default function RecoveryMetricsClient({ user }: {
           <div className="flex items-start justify-between mb-5">
             <div>
               <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Recupero</p>
-              <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Metricas</h1>
+              <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Metricas</h1>
               {d && (
                 <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
                   {d.esEquipo ? "Todo el equipo" : "Tus llamadas"}
@@ -127,7 +127,7 @@ export default function RecoveryMetricsClient({ user }: {
                       </p>
                     </div>
                     <div className="rounded-xl p-4" style={{ background: "#F8F9FB" }}>
-                      <p className="text-2xl font-bold" style={{ color: "#27295C" }}>
+                      <p className="text-2xl font-bold" style={{ color: "#000000" }}>
                         USD {d.propuestas.sinArrancar.monto.toLocaleString("en-US")}
                       </p>
                       <p className="text-xs font-medium mt-0.5" style={{ color: "#6B7280" }}>
@@ -143,7 +143,7 @@ export default function RecoveryMetricsClient({ user }: {
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
                 <Stat icon={Phone} label="Llamadas hoy" value={d.resumen.hoy}
-                  sub={`${d.resumen.semana} esta semana`} color="#27295C" bg="rgba(39,41,92,0.08)" />
+                  sub={`${d.resumen.semana} esta semana`} color="#000000" bg="rgba(39,41,92,0.08)" />
                 <Stat icon={PhoneCall} label="Este mes" value={d.resumen.mes}
                   sub={`${d.resumen.total} en total`} color="#3B82F6" bg="rgba(59,130,246,0.1)" />
                 <Stat icon={Clock} label="Minutos hablados" value={d.resumen.minutos}
@@ -163,7 +163,7 @@ export default function RecoveryMetricsClient({ user }: {
 
               <div className="grid lg:grid-cols-2 gap-4">
                 <div className="bg-white rounded-2xl border p-5" style={{ borderColor: "#E5E7EB" }}>
-                  <p className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Quien llamo mas</p>
+                  <p className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Quien llamo mas</p>
                   {d.porUsuario.length === 0 ? (
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>Sin datos</p>
                   ) : d.porUsuario.map(u => (
@@ -171,19 +171,19 @@ export default function RecoveryMetricsClient({ user }: {
                       <div className="flex items-baseline justify-between mb-1">
                         <span className="text-xs font-medium" style={{ color: "#374151" }}>{u.usuario}</span>
                         <span className="text-xs" style={{ color: "#9CA3AF" }}>
-                          <b style={{ color: "#27295C" }}>{u.llamadas}</b> · {u.minutos}m
+                          <b style={{ color: "#000000" }}>{u.llamadas}</b> · {u.minutos}m
                           {u.recuperados > 0 && <span style={{ color: "#16A34A" }}> · {u.recuperados} rec.</span>}
                         </span>
                       </div>
                       <div className="h-1.5 rounded-full" style={{ background: "#F3F4F6" }}>
-                        <div className="h-1.5 rounded-full" style={{ width: `${(u.llamadas / maxUser) * 100}%`, background: "#27295C" }} />
+                        <div className="h-1.5 rounded-full" style={{ width: `${(u.llamadas / maxUser) * 100}%`, background: "#000000" }} />
                       </div>
                     </div>
                   ))}
                 </div>
 
                 <div className="bg-white rounded-2xl border p-5" style={{ borderColor: "#E5E7EB" }}>
-                  <p className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Resultados</p>
+                  <p className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Resultados</p>
                   {d.porOutcome.length === 0 ? (
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>Todavia nadie cargo resultados</p>
                   ) : (() => {
@@ -210,7 +210,7 @@ export default function RecoveryMetricsClient({ user }: {
               </div>
 
               <div className="bg-white rounded-2xl border p-5 mt-4" style={{ borderColor: "#E5E7EB" }}>
-                <p className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Ultimos 14 dias</p>
+                <p className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Ultimos 14 dias</p>
                 {d.porDia.length === 0 ? (
                   <p className="text-xs" style={{ color: "#9CA3AF" }}>Sin datos</p>
                 ) : (
@@ -219,7 +219,7 @@ export default function RecoveryMetricsClient({ user }: {
                       <div key={x.fecha} className="flex-1 flex flex-col items-center justify-end gap-1">
                         <span className="text-xs" style={{ color: "#9CA3AF" }}>{x.llamadas}</span>
                         <div className="w-full rounded-t"
-                          style={{ height: `${(x.llamadas / maxDia) * 60}px`, background: "#C9A84C", minHeight: 3 }} />
+                          style={{ height: `${(x.llamadas / maxDia) * 60}px`, background: "#0183FF", minHeight: 3 }} />
                         <span className="text-xs" style={{ color: "#9CA3AF", fontSize: 9 }}>
                           {x.fecha.slice(8, 10)}/{x.fecha.slice(5, 7)}
                         </span>

@@ -32,7 +32,7 @@ export default function AcceptProposalClient({ proposal, client }: {
         </div>
 
         <div className="bg-white rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", boxShadow: "0 4px 24px rgba(39,41,92,0.08)" }}>
-          <div style={{ background: "#27295C", padding: "24px 28px" }}>
+          <div style={{ background: "#000000", padding: "24px 28px" }}>
             <p className="text-white font-bold text-lg mb-1">{t.title}</p>
             <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>{t.subtitle}</p>
           </div>
@@ -40,7 +40,7 @@ export default function AcceptProposalClient({ proposal, client }: {
           <div className="p-6">
             {client && (
               <div className="mb-5 p-4 rounded-xl" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
-                <p className="font-bold text-sm" style={{ color: "#27295C" }}>{client.clientName}</p>
+                <p className="font-bold text-sm" style={{ color: "#000000" }}>{client.clientName}</p>
                 <p className="text-xs" style={{ color: "#6B7280" }}>{client.clientCompany}</p>
                 <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{proposal.proposalNum}</p>
               </div>
@@ -57,7 +57,7 @@ export default function AcceptProposalClient({ proposal, client }: {
                 {services.map((svc, i) => (
                   <tr key={i} style={{ borderBottom: "1px solid #F0F0F0" }}>
                     <td className="py-3 text-sm" style={{ color: "#374151" }}>{svc.name}</td>
-                    <td className="py-3 text-sm text-right font-semibold" style={{ color: "#27295C" }}>
+                    <td className="py-3 text-sm text-right font-semibold" style={{ color: "#000000" }}>
                       USD ${svc.price.toLocaleString("en-US")}
                     </td>
                   </tr>
@@ -72,8 +72,8 @@ export default function AcceptProposalClient({ proposal, client }: {
               </div>
             )}
             <div className="flex justify-between py-3 border-t" style={{ borderColor: "#E5E7EB" }}>
-              <span className="font-bold" style={{ color: "#27295C" }}>{t.total}</span>
-              <span className="text-xl font-bold" style={{ color: "#C9A84C" }}>USD ${proposal.total.toLocaleString("en-US")}</span>
+              <span className="font-bold" style={{ color: "#000000" }}>{t.total}</span>
+              <span className="text-xl font-bold" style={{ color: "#0183FF" }}>USD ${proposal.total.toLocaleString("en-US")}</span>
             </div>
 
             <div className="mt-4 p-3 rounded-xl text-xs" style={{ background: "#F8F9FB", color: "#6B7280" }}>
@@ -90,7 +90,7 @@ export default function AcceptProposalClient({ proposal, client }: {
             ) : (
               <button onClick={handleAccept} disabled={accepting}
                 className="w-full mt-6 py-4 rounded-xl font-bold text-base"
-                style={{ background: "#27295C", color: "white" }}>
+                style={{ background: "#000000", color: "white" }}>
                 {accepting ? "..." : t.confirm}
               </button>
             )}

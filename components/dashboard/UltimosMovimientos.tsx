@@ -92,7 +92,7 @@ export function UltimosMovimientos({ email, timezone = "America/New_York", canti
             );
           })}
           <a href={"/dashboard/clients/" + encodeURIComponent(email)}
-             className="inline-block text-xs mt-2.5 hover:underline" style={{ color: "#27295C" }}>
+             className="inline-block text-xs mt-2.5 hover:underline" style={{ color: "#000000" }}>
             Ver los {total} movimientos →
           </a>
         </>

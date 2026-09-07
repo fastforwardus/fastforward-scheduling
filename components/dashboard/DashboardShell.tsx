@@ -66,7 +66,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
         <div className="flex items-center gap-3 px-5 py-3.5 cursor-pointer hover:bg-gray-50 transition-colors"
              onClick={() => setExpanded(!expanded)}>
           <div className="w-14 flex-shrink-0 text-right">
-            <span className="text-sm font-bold" style={{ color: isToday ? "#27295C" : "#6B7280" }}>{timeStr}</span>
+            <span className="text-sm font-bold" style={{ color: isToday ? "#000000" : "#6B7280" }}>{timeStr}</span>
           </div>
           <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: st.dot }} />
           <div className="flex-1 min-w-0">
@@ -92,7 +92,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
           {appt.repName && (
             <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
               <div className="w-5 h-5 rounded-full flex items-center justify-center text-white font-bold"
-                   style={{ background: "#27295C", fontSize: "9px" }}>{appt.repName[0]}</div>
+                   style={{ background: "#000000", fontSize: "9px" }}>{appt.repName[0]}</div>
               <span className="text-xs" style={{ color: "#6B7280" }}>{appt.repName.split(" ")[0]}</span>
             </div>
           )}
@@ -125,7 +125,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                           onChange={e => setEmailDraft(e.target.value)}
                           onKeyDown={e => { if (e.key === "Escape") { setEditEmail(false); setEmailDraft(appt.clientEmail); } }}
                           className="text-xs px-2 py-1 rounded-md border flex-1 min-w-0"
-                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                          style={{ borderColor: "#E5E7EB", color: "#000000" }} />
                         <button disabled={savingEmail}
                           onClick={async () => {
                             setSavingEmail(true);
@@ -147,7 +147,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                       </div>
                     ) : (
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xs font-medium truncate" style={{ color: "#27295C" }}>{appt.clientEmail}</span>
+                        <span className="text-xs font-medium truncate" style={{ color: "#000000" }}>{appt.clientEmail}</span>
                         <button onClick={() => { setEmailDraft(appt.clientEmail); setEditEmail(true); }}
                           className="flex-shrink-0 opacity-40 hover:opacity-100 transition-opacity" aria-label="Editar email">
                           <Pencil className="w-3 h-3" style={{ color: "#6B7280" }} />
@@ -175,9 +175,9 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                             }}
                             className="text-xs px-2 py-0.5 rounded-md font-medium transition-colors"
                             style={{
-                              background: activo ? "#27295C" : "transparent",
+                              background: activo ? "#000000" : "transparent",
                               color: activo ? "white" : "#9CA3AF",
-                              border: `1px solid ${activo ? "#27295C" : "#E5E7EB"}`,
+                              border: `1px solid ${activo ? "#000000" : "#E5E7EB"}`,
                               cursor: activo ? "default" : "pointer",
                             }}>
                             {code.toUpperCase()}
@@ -195,7 +195,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                           onKeyDown={e => { if (e.key === "Escape") { setEditPhone(false); setPhoneDraft(appt.clientWhatsapp); } }}
                           placeholder="Con codigo de pais"
                           className="text-xs px-2 py-1 rounded-md border flex-1 min-w-0"
-                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                          style={{ borderColor: "#E5E7EB", color: "#000000" }} />
                         <button disabled={savingPhone}
                           onClick={async () => {
                             setSavingPhone(true);
@@ -234,7 +234,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   ].map(item => (
                     <div key={item.label} className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>
                       <span className="text-xs" style={{ color: "#9CA3AF" }}>{item.label}</span>
-                      <span className="text-xs font-medium truncate" style={{ color: item.accent ? "#27295C" : "#374151" }}>{item.value}</span>
+                      <span className="text-xs font-medium truncate" style={{ color: item.accent ? "#000000" : "#374151" }}>{item.value}</span>
                     </div>
                   ))}
                   <div className="grid items-baseline gap-3" style={{ gridTemplateColumns: "84px minmax(0,1fr)" }}>
@@ -259,7 +259,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   {appt.platform !== "whatsapp" && appt.meetingLink && (
                     <a href={appt.meetingLink} target="_blank" rel="noreferrer"
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold"
-                      style={{ background: "#27295C", color: "white" }}>
+                      style={{ background: "#000000", color: "white" }}>
                       <Video className="w-3.5 h-3.5 flex-shrink-0" /> Iniciar reunion
                     </a>
                   )}
@@ -272,7 +272,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   {appt.platform === "whatsapp" && (
                     <a href={"https://wa.me/" + appt.clientWhatsapp.replace(/\D/g, "")} target="_blank" rel="noreferrer"
                       className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold"
-                      style={{ background: "#27295C", color: "white" }}>
+                      style={{ background: "#000000", color: "white" }}>
                       <Phone className="w-3.5 h-3.5 flex-shrink-0" /> Llamar
                     </a>
                   )}
@@ -294,7 +294,7 @@ function AppointmentRow({ appt, canAssign, currentUserId, currentRole, onRefresh
                   <button onClick={() => setProposalAppt({ id: appt.id, clientName: appt.clientName, clientCompany: appt.clientCompany, clientEmail: appt.clientEmail, clientLanguage: appt.clientLanguage, repSlug: appt.repSlug || "book" })}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold"
                     style={{ background: "white", border: "1px solid #E5E7EB", color: "#374151" }}>
-                    <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#C9A84C" }} /> Enviar propuesta
+                    <FileText className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#0183FF" }} /> Enviar propuesta
                   </button>
 
                   {/* Menu "Mas" */}
@@ -446,13 +446,13 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{roleLabel} · {(user.timezone || "America/New_York").replace(/_/g, " ")}</p>
-              <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Hola, {user.fullName.split(" ")[0]} 👋</h1>
+              <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Hola, {user.fullName.split(" ")[0]} 👋</h1>
             </div>
             <div className="flex gap-2">
               {user.slug && (
                 <a href={"/book/" + user.slug} target="_blank"
                   className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold border-2"
-                  style={{ borderColor: "#27295C", color: "#27295C" }}>Mi link</a>
+                  style={{ borderColor: "#000000", color: "#000000" }}>Mi link</a>
               )}
               <button onClick={onRefresh}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg border text-sm"
@@ -466,11 +466,11 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
             {tabs.map(t => (
               <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
                 className="relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all border-b-2 -mb-px"
-                style={{ borderBottomColor: tab === t.key ? "#27295C" : "transparent", color: tab === t.key ? "#27295C" : "#9CA3AF" }}>
+                style={{ borderBottomColor: tab === t.key ? "#000000" : "transparent", color: tab === t.key ? "#000000" : "#9CA3AF" }}>
                 {t.label}
                 {t.count > 0 && (
                   <span className="px-1.5 py-0.5 rounded-full text-xs font-bold"
-                        style={{ background: t.red ? "#EF4444" : tab === t.key ? "#27295C" : "#E5E7EB", color: t.red || tab === t.key ? "white" : "#6B7280" }}>
+                        style={{ background: t.red ? "#EF4444" : tab === t.key ? "#000000" : "#E5E7EB", color: t.red || tab === t.key ? "white" : "#6B7280" }}>
                     {t.count}
                   </span>
                 )}
@@ -494,7 +494,7 @@ export function DashboardShell({ user, roleLabel, appointments, loading, onRefre
             ) : tabData.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-3xl mb-3">{tab === "today" ? "☀️" : tab === "unassigned" ? "✅" : "📭"}</p>
-                <p className="font-semibold text-sm" style={{ color: "#27295C" }}>
+                <p className="font-semibold text-sm" style={{ color: "#000000" }}>
                   {tab === "today" ? "Sin citas para hoy" : tab === "unassigned" ? "Todo asignado" : "Sin citas aqui"}
                 </p>
               </div>

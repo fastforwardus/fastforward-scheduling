@@ -70,12 +70,12 @@ export default function ConversacionAcciones({
         {puedeAsignar ? (
           <select value={ownerUserId || ""} onChange={e => asignar(e.target.value)}
             className="text-xs px-2 py-1 rounded-md border"
-            style={{ borderColor: "#E5E7EB", color: "#27295C" }}>
+            style={{ borderColor: "#E5E7EB", color: "#000000" }}>
             <option value="">Sin asignar</option>
             {usuarios.map(u => <option key={u.id} value={u.id}>{u.fullName}</option>)}
           </select>
         ) : (
-          <span className="text-xs font-medium" style={{ color: "#27295C" }}>
+          <span className="text-xs font-medium" style={{ color: "#000000" }}>
             {usuarios.find(u => u.id === ownerUserId)?.fullName || (ownerUserId ? "Asignada" : "Sin asignar")}
           </span>
         )}
@@ -112,7 +112,7 @@ export default function ConversacionAcciones({
             style={{ borderColor: "#E5E7EB", color: "#1F2937" }} />
           <button onClick={responder} disabled={!texto.trim() || enviando}
             className="p-2.5 rounded-lg flex-shrink-0"
-            style={{ background: texto.trim() ? "#27295C" : "#F3F4F6" }}
+            style={{ background: texto.trim() ? "#000000" : "#F3F4F6" }}
             aria-label="Enviar">
             {enviando
               ? <Loader2 className="w-4 h-4 animate-spin" style={{ color: "white" }} />

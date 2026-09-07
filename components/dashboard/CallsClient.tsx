@@ -30,7 +30,7 @@ interface Call {
 const OUTCOMES: [string, string, string][] = [
   ["recuperado", "Recuperado", "#16A34A"],
   ["interesado", "Interesado", "#3B82F6"],
-  ["pidio_tiempo", "Pidio tiempo", "#C9A84C"],
+  ["pidio_tiempo", "Pidio tiempo", "#0183FF"],
   ["no_interesa", "No le interesa", "#6B7280"],
   ["no_contesta", "No contesta", "#9CA3AF"],
   ["numero_equivocado", "Numero equivocado", "#EF4444"],
@@ -106,7 +106,7 @@ export default function CallsClient({ user }: {
           <div className="flex items-start justify-between mb-5">
             <div>
               <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Recupero</p>
-              <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Llamados</h1>
+              <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Llamados</h1>
             </div>
             <button onClick={cargar} className="p-2 rounded-lg border" style={{ borderColor: "#E5E7EB", background: "white" }} aria-label="Refrescar">
               <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} style={{ color: "#6B7280" }} />
@@ -126,9 +126,9 @@ export default function CallsClient({ user }: {
             <button onClick={() => setSoloPendientes(!soloPendientes)}
               className="px-3 py-2 rounded-lg text-xs font-semibold"
               style={{
-                background: soloPendientes ? "#27295C" : "white",
+                background: soloPendientes ? "#000000" : "white",
                 color: soloPendientes ? "white" : "#6B7280",
-                border: `1px solid ${soloPendientes ? "#27295C" : "#E5E7EB"}`,
+                border: `1px solid ${soloPendientes ? "#000000" : "#E5E7EB"}`,
               }}>
               Pendientes
             </button>
@@ -151,9 +151,9 @@ export default function CallsClient({ user }: {
                     <div className="flex items-start gap-4 flex-wrap">
                       <div className="flex-1 min-w-[200px]">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{c.clientName || "Sin nombre"}</p>
+                          <p className="text-sm font-semibold" style={{ color: "#000000" }}>{c.clientName || "Sin nombre"}</p>
                           {c.proposalNum && (
-                            <span className="text-xs" style={{ color: "#C9A84C" }}>
+                            <span className="text-xs" style={{ color: "#0183FF" }}>
                               {c.proposalNum}{c.total != null ? ` · USD ${c.total.toLocaleString("en-US")}` : ""}
                             </span>
                           )}
@@ -232,14 +232,14 @@ export default function CallsClient({ user }: {
                           style={{ borderColor: "#E5E7EB" }} />
 
                         <div className="flex items-center gap-2 flex-wrap">
-                          <label className="text-xs" style={{ color: "#9CA3AF" }}>Volver a llamar <span style={{ color: "#C9A84C" }}>(hora Miami)</span></label>
+                          <label className="text-xs" style={{ color: "#9CA3AF" }}>Volver a llamar <span style={{ color: "#0183FF" }}>(hora Miami)</span></label>
                           <input type="datetime-local" value={fecha} onChange={e => setFecha(e.target.value)}
                             className="px-2 py-1.5 rounded-lg border text-xs"
-                            style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                            style={{ borderColor: "#E5E7EB", color: "#000000" }} />
                           <button onClick={() => guardar(c, { outcomeNote: draft, followUpAt: fecha ? fromZonedTime(fecha, MIAMI).toISOString() : null })}
                             disabled={guardando}
                             className="px-4 py-1.5 rounded-lg text-xs font-semibold ml-auto"
-                            style={{ background: "#27295C", color: "white" }}>
+                            style={{ background: "#000000", color: "white" }}>
                             {guardando ? "..." : "Guardar"}
                           </button>
                           {c.followUpAt && !c.followUpDone && (

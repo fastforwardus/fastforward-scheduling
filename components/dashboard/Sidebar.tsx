@@ -46,7 +46,7 @@ export function Sidebar({ user }: SidebarProps) {
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
             style={{
               background: active ? "rgba(201,168,76,0.12)" : "transparent",
-              color: active ? "#C9A84C" : "rgba(255,255,255,0.5)",
+              color: active ? "#0183FF" : "rgba(255,255,255,0.5)",
             }}>
             <link.icon className="w-4 h-4 flex-shrink-0" />
             {link.label}
@@ -60,7 +60,7 @@ export function Sidebar({ user }: SidebarProps) {
     <div className="px-3 pb-4 border-t pt-4" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
       <div className="flex items-center gap-3 px-3 py-2">
         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-             style={{ background: "#C9A84C" }}>
+             style={{ background: "#0183FF" }}>
           {user.fullName[0]}
         </div>
         <div className="flex-1 min-w-0">
@@ -82,7 +82,7 @@ export function Sidebar({ user }: SidebarProps) {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 min-h-screen flex-shrink-0"
-             style={{ background: "#1A1C3E", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
+             style={{ background: "#000000", borderRight: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="px-5 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
           <Image
             src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
@@ -95,7 +95,7 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* Mobile header */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-4"
-           style={{ background: "#1A1C3E", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+           style={{ background: "#000000", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <Image
           src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
           alt="FastForward" width={120} height={28} className="object-contain" unoptimized
@@ -110,7 +110,7 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="lg:hidden fixed inset-0 z-40" onClick={() => setMobileOpen(false)}>
           <div className="absolute inset-0" style={{ background: "rgba(0,0,0,0.5)" }} />
           <aside className="absolute left-0 top-0 bottom-0 w-64 flex flex-col"
-                 style={{ background: "#1A1C3E" }}
+                 style={{ background: "#000000" }}
                  onClick={e => e.stopPropagation()}>
             <div className="px-5 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
               <Image src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"

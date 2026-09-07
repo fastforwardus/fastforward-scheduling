@@ -41,7 +41,7 @@ export default function TrabajoEnCurso() {
   return (
     <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
       <div className="px-5 py-3.5 border-b flex items-center gap-2" style={{ borderColor: "#F0F0F0" }}>
-        <p className="font-semibold text-sm" style={{ color: "#27295C" }}>Trabajo en curso</p>
+        <p className="font-semibold text-sm" style={{ color: "#000000" }}>Trabajo en curso</p>
         <span className="text-xs px-2 py-0.5 rounded-full font-bold"
               style={{ background: "#F3F4F6", color: "#6B7280" }}>{items.length}</span>
         <span className="ml-auto text-xs" style={{ color: "#D1D5DB", fontFamily: "ui-monospace, monospace" }}>
@@ -73,7 +73,7 @@ export default function TrabajoEnCurso() {
 
       {items.length > VISIBLES && (
         <button onClick={() => setTodas(!todas)}
-          className="w-full px-5 py-2.5 text-xs text-left" style={{ color: "#27295C" }}>
+          className="w-full px-5 py-2.5 text-xs text-left" style={{ color: "#000000" }}>
           {todas ? "Ver menos" : `Ver las ${items.length} →`}
         </button>
       )}

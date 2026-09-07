@@ -58,7 +58,7 @@ export default function TeamPageClient({ user }: { user: { id: string; fullName:
 
           <div className="mb-8">
             <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Dashboard</p>
-            <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Equipo</h1>
+            <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Equipo</h1>
           </div>
 
           {loading ? (
@@ -72,11 +72,11 @@ export default function TeamPageClient({ user }: { user: { id: string; fullName:
                      style={{ borderColor: "#E5E7EB", boxShadow: "0 2px 8px rgba(39,41,92,0.04)" }}>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-                         style={{ background: "#27295C" }}>
+                         style={{ background: "#000000" }}>
                       {rep.fullName[0]}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate" style={{ color: "#27295C" }}>{rep.fullName}</p>
+                      <p className="font-semibold text-sm truncate" style={{ color: "#000000" }}>{rep.fullName}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                               style={{ background: `${roleColor(rep.role)}18`, color: roleColor(rep.role) }}>
@@ -95,7 +95,7 @@ export default function TeamPageClient({ user }: { user: { id: string; fullName:
 
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { label: "Próximas", value: rep.upcoming, icon: Calendar, color: "#27295C" },
+                      { label: "Próximas", value: rep.upcoming, icon: Calendar, color: "#000000" },
                       { label: "Completadas", value: rep.completed, icon: TrendingUp, color: "#22C55E" },
                       { label: "No-shows", value: rep.noShow, icon: Users, color: "#EF4444" },
                     ].map(s => (
@@ -110,7 +110,7 @@ export default function TeamPageClient({ user }: { user: { id: string; fullName:
                   <div className="mt-3 pt-3 border-t flex items-center justify-between"
                        style={{ borderColor: "#F0F0F0" }}>
                     <span className="text-xs" style={{ color: "#9CA3AF" }}>{rep.email}</span>
-                    <span className="text-xs font-semibold" style={{ color: "#27295C" }}>{rep.total} total</span>
+                    <span className="text-xs font-semibold" style={{ color: "#000000" }}>{rep.total} total</span>
                   </div>
                 </div>
               ))}

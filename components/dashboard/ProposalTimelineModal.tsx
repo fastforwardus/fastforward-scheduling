@@ -21,9 +21,9 @@ const ICONS: Record<string, typeof Mail> = {
 };
 
 const COLORS: Record<string, string> = {
-  created: "#27295C", reminder: "#3B82F6", reminder_failed: "#EF4444",
+  created: "#000000", reminder: "#3B82F6", reminder_failed: "#EF4444",
   delivery_failed: "#EF4444", accepted: "#22C55E",
-  invoice: "#C9A84C", paid: "#16A34A", note: "#8B5CF6",
+  invoice: "#0183FF", paid: "#16A34A", note: "#8B5CF6",
 };
 
 export default function ProposalTimelineModal({ proposalId, onClose }: {
@@ -57,7 +57,7 @@ export default function ProposalTimelineModal({ proposalId, onClose }: {
       <div className="w-full max-w-2xl rounded-2xl overflow-hidden flex flex-col"
            style={{ background: "white", maxHeight: "85vh" }} onClick={e => e.stopPropagation()}>
 
-        <div className="px-6 py-4 flex items-center justify-between flex-shrink-0" style={{ background: "#27295C" }}>
+        <div className="px-6 py-4 flex items-center justify-between flex-shrink-0" style={{ background: "#000000" }}>
           <div>
             <p className="text-white font-semibold text-sm">
               {info?.proposalNum || "Propuesta"}
@@ -130,7 +130,7 @@ export default function ProposalTimelineModal({ proposalId, onClose }: {
                       </div>
                       <div className="flex-1 min-w-0 pt-1">
                         <div className="flex items-baseline gap-2 flex-wrap">
-                          <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{it.label}</p>
+                          <p className="text-sm font-semibold" style={{ color: "#000000" }}>{it.label}</p>
                           {it.channel && (
                             <span className="text-xs px-1.5 py-0.5 rounded"
                               style={{ background: "#F3F4F6", color: "#6B7280" }}>{it.channel}</span>

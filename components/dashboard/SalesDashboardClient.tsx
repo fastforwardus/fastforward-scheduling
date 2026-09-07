@@ -41,7 +41,7 @@ function StatCard({ icon: Icon, label, value, color, bg }: { icon: React.Element
         <Icon className="w-5 h-5" style={{ color }} />
       </div>
       <div>
-        <p className="text-2xl font-bold" style={{ color: "#27295C" }}>{value}</p>
+        <p className="text-2xl font-bold" style={{ color: "#000000" }}>{value}</p>
         <p className="text-xs font-medium" style={{ color: "#9CA3AF" }}>{label}</p>
       </div>
     </div>
@@ -124,7 +124,7 @@ export default function SalesDashboardClient({ user }: {
       <Sidebar user={user} />
       <main className="flex-1 min-w-0 pt-14 lg:pt-0 overflow-auto">
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #27295C 0%, #1e2150 100%)" }}>
+      <div style={{ background: "linear-gradient(135deg, #000000 0%, #1e2150 100%)" }}>
         <div className="max-w-5xl mx-auto px-6 py-8">
           <div className="flex items-start justify-between">
             <div>
@@ -134,7 +134,7 @@ export default function SalesDashboardClient({ user }: {
             </div>
             <div className="text-right">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: "rgba(255,255,255,0.1)" }}>
-                <Calendar className="w-4 h-4" style={{ color: "#C9A84C" }} />
+                <Calendar className="w-4 h-4" style={{ color: "#0183FF" }} />
                 <span className="text-sm font-semibold text-white">{stats.todayCount} {stats.todayCount === 1 ? "cita hoy" : "citas hoy"}</span>
               </div>
             </div>
@@ -146,10 +146,10 @@ export default function SalesDashboardClient({ user }: {
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard icon={Calendar} label="Total citas" value={stats.total} color="#27295C" bg="rgba(39,41,92,0.08)" />
+          <StatCard icon={Calendar} label="Total citas" value={stats.total} color="#000000" bg="rgba(39,41,92,0.08)" />
           <StatCard icon={CheckCircle} label="Completadas" value={stats.completed} color="#166534" bg="#DCFCE7" />
           <StatCard icon={FileText} label="Propuestas" value={stats.proposalsSent} color="#92400E" bg="rgba(201,168,76,0.12)" />
-          <StatCard icon={TrendingUp} label="Cerradas" value={stats.closed} color="#C9A84C" bg="rgba(201,168,76,0.1)" />
+          <StatCard icon={TrendingUp} label="Cerradas" value={stats.closed} color="#0183FF" bg="rgba(201,168,76,0.1)" />
         </div>
 
         <PanelDia timezone={user.timezone || "America/New_York"} />
@@ -158,24 +158,24 @@ export default function SalesDashboardClient({ user }: {
         <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB", boxShadow: "0 1px 4px rgba(39,41,92,0.06)" }}>
           <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: "#F0F0F0" }}>
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" style={{ color: "#27295C" }} />
-              <p className="font-semibold text-sm" style={{ color: "#27295C" }}>Mis citas de hoy</p>
+              <Clock className="w-4 h-4" style={{ color: "#000000" }} />
+              <p className="font-semibold text-sm" style={{ color: "#000000" }}>Mis citas de hoy</p>
               {stats.todayCount > 0 && (
-                <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "#27295C", color: "white" }}>{stats.todayCount}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background: "#000000", color: "white" }}>{stats.todayCount}</span>
               )}
             </div>
-            <button onClick={() => setView("all")} className="flex items-center gap-1 text-xs font-medium" style={{ color: "#C9A84C" }}>
+            <button onClick={() => setView("all")} className="flex items-center gap-1 text-xs font-medium" style={{ color: "#0183FF" }}>
               Ver todas <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
           {loading ? (
             <div className="text-center py-10">
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "#C9A84C", borderTopColor: "transparent" }} />
+              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: "#0183FF", borderTopColor: "transparent" }} />
             </div>
           ) : todayAppts.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-3xl mb-2">🎉</p>
-              <p className="text-sm font-medium" style={{ color: "#27295C" }}>Sin citas hoy</p>
+              <p className="text-sm font-medium" style={{ color: "#000000" }}>Sin citas hoy</p>
               <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>Disfruta el día</p>
             </div>
           ) : (
@@ -190,19 +190,19 @@ export default function SalesDashboardClient({ user }: {
                   <div key={appt.id} className="flex items-center gap-4 px-5 py-4"
                        style={{ opacity: paso ? 0.5 : 1 }}>
                     <div className="text-center flex-shrink-0 w-14">
-                      <p className="text-lg font-bold" style={{ color: "#27295C" }}>{time}</p>
+                      <p className="text-lg font-bold" style={{ color: "#000000" }}>{time}</p>
                       {isNow && <span className="text-xs font-bold" style={{ color: "#EF4444" }}>AHORA</span>}
-                      {isSoon && <span className="text-xs font-bold" style={{ color: "#C9A84C" }}>en {minsLeft}m</span>}
+                      {isSoon && <span className="text-xs font-bold" style={{ color: "#0183FF" }}>en {minsLeft}m</span>}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate" style={{ color: "#27295C" }}>{appt.clientName}</p>
+                      <p className="font-semibold text-sm truncate" style={{ color: "#000000" }}>{appt.clientName}</p>
                       <p className="text-xs truncate" style={{ color: "#9CA3AF" }}>{appt.clientCompany} · {appt.platform === "meet" ? "Google Meet" : "WhatsApp"}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {appt.meetingLink && (
                         <a href={appt.meetingLink} target="_blank" rel="noreferrer"
                           className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-                          style={{ background: "#27295C", color: "white" }}>
+                          style={{ background: "#000000", color: "white" }}>
                           Unirse
                         </a>
                       )}
@@ -221,7 +221,7 @@ export default function SalesDashboardClient({ user }: {
         {upcoming.length > 0 && (
           <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB", boxShadow: "0 1px 4px rgba(39,41,92,0.06)" }}>
             <div className="px-5 py-4 border-b" style={{ borderColor: "#F0F0F0" }}>
-              <p className="font-semibold text-sm" style={{ color: "#27295C" }}>Próximas citas</p>
+              <p className="font-semibold text-sm" style={{ color: "#000000" }}>Próximas citas</p>
             </div>
             <div className="divide-y" style={{ borderColor: "#F8F9FB" }}>
               {upcoming.map(appt => {
@@ -231,11 +231,11 @@ export default function SalesDashboardClient({ user }: {
                 return (
                   <div key={appt.id} className="flex items-center gap-4 px-5 py-3.5">
                     <div className="flex-shrink-0 text-center w-20">
-                      <p className="text-xs font-semibold capitalize" style={{ color: "#27295C" }}>{date}</p>
+                      <p className="text-xs font-semibold capitalize" style={{ color: "#000000" }}>{date}</p>
                       <p className="text-xs" style={{ color: "#9CA3AF" }}>{time}</p>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate" style={{ color: "#27295C" }}>{appt.clientName}</p>
+                      <p className="font-medium text-sm truncate" style={{ color: "#000000" }}>{appt.clientName}</p>
                       <p className="text-xs truncate" style={{ color: "#9CA3AF" }}>{appt.clientCompany}</p>
                     </div>
                   </div>
@@ -250,13 +250,13 @@ export default function SalesDashboardClient({ user }: {
         {/* Mis Propuestas */}
         <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
           <div className="px-5 py-3.5 border-b flex items-center justify-between" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Mis propuestas ({myProposals.length})</p>
-            <a href="/dashboard/propuestas" className="text-xs font-medium" style={{ color: "#C9A84C" }}>
+            <p className="text-sm font-semibold" style={{ color: "#000000" }}>Mis propuestas ({myProposals.length})</p>
+            <a href="/dashboard/propuestas" className="text-xs font-medium" style={{ color: "#0183FF" }}>
               Ver todas →
             </a>
           </div>
           {loadingProposals ? (
-            <div className="text-center py-8"><Clock className="w-5 h-5 animate-spin mx-auto" style={{ color: "#C9A84C" }} /></div>
+            <div className="text-center py-8"><Clock className="w-5 h-5 animate-spin mx-auto" style={{ color: "#0183FF" }} /></div>
           ) : myProposals.length === 0 ? (
             <div className="text-center py-8"><p className="text-sm" style={{ color: "#9CA3AF" }}>No hay propuestas enviadas</p></div>
           ) : (
@@ -265,7 +265,7 @@ export default function SalesDashboardClient({ user }: {
                 <div key={prop.id} className="px-5 py-3.5 flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <p className="text-sm font-semibold truncate" style={{ color: "#27295C" }}>{prop.client_name || prop.client_email}</p>
+                      <p className="text-sm font-semibold truncate" style={{ color: "#000000" }}>{prop.client_name || prop.client_email}</p>
                       <StatusBadge status={prop.status} invoiceSent={!!prop.invoice_sent_at} paymentConfirmed={!!prop.payment_confirmed_at} />
                     </div>
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>
@@ -291,12 +291,12 @@ export default function SalesDashboardClient({ user }: {
           {user.canRecovery && (
             <Link href="/dashboard/recovery"
               className="bg-white rounded-2xl p-5 border flex items-center gap-3 hover:shadow-md transition-all col-span-2"
-              style={{ borderColor: "#C9A84C" }}>
+              style={{ borderColor: "#0183FF" }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.15)" }}>
-                <PhoneCall className="w-5 h-5" style={{ color: "#C9A84C" }} />
+                <PhoneCall className="w-5 h-5" style={{ color: "#0183FF" }} />
               </div>
               <div>
-                <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Recupero</p>
+                <p className="text-sm font-semibold" style={{ color: "#000000" }}>Recupero</p>
                 <p className="text-xs" style={{ color: "#9CA3AF" }}>Tus propuestas sin aceptar y citas sin cerrar</p>
               </div>
             </Link>
@@ -305,10 +305,10 @@ export default function SalesDashboardClient({ user }: {
             className="bg-white rounded-2xl p-5 border flex items-center gap-3 hover:shadow-md transition-all"
             style={{ borderColor: "#E5E7EB" }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(201,168,76,0.1)" }}>
-              <FileText className="w-5 h-5" style={{ color: "#C9A84C" }} />
+              <FileText className="w-5 h-5" style={{ color: "#0183FF" }} />
             </div>
             <div>
-              <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Enviar propuesta</p>
+              <p className="text-sm font-semibold" style={{ color: "#000000" }}>Enviar propuesta</p>
               <p className="text-xs" style={{ color: "#9CA3AF" }}>Sin cita previa</p>
             </div>
           </Link>
@@ -316,10 +316,10 @@ export default function SalesDashboardClient({ user }: {
             className="bg-white rounded-2xl p-5 border flex items-center gap-3 hover:shadow-md transition-all"
             style={{ borderColor: "#E5E7EB" }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(39,41,92,0.08)" }}>
-              <Calendar className="w-5 h-5" style={{ color: "#27295C" }} />
+              <Calendar className="w-5 h-5" style={{ color: "#000000" }} />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Todas mis citas</p>
+              <p className="text-sm font-semibold" style={{ color: "#000000" }}>Todas mis citas</p>
               <p className="text-xs" style={{ color: "#9CA3AF" }}>{stats.total} en total</p>
             </div>
           </button>

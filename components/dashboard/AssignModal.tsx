@@ -63,7 +63,7 @@ export function AssignModal({
 
         {/* Header */}
         <div className="px-6 py-4 flex items-center justify-between"
-             style={{ background: "#27295C" }}>
+             style={{ background: "#000000" }}>
           <div>
             <p className="text-white font-semibold text-sm">{appointment.clientName}</p>
             <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{appointment.clientCompany} · {formatted}</p>
@@ -81,7 +81,7 @@ export function AssignModal({
                    style={{ background: "rgba(34,197,94,0.12)" }}>
                 <Check className="w-6 h-6 text-green-500" />
               </div>
-              <p className="font-semibold text-sm" style={{ color: "#27295C" }}>Cita asignada y notificación enviada</p>
+              <p className="font-semibold text-sm" style={{ color: "#000000" }}>Cita asignada y notificación enviada</p>
             </div>
           ) : (
             <>
@@ -93,15 +93,15 @@ export function AssignModal({
                     <button key={u.id} onClick={() => setSelected(u.id)}
                       className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all"
                       style={{
-                        borderColor: selected === u.id ? "#C9A84C" : "#E5E7EB",
+                        borderColor: selected === u.id ? "#0183FF" : "#E5E7EB",
                         background: selected === u.id ? "rgba(201,168,76,0.05)" : "white",
                       }}>
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                           style={{ background: "#27295C" }}>
+                           style={{ background: "#000000" }}>
                         {u.fullName[0]}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{u.fullName}</p>
+                        <p className="text-sm font-semibold" style={{ color: "#000000" }}>{u.fullName}</p>
                         <p className="text-xs" style={{ color: "#9CA3AF" }}>
                           {u.role === "admin" ? "Admin" : u.role === "sales_manager" ? "Manager" : "Sales Rep"}
                         </p>
@@ -118,7 +118,7 @@ export function AssignModal({
                           </p>
                         )}
                       </div>
-                      {selected === u.id && <Check className="w-4 h-4" style={{ color: "#C9A84C" }} />}
+                      {selected === u.id && <Check className="w-4 h-4" style={{ color: "#0183FF" }} />}
                     </button>
                   ))
                 }
@@ -127,8 +127,8 @@ export function AssignModal({
               <button onClick={handleAssign} disabled={!selected || loading}
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all"
                 style={{
-                  background: !selected ? "#E5E7EB" : "#C9A84C",
-                  color: !selected ? "#9CA3AF" : "#1A1C3E",
+                  background: !selected ? "#E5E7EB" : "#0183FF",
+                  color: !selected ? "#9CA3AF" : "#000000",
                   cursor: !selected ? "not-allowed" : "pointer",
                 }}>
                 {loading

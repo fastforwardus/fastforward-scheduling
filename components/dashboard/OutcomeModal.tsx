@@ -56,7 +56,7 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
       <div className="w-full max-w-md rounded-2xl overflow-hidden"
            style={{ background: "white", boxShadow: "0 24px 64px rgba(0,0,0,0.2)" }}
            onClick={e => e.stopPropagation()}>
-        <div className="px-6 py-4 flex items-center justify-between" style={{ background: "#27295C" }}>
+        <div className="px-6 py-4 flex items-center justify-between" style={{ background: "#000000" }}>
           <div>
             <p className="text-white font-semibold text-sm">{appointment.clientName}</p>
             <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>{appointment.clientCompany}</p>
@@ -69,7 +69,7 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
             <p className="text-xs" style={{ color: "#9CA3AF" }}>Completá el resultado de la llamada</p>
             <button onClick={handleSave} disabled={saving || (status === "completed" && !outcome)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all flex-shrink-0"
-              style={{ background: (saving || (status === "completed" && !outcome)) ? "#E5E7EB" : "#C9A84C", color: (saving || (status === "completed" && !outcome)) ? "#9CA3AF" : "#1A1C3E" }}>
+              style={{ background: (saving || (status === "completed" && !outcome)) ? "#E5E7EB" : "#0183FF", color: (saving || (status === "completed" && !outcome)) ? "#9CA3AF" : "#000000" }}>
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Guardar →"}
             </button>
           </div>
@@ -78,7 +78,7 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
           {saved ? (
             <div className="text-center py-6">
               <CheckCircle className="w-12 h-12 mx-auto mb-3" style={{ color: "#22C55E" }} />
-              <p className="font-semibold" style={{ color: "#27295C" }}>Guardado correctamente</p>
+              <p className="font-semibold" style={{ color: "#000000" }}>Guardado correctamente</p>
             </div>
           ) : (
             <>
@@ -88,7 +88,7 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
                   {STATUS_OPTIONS.map(s => (
                     <button key={s.value} onClick={() => setStatus(s.value)}
                       className="flex-1 py-2 rounded-xl text-xs font-semibold border-2 transition-all"
-                      style={{ borderColor: status === s.value ? "#27295C" : "#E5E7EB", background: status === s.value ? "#27295C" : "white", color: status === s.value ? "white" : "#6B7280" }}>
+                      style={{ borderColor: status === s.value ? "#000000" : "#E5E7EB", background: status === s.value ? "#000000" : "white", color: status === s.value ? "white" : "#6B7280" }}>
                       {s.label}
                     </button>
                   ))}
@@ -101,10 +101,10 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
                     {OUTCOMES.map(o => (
                       <button key={o.value} onClick={() => setOutcome(o.value)}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all"
-                        style={{ borderColor: outcome === o.value ? "#C9A84C" : "#E5E7EB", background: outcome === o.value ? "rgba(201,168,76,0.06)" : "white" }}>
+                        style={{ borderColor: outcome === o.value ? "#0183FF" : "#E5E7EB", background: outcome === o.value ? "rgba(201,168,76,0.06)" : "white" }}>
                         <span className="text-lg">{o.emoji}</span>
-                        <span className="text-sm font-medium" style={{ color: "#27295C" }}>{o.label}</span>
-                        {outcome === o.value && <span className="ml-auto w-2 h-2 rounded-full" style={{ background: "#C9A84C" }} />}
+                        <span className="text-sm font-medium" style={{ color: "#000000" }}>{o.label}</span>
+                        {outcome === o.value && <span className="ml-auto w-2 h-2 rounded-full" style={{ background: "#0183FF" }} />}
                       </button>
                     ))}
                   </div>
@@ -117,7 +117,7 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
                     {NEXT_STEPS.map(s => (
                       <button key={s.value} onClick={() => setNextStep(s.value)}
                         className="py-2.5 px-3 rounded-xl text-xs font-medium border-2 transition-all"
-                        style={{ borderColor: nextStep === s.value ? "#C9A84C" : "#E5E7EB", background: nextStep === s.value ? "rgba(201,168,76,0.08)" : "white", color: nextStep === s.value ? "#92400E" : "#6B7280" }}>
+                        style={{ borderColor: nextStep === s.value ? "#0183FF" : "#E5E7EB", background: nextStep === s.value ? "rgba(201,168,76,0.08)" : "white", color: nextStep === s.value ? "#92400E" : "#6B7280" }}>
                         {s.label}
                       </button>
                     ))}
@@ -130,7 +130,7 @@ export function OutcomeModal({ appointment, onClose, onSaved }: {
                   placeholder="Observaciones, contexto, detalles..." rows={3} maxLength={500}
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
                   style={{ border: "1.5px solid #E5E7EB", color: "#111827", background: "#F8F9FB" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                  onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                   onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
                 <p className="text-xs mt-1 text-right" style={{ color: "#9CA3AF" }}>{notes.length}/500</p>
               </div>

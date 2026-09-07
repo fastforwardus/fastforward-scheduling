@@ -42,8 +42,8 @@ function PasswordForm() {
           <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>{f.label}</label>
           <input type="password" value={f.value} onChange={e => f.set(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
-            style={{ borderColor: "#E5E7EB", color: "#27295C" }}
-            onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+            style={{ borderColor: "#E5E7EB", color: "#000000" }}
+            onFocus={e => e.currentTarget.style.borderColor = "#000000"}
             onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
         </div>
       ))}
@@ -51,7 +51,7 @@ function PasswordForm() {
       {success && <p className="text-xs font-semibold" style={{ color: "#22C55E" }}>✅ Contrasena actualizada correctamente</p>}
       <button onClick={handleSave} disabled={saving}
         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
-        style={{ background: "#27295C", color: "white", opacity: saving ? 0.7 : 1 }}>
+        style={{ background: "#000000", color: "white", opacity: saving ? 0.7 : 1 }}>
         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Guardar contrasena</>}
       </button>
     </div>
@@ -79,7 +79,7 @@ export default function SettingsClient({ user }: {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
           <div className="mb-8">
             <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Dashboard</p>
-            <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Configuracion</h1>
+            <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Configuracion</h1>
           </div>
 
           <div className="rounded-2xl border bg-white p-6 mb-4"
@@ -89,7 +89,7 @@ export default function SettingsClient({ user }: {
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
                      style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>📅</div>
                 <div>
-                  <h3 className="font-semibold" style={{ color: "#27295C" }}>Google Calendar & Meet</h3>
+                  <h3 className="font-semibold" style={{ color: "#000000" }}>Google Calendar & Meet</h3>
                   <p className="text-sm mt-0.5" style={{ color: "#6B7280" }}>
                     Genera links de Google Meet reales al asignar cada cita
                   </p>
@@ -105,7 +105,7 @@ export default function SettingsClient({ user }: {
               </div>
               <a href="/api/integrations/google/auth"
                  className="flex-shrink-0 flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold"
-                 style={{ background: connected ? "rgba(34,197,94,0.08)" : "#27295C", color: connected ? "#166534" : "white", border: connected ? "1px solid rgba(34,197,94,0.3)" : "none" }}>
+                 style={{ background: connected ? "rgba(34,197,94,0.08)" : "#000000", color: connected ? "#166534" : "white", border: connected ? "1px solid rgba(34,197,94,0.3)" : "none" }}>
                 {connected ? "Reconectar" : "Conectar"} <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
@@ -127,7 +127,7 @@ export default function SettingsClient({ user }: {
 
           <div className="rounded-xl p-4 mb-6" style={{ background: "rgba(39,41,92,0.04)", border: "1px solid rgba(39,41,92,0.08)" }}>
             <p className="text-xs" style={{ color: "#6B7280" }}>
-              <strong style={{ color: "#27295C" }}>Como funciona:</strong> Cada sales rep conecta su cuenta de Google una sola vez.
+              <strong style={{ color: "#000000" }}>Como funciona:</strong> Cada sales rep conecta su cuenta de Google una sola vez.
               Al asignar una cita de Google Meet, se crea el evento en su calendario con el link real.
               El cliente recibe el link por email automaticamente.
             </p>
@@ -140,7 +140,7 @@ export default function SettingsClient({ user }: {
               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
                    style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>🔒</div>
               <div>
-                <h3 className="font-semibold" style={{ color: "#27295C" }}>Cambiar contrasena</h3>
+                <h3 className="font-semibold" style={{ color: "#000000" }}>Cambiar contrasena</h3>
                 <p className="text-sm mt-0.5" style={{ color: "#6B7280" }}>Actualizá tu contrasena de acceso</p>
               </div>
             </div>

@@ -18,8 +18,8 @@ export function RecoveryTabs() {
           <Link key={t.href} href={t.href}
             className="px-4 py-2.5 text-sm font-semibold transition-colors"
             style={{
-              color: activo ? "#27295C" : "#9CA3AF",
-              borderBottom: `2px solid ${activo ? "#C9A84C" : "transparent"}`,
+              color: activo ? "#000000" : "#9CA3AF",
+              borderBottom: `2px solid ${activo ? "#0183FF" : "transparent"}`,
               marginBottom: -1,
             }}>
             {t.label}

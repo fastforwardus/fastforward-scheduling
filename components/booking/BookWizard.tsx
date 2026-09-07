@@ -246,7 +246,7 @@ export default function BookWizard({
       <WizardShell language={w.language} onLangChange={w.setLanguage} repInfo={repInfo}>
         <div className="text-center py-8">
           <div className="text-5xl mb-4">🚫</div>
-          <h2 className="text-xl font-bold mb-3" style={{ color: "#27295C" }}>{tr.blockedTitle}</h2>
+          <h2 className="text-xl font-bold mb-3" style={{ color: "#000000" }}>{tr.blockedTitle}</h2>
           <p className="text-gray-500 mb-6 text-sm leading-relaxed max-w-xs mx-auto">{tr.blockedText}</p>
           <a href="https://wa.me/17868225585"
              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white text-sm"
@@ -306,10 +306,10 @@ export default function BookWizard({
           {/* Check icon */}
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
                style={{ background: "rgba(201,168,76,0.12)" }}>
-            <CheckCircle className="w-8 h-8" style={{ color: "#C9A84C" }} />
+            <CheckCircle className="w-8 h-8" style={{ color: "#0183FF" }} />
           </div>
 
-          <h2 className="text-2xl font-bold mb-2" style={{ color: "#27295C" }}>{tr.successTitle}</h2>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: "#000000" }}>{tr.successTitle}</h2>
           <p className="text-gray-400 text-sm mb-6">{tr.successSub}</p>
 
           {/* Resumen cita */}
@@ -317,15 +317,15 @@ export default function BookWizard({
                style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                   style={{ background: "#27295C" }}>
+                   style={{ background: "#000000" }}>
                 <Calendar className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="font-semibold text-sm capitalize" style={{ color: "#27295C" }}>{formattedSlot}</p>
+                <p className="font-semibold text-sm capitalize" style={{ color: "#000000" }}>{formattedSlot}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{timezone}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="px-2 py-0.5 rounded-full text-xs font-medium capitalize"
-                        style={{ background: "rgba(39,41,92,0.08)", color: "#27295C" }}>
+                        style={{ background: "rgba(39,41,92,0.08)", color: "#000000" }}>
                     {w.platform === "meet" ? "🎥 Google Meet" : "💬 WhatsApp"}
                   </span>
                   <span className="text-xs text-gray-400">30 min</span>
@@ -357,14 +357,14 @@ export default function BookWizard({
           <div className="p-4 rounded-xl mb-6 text-left"
                style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
             <p className="text-xs text-gray-400 mb-1">{w.language === "es" ? "Confirmación enviada a" : w.language === "en" ? "Confirmation sent to" : "Confirmação enviada para"}</p>
-            <p className="text-sm font-medium" style={{ color: "#27295C" }}>{w.clientEmail}</p>
+            <p className="text-sm font-medium" style={{ color: "#000000" }}>{w.clientEmail}</p>
           </div>
 
           {/* Calendar buttons */}
           <div className="flex flex-col gap-2.5">
             <a href={googleCalUrl} target="_blank" rel="noreferrer"
                className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
-               style={{ background: "#27295C", color: "white" }}>
+               style={{ background: "#000000", color: "white" }}>
               <Calendar className="w-4 h-4" /> {tr.addGoogle}
             </a>
             <button onClick={downloadIcs}
@@ -391,19 +391,19 @@ export default function BookWizard({
       {/* Progress bar */}
       <div className="h-0.5 rounded-full mb-8" style={{ background: "#F0F0F0" }}>
         <div className="h-full rounded-full transition-all duration-500"
-             style={{ width: `${progress}%`, background: "linear-gradient(90deg, #27295C, #C9A84C)" }} />
+             style={{ width: `${progress}%`, background: "linear-gradient(90deg, #000000, #0183FF)" }} />
       </div>
 
       {/* ── STEP 1: Servicio ── */}
       {w.step === 1 && (
         <div>
-          <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{tr.step1Title}</h2>
+          <h2 className="text-xl font-bold mb-6" style={{ color: "#000000" }}>{tr.step1Title}</h2>
           <div className="space-y-3">
             {(["food_beverage","alcoholic_beverages","cosmetics","pharma_supplements","medical_devices","llc_only","other_not_sure"] as ServiceType[]).map((s) => (
               <button key={s} onClick={() => { w.setServiceType(s); w.setStep(2); }}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all duration-150 hover:-translate-y-0.5"
                 style={{
-                  borderColor: w.serviceType === s ? "#C9A84C" : "#E5E7EB",
+                  borderColor: w.serviceType === s ? "#0183FF" : "#E5E7EB",
                   background: w.serviceType === s ? "rgba(201,168,76,0.05)" : "white",
                   boxShadow: w.serviceType === s ? "0 4px 16px rgba(201,168,76,0.15)" : "none",
                 }}>
@@ -415,8 +415,8 @@ export default function BookWizard({
                   s === "medical_devices" ? "🩺" :
                   s === "llc_only" ? "🏢" : "❓"
                 }</span>
-                <span className="font-medium text-sm" style={{ color: "#27295C" }}>{tr.services[s]}</span>
-                {w.serviceType === s && <Check className="w-4 h-4 ml-auto" style={{ color: "#C9A84C" }} />}
+                <span className="font-medium text-sm" style={{ color: "#000000" }}>{tr.services[s]}</span>
+                {w.serviceType === s && <Check className="w-4 h-4 ml-auto" style={{ color: "#0183FF" }} />}
               </button>
             ))}
           </div>
@@ -426,13 +426,13 @@ export default function BookWizard({
       {/* ── STEP 2: Volumen ── */}
       {w.step === 2 && (
         <div>
-          <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{w.serviceType === "llc_only" ? tr.b2bQuestion : tr.step2Title}</h2>
+          <h2 className="text-xl font-bold mb-6" style={{ color: "#000000" }}>{w.serviceType === "llc_only" ? tr.b2bQuestion : tr.step2Title}</h2>
           <div className="space-y-3 mb-8">
             {((w.serviceType === "llc_only" ? [] : ["not_exporting","starting_under_100k","exporting_100k_1m","high_volume_over_1m"]) as ExportVolume[]).map((v) => (
               <button key={v} onClick={() => w.setExportVolume(v)}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all duration-150 hover:-translate-y-0.5"
                 style={{
-                  borderColor: w.exportVolume === v ? "#C9A84C" : "#E5E7EB",
+                  borderColor: w.exportVolume === v ? "#0183FF" : "#E5E7EB",
                   background: w.exportVolume === v ? "rgba(201,168,76,0.05)" : "white",
                 }}>
                 <span className="text-2xl">{
@@ -440,8 +440,8 @@ export default function BookWizard({
                   v === "starting_under_100k" ? "🚢" :
                   v === "exporting_100k_1m" ? "📈" : "🏭"
                 }</span>
-                <span className="font-medium text-sm" style={{ color: "#27295C" }}>{tr.volumes[v]}</span>
-                {w.exportVolume === v && <Check className="w-4 h-4 ml-auto" style={{ color: "#C9A84C" }} />}
+                <span className="font-medium text-sm" style={{ color: "#000000" }}>{tr.volumes[v]}</span>
+                {w.exportVolume === v && <Check className="w-4 h-4 ml-auto" style={{ color: "#0183FF" }} />}
               </button>
             ))}
           </div>
@@ -449,11 +449,11 @@ export default function BookWizard({
           {/* B2B filter */}
           {(w.exportVolume || w.serviceType === "llc_only") && (
             <div className="p-4 rounded-xl mb-6" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
-              {w.serviceType !== "llc_only" && <p className="text-sm font-semibold mb-3" style={{ color: "#27295C" }}>{tr.b2bQuestion}</p>}
+              {w.serviceType !== "llc_only" && <p className="text-sm font-semibold mb-3" style={{ color: "#000000" }}>{tr.b2bQuestion}</p>}
               <div className="flex gap-3">
                 <button onClick={() => { w.setIsB2b(true); w.next(); }}
                   className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border-2"
-                  style={{ borderColor: "#27295C", background: "#27295C", color: "white" }}>
+                  style={{ borderColor: "#000000", background: "#000000", color: "white" }}>
                   ✅ {tr.b2bYes}
                 </button>
                 <button onClick={() => { w.setIsB2b(false); setBlocked(true); }}
@@ -478,7 +478,7 @@ export default function BookWizard({
       {/* ── STEP 3: Datos del cliente ── */}
       {w.step === 3 && (
         <div>
-          <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{tr.step3Title}</h2>
+          <h2 className="text-xl font-bold mb-6" style={{ color: "#000000" }}>{tr.step3Title}</h2>
           <div className="space-y-4">
             {/* Nombre */}
             <div>
@@ -489,7 +489,7 @@ export default function BookWizard({
                 placeholder={tr.placeholders.name}
                 className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all"
                 style={{ borderColor: "#E5E7EB", color: "#111827" }}
-                onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                 onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"}
               />
             </div>
@@ -502,7 +502,7 @@ export default function BookWizard({
                 placeholder={tr.placeholders.email}
                 className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all"
                 style={{ borderColor: "#E5E7EB", color: "#111827" }}
-                onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                 onBlur={e => { e.currentTarget.style.borderColor = "#E5E7EB"; handleEmailBlur(); }}
               />
               {w.personalEmailWarning && (
@@ -521,7 +521,7 @@ export default function BookWizard({
                 placeholder={tr.placeholders.company}
                 className="w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all"
                 style={{ borderColor: "#E5E7EB", color: "#111827" }}
-                onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                 onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"}
               />
             </div>
@@ -550,14 +550,14 @@ export default function BookWizard({
                   <input type="text" value={w.clientCountryCode} onChange={e => w.setClientCountryCode(e.target.value)}
                     placeholder="+39"
                     className="w-20 px-3 py-3 rounded-xl border-2 text-sm outline-none"
-                    style={{ borderColor: "#27295C", color: "#111827" }}
+                    style={{ borderColor: "#000000", color: "#111827" }}
                   />
                 )}
                 <input type="tel" value={w.clientWhatsapp} onChange={e => w.setClientWhatsapp(e.target.value)}
                   placeholder={tr.placeholders.whatsapp}
                   className="flex-1 px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all"
                   style={{ borderColor: "#E5E7EB", color: "#111827" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                  onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                   onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"}
                 />
               </div>
@@ -578,7 +578,7 @@ export default function BookWizard({
                   maxLength={500}
                   className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none"
                   style={{ border: "1.5px solid #E5E7EB", color: "#111827", background: "white" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                  onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                   onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"}
                 />
                 <p className="text-xs mt-1 text-right" style={{ color: "#9CA3AF" }}>{(w.clientNotes || "").length}/500</p>
@@ -597,7 +597,7 @@ export default function BookWizard({
               disabled={!w.clientName || !w.clientEmail || !w.clientCompany || !w.clientWhatsapp}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all"
               style={{
-                background: (!w.clientName || !w.clientEmail || !w.clientCompany || !w.clientWhatsapp) ? "#E5E7EB" : "#27295C",
+                background: (!w.clientName || !w.clientEmail || !w.clientCompany || !w.clientWhatsapp) ? "#E5E7EB" : "#000000",
                 color: (!w.clientName || !w.clientEmail || !w.clientCompany || !w.clientWhatsapp) ? "#9CA3AF" : "white",
               }}>
               {tr.next} <ArrowRight className="w-4 h-4" />
@@ -609,7 +609,7 @@ export default function BookWizard({
       {/* ── STEP 4: Horario ── */}
       {w.step === 4 && (
         <div>
-          <h2 className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>{tr.step4Title}</h2>
+          <h2 className="text-xl font-bold mb-2" style={{ color: "#000000" }}>{tr.step4Title}</h2>
           <p className="text-xs text-gray-400 mb-6">{tr.timezone}: <span className="font-medium">{timezone}</span></p>
 
           {loadingSlots ? (
@@ -633,8 +633,8 @@ export default function BookWizard({
                     <button key={date} onClick={() => setSelectedDate(date)}
                       className="flex-shrink-0 flex flex-col items-center px-4 py-2.5 rounded-xl border-2 text-xs font-medium transition-all"
                       style={{
-                        borderColor: isSelected ? "#27295C" : "#E5E7EB",
-                        background: isSelected ? "#27295C" : "white",
+                        borderColor: isSelected ? "#000000" : "#E5E7EB",
+                        background: isSelected ? "#000000" : "white",
                         color: isSelected ? "white" : "#6B7280",
                         minWidth: "64px",
                       }}>
@@ -655,8 +655,8 @@ export default function BookWizard({
                       <button key={slot.utc} onClick={() => w.setSelectedSlot(slot.utc)}
                         className="py-2.5 rounded-xl border-2 text-sm font-medium transition-all"
                         style={{
-                          borderColor: isSelected ? "#27295C" : "#E5E7EB",
-                          background: isSelected ? "#27295C" : "white",
+                          borderColor: isSelected ? "#000000" : "#E5E7EB",
+                          background: isSelected ? "#000000" : "white",
                           color: isSelected ? "white" : "#374151",
                         }}>
                         {slot.label}
@@ -677,7 +677,7 @@ export default function BookWizard({
             <button onClick={w.next} disabled={!w.selectedSlot}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all"
               style={{
-                background: !w.selectedSlot ? "#E5E7EB" : "#27295C",
+                background: !w.selectedSlot ? "#E5E7EB" : "#000000",
                 color: !w.selectedSlot ? "#9CA3AF" : "white",
               }}>
               {tr.next} <ArrowRight className="w-4 h-4" />
@@ -689,21 +689,21 @@ export default function BookWizard({
       {/* ── STEP 5: Plataforma + Confirmar ── */}
       {w.step === 5 && (
         <div>
-          <h2 className="text-xl font-bold mb-6" style={{ color: "#27295C" }}>{tr.step5Title}</h2>
+          <h2 className="text-xl font-bold mb-6" style={{ color: "#000000" }}>{tr.step5Title}</h2>
           <div className="space-y-3 mb-8">
             {(["meet","whatsapp"] as Platform[]).map((p) => (
               <button key={p} onClick={() => w.setPlatform(p)}
                 className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border-2 text-left transition-all hover:-translate-y-0.5"
                 style={{
-                  borderColor: w.platform === p ? "#C9A84C" : "#E5E7EB",
+                  borderColor: w.platform === p ? "#0183FF" : "#E5E7EB",
                   background: w.platform === p ? "rgba(201,168,76,0.05)" : "white",
                 }}>
                 <span className="text-2xl">{p === "meet" ? "🎥" : "💬"}</span>
                 <div>
-                  <p className="font-semibold text-sm" style={{ color: "#27295C" }}>{tr.platforms[p]}</p>
+                  <p className="font-semibold text-sm" style={{ color: "#000000" }}>{tr.platforms[p]}</p>
                   <p className="text-xs text-gray-400">{tr.platformSub[p]}</p>
                 </div>
-                {w.platform === p && <Check className="w-4 h-4 ml-auto" style={{ color: "#C9A84C" }} />}
+                {w.platform === p && <Check className="w-4 h-4 ml-auto" style={{ color: "#0183FF" }} />}
               </button>
             ))}
           </div>
@@ -712,7 +712,7 @@ export default function BookWizard({
           {w.selectedSlot && w.platform && (
             <div className="p-4 rounded-xl mb-6" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
               <p className="text-xs text-gray-400 uppercase tracking-widest mb-2">Resumen</p>
-              <p className="text-sm font-medium" style={{ color: "#27295C" }}>
+              <p className="text-sm font-medium" style={{ color: "#000000" }}>
                 {formatInTimeZone(parseISO(w.selectedSlot), timezone, "EEEE d MMM · h:mm a")}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">{w.platform} · {w.clientCompany}</p>
@@ -728,8 +728,8 @@ export default function BookWizard({
             <button onClick={handleSubmit} disabled={!w.platform || submitting}
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all active:scale-95"
               style={{
-                background: (!w.platform || submitting) ? "#E5E7EB" : "#C9A84C",
-                color: (!w.platform || submitting) ? "#9CA3AF" : "#1A1C3E",
+                background: (!w.platform || submitting) ? "#E5E7EB" : "#0183FF",
+                color: (!w.platform || submitting) ? "#9CA3AF" : "#000000",
               }}>
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{tr.confirm} <CheckCircle className="w-4 h-4" /></>}
             </button>
@@ -751,7 +751,7 @@ function WizardShell({ children, language, onLangChange, repInfo }: {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#F8F9FB" }}>
       {/* Header */}
-      <header className="h-14 flex items-center px-4 sm:px-6" style={{ background: "#27295C" }}>
+      <header className="h-14 flex items-center px-4 sm:px-6" style={{ background: "#000000" }}>
         <div className="max-w-lg mx-auto w-full flex items-center justify-between">
           <Image
             src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
@@ -764,7 +764,7 @@ function WizardShell({ children, language, onLangChange, repInfo }: {
             {LANGS.map(l => (
               <button key={l.code} onClick={() => onLangChange(l.code)}
                 className="px-2 py-1 rounded text-xs font-medium transition-all"
-                style={{ color: language === l.code ? "#C9A84C" : "rgba(255,255,255,0.4)" }}>
+                style={{ color: language === l.code ? "#0183FF" : "rgba(255,255,255,0.4)" }}>
                 {l.flag} {l.label}
               </button>
             ))}
@@ -780,7 +780,7 @@ function WizardShell({ children, language, onLangChange, repInfo }: {
             <div className="flex items-center gap-3 mb-6 p-4 rounded-xl"
                  style={{ background: "white", border: "1px solid #E5E7EB", boxShadow: "0 2px 8px rgba(39,41,92,0.06)" }}>
               <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-                   style={{ background: "linear-gradient(135deg, #27295C, #373CA7)", fontSize: "18px" }}>
+                   style={{ background: "linear-gradient(135deg, #000000, #373CA7)", fontSize: "18px" }}>
                 {repInfo.avatarUrl
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <img src={repInfo.avatarUrl} alt={repInfo.fullName} className="w-full h-full rounded-full object-cover" />
@@ -791,8 +791,8 @@ function WizardShell({ children, language, onLangChange, repInfo }: {
                 <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: "#9CA3AF" }}>
                   {language === "en" ? "Your expert" : language === "pt" ? "Seu especialista" : "Tu experto"}
                 </p>
-                <p className="font-bold text-sm" style={{ color: "#27295C" }}>{repInfo.fullName}</p>
-                <p className="text-xs" style={{ color: "#C9A84C" }}>FastForward ® | FDA Experts</p>
+                <p className="font-bold text-sm" style={{ color: "#000000" }}>{repInfo.fullName}</p>
+                <p className="text-xs" style={{ color: "#0183FF" }}>FastForward ® | FDA Experts</p>
               </div>
               <div className="w-2 h-2 rounded-full" style={{ background: "#22C55E" }} title="Disponible" />
             </div>

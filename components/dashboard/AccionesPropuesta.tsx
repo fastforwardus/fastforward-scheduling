@@ -41,14 +41,14 @@ export default function AccionesPropuesta({ id, pagada, sinFactura, onListo, onE
         className="p-1.5 rounded-md" style={{ background: "#F3F4F6" }}>
         {cargando === "reenviar"
           ? <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: "#6B7280" }} />
-          : <Send className="w-3.5 h-3.5" style={{ color: "#27295C" }} />}
+          : <Send className="w-3.5 h-3.5" style={{ color: "#000000" }} />}
       </button>
 
       {!pagada && onEditar && (
         <button onClick={e => { e.stopPropagation(); onEditar(); }}
           title="Editar y reenviar"
           className="p-1.5 rounded-md" style={{ background: "#F3F4F6" }}>
-          <Pencil className="w-3.5 h-3.5" style={{ color: "#27295C" }} />
+          <Pencil className="w-3.5 h-3.5" style={{ color: "#000000" }} />
         </button>
       )}
 

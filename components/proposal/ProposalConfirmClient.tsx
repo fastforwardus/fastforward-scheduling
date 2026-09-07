@@ -112,9 +112,9 @@ export default function ProposalConfirmClient({
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#FEF3C7" }}>
           <span style={{ fontSize: 32 }}>📋</span>
         </div>
-        <p className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>Propuesta ya aceptada</p>
+        <p className="text-xl font-bold mb-2" style={{ color: "#000000" }}>Propuesta ya aceptada</p>
         <p className="text-sm" style={{ color: "#6B7280" }}>Esta propuesta ya fue aceptada anteriormente. Si tenés alguna consulta, contactá a tu asesor de FastForward.</p>
-        <p className="text-sm mt-4 font-medium" style={{ color: "#C9A84C" }}>info@fastfwdus.com</p>
+        <p className="text-sm mt-4 font-medium" style={{ color: "#0183FF" }}>info@fastfwdus.com</p>
       </div>
     </div>
   );
@@ -122,11 +122,11 @@ export default function ProposalConfirmClient({
   return (
     <div className="min-h-screen" style={{ background: "#F8F9FB" }}>
       {/* Header */}
-      <div style={{ background: "#27295C" }}>
+      <div style={{ background: "#000000" }}>
         <div className="max-w-2xl mx-auto px-6 py-5 flex items-center justify-between">
           <Image src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
             alt="FastForward" width={140} height={32} className="object-contain" unoptimized />
-          <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(201,168,76,0.2)", color: "#C9A84C" }}>
+          <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(201,168,76,0.2)", color: "#0183FF" }}>
             {proposalNum}
           </span>
         </div>
@@ -139,7 +139,7 @@ export default function ProposalConfirmClient({
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#DCFCE7" }}>
               <CheckCircle className="w-9 h-9" style={{ color: "#22C55E" }} />
             </div>
-            <h1 className="text-2xl font-bold mb-3" style={{ color: "#27295C" }}>{status === "accepted" && !confirming ? t.already_title : t.accepted_title}</h1>
+            <h1 className="text-2xl font-bold mb-3" style={{ color: "#000000" }}>{status === "accepted" && !confirming ? t.already_title : t.accepted_title}</h1>
             <p className="text-sm leading-relaxed" style={{ color: "#6B7280", maxWidth: 400, margin: "0 auto" }}>
               {status === "accepted" && !confirming ? t.already_sub : t.accepted_sub}
             </p>
@@ -151,12 +151,12 @@ export default function ProposalConfirmClient({
               <div className="grid grid-cols-2 gap-4">
                 <div className="min-w-0">
                   <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{t.for}</p>
-                  <p className="text-base font-bold break-words" style={{ color: "#27295C" }}>{clientCompany || clientName}</p>
+                  <p className="text-base font-bold break-words" style={{ color: "#000000" }}>{clientCompany || clientName}</p>
                   <p className="text-sm break-words" style={{ color: "#6B7280" }}>{clientCompany ? clientName : ""}</p>
                 </div>
                 <div className="text-right min-w-0">
                   <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>{t.from}</p>
-                  <p className="text-sm font-semibold break-words" style={{ color: "#27295C" }}>{repName}</p>
+                  <p className="text-sm font-semibold break-words" style={{ color: "#000000" }}>{repName}</p>
                   <p className="text-xs" style={{ color: "#9CA3AF" }}>FastForward FDA Experts</p>
                 </div>
               </div>
@@ -164,17 +164,17 @@ export default function ProposalConfirmClient({
 
             {/* Services */}
             <div className="bg-white rounded-2xl overflow-hidden mb-4" style={{ border: "1px solid #E5E7EB" }}>
-              <div className="px-5 py-3 border-b" style={{ background: "#27295C", borderColor: "#1e2050" }}>
+              <div className="px-5 py-3 border-b" style={{ background: "#000000", borderColor: "#1e2050" }}>
                 <p className="text-xs font-bold uppercase tracking-widest text-white">{t.services}</p>
               </div>
               {services.map((svc, i) => (
                 <div key={i} className="flex items-start justify-between px-5 py-4 border-b last:border-b-0"
                      style={{ borderColor: "#F0F0F0", background: i % 2 === 0 ? "white" : "#F8F9FB" }}>
                   <div className="flex-1 pr-4">
-                    <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{svc.name}</p>
+                    <p className="text-sm font-semibold" style={{ color: "#000000" }}>{svc.name}</p>
                     <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{svc.description}</p>
                   </div>
-                  <p className="text-sm font-bold flex-shrink-0" style={{ color: "#27295C" }}>${svc.price.toLocaleString("en-US")}</p>
+                  <p className="text-sm font-bold flex-shrink-0" style={{ color: "#000000" }}>${svc.price.toLocaleString("en-US")}</p>
                 </div>
               ))}
               {/* Totals */}
@@ -190,15 +190,15 @@ export default function ProposalConfirmClient({
                   </div>
                 )}
                 <div className="flex justify-between pt-2 border-t" style={{ borderColor: "#E5E7EB" }}>
-                  <span className="font-bold text-sm" style={{ color: "#27295C" }}>{t.total}</span>
-                  <span className="font-bold text-xl" style={{ color: "#C9A84C" }}>{t.currency} ${total.toLocaleString("en-US")}</span>
+                  <span className="font-bold text-sm" style={{ color: "#000000" }}>{t.total}</span>
+                  <span className="font-bold text-xl" style={{ color: "#0183FF" }}>{t.currency} ${total.toLocaleString("en-US")}</span>
                 </div>
               </div>
             </div>
 
             {/* CTA */}
             <div className="bg-white rounded-2xl p-6" style={{ border: "1px solid #E5E7EB" }}>
-              <h2 className="font-bold text-lg mb-2" style={{ color: "#27295C" }}>{t.pending_title}</h2>
+              <h2 className="font-bold text-lg mb-2" style={{ color: "#000000" }}>{t.pending_title}</h2>
               <p className="text-sm mb-5" style={{ color: "#6B7280" }}>{t.pending_sub}</p>
               <button onClick={handleConfirm} disabled={confirming}
                 className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-bold text-base transition-all"

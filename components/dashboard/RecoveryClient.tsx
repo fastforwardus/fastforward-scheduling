@@ -152,7 +152,7 @@ export default function RecoveryClient({ user }: {
           <div className="flex items-start justify-between mb-6">
             <div>
               <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Recupero</p>
-              <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Leads para contactar</h1>
+              <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Leads para contactar</h1>
               <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
                 Propuestas sin aceptar y citas que no cerraron
               </p>
@@ -181,9 +181,9 @@ export default function RecoveryClient({ user }: {
               <button key={k} onClick={() => setFiltro(k)}
                 className="px-3 py-2 rounded-lg text-xs font-semibold"
                 style={{
-                  background: filtro === k ? "#27295C" : "white",
+                  background: filtro === k ? "#000000" : "white",
                   color: filtro === k ? "white" : "#6B7280",
-                  border: `1px solid ${filtro === k ? "#27295C" : "#E5E7EB"}`,
+                  border: `1px solid ${filtro === k ? "#000000" : "#E5E7EB"}`,
                 }}>
                 {label}
               </button>
@@ -219,7 +219,7 @@ export default function RecoveryClient({ user }: {
                     <div className="flex items-start gap-4 flex-wrap">
                       <div className="flex-1 min-w-[220px]">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{r.clientName || "Sin nombre"}</p>
+                          <p className="text-sm font-semibold" style={{ color: "#000000" }}>{r.clientName || "Sin nombre"}</p>
                           <span className="text-xs px-2 py-0.5 rounded-md"
                             style={{
                               background: r.sourceType === "proposal" ? "rgba(201,168,76,0.12)" : "rgba(139,92,246,0.12)",
@@ -228,7 +228,7 @@ export default function RecoveryClient({ user }: {
                             {r.sourceType === "proposal" ? "Propuesta" : "Cita"}
                           </span>
                           {r.total != null && (
-                            <span className="text-xs font-semibold" style={{ color: "#C9A84C" }}>USD {r.total.toLocaleString("en-US")}</span>
+                            <span className="text-xs font-semibold" style={{ color: "#0183FF" }}>USD {r.total.toLocaleString("en-US")}</span>
                           )}
                           {r.sourceType === "proposal" && (r.waStage ?? 0) >= 4 && (
                             <span className="text-xs px-1.5 py-0.5 rounded font-medium"
@@ -297,7 +297,7 @@ export default function RecoveryClient({ user }: {
                         <button onClick={() => llamar(r)}
                           className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold self-start"
                           style={{
-                            background: enLlamada === key ? "#FEE2E2" : "#27295C",
+                            background: enLlamada === key ? "#FEE2E2" : "#000000",
                             color: enLlamada === key ? "#991B1B" : "white",
                             border: "1px solid transparent",
                           }}>
@@ -327,7 +327,7 @@ export default function RecoveryClient({ user }: {
                           style={{ borderColor: "#E5E7EB" }} />
                         <button onClick={() => guardarNota(r)} disabled={guardando || !draft.trim()}
                           className="px-4 py-2 rounded-lg text-xs font-semibold self-end"
-                          style={{ background: draft.trim() ? "#27295C" : "#E5E7EB", color: draft.trim() ? "white" : "#9CA3AF" }}>
+                          style={{ background: draft.trim() ? "#000000" : "#E5E7EB", color: draft.trim() ? "white" : "#9CA3AF" }}>
                           {guardando ? "..." : "Guardar"}
                         </button>
                       </div>

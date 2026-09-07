@@ -155,7 +155,7 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
   return (
     <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
       <div className="px-5 py-3 border-b flex items-center gap-4 flex-wrap" style={{ borderColor: "#F0F0F0" }}>
-        <span className="text-sm font-semibold" style={{ color: "#27295C" }}>Movimientos</span>
+        <span className="text-sm font-semibold" style={{ color: "#000000" }}>Movimientos</span>
         <div className="flex gap-3 flex-wrap">
           {FILTROS.map(f => {
             const n = f.key === "todo" ? items.length : items.filter(m => m.source === f.key).length;
@@ -163,7 +163,7 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
             return (
               <button key={f.key} onClick={() => setFiltro(f.key)}
                 className="text-xs transition-colors"
-                style={{ color: filtro === f.key ? "#27295C" : "#9CA3AF", fontWeight: filtro === f.key ? 600 : 400 }}>
+                style={{ color: filtro === f.key ? "#000000" : "#9CA3AF", fontWeight: filtro === f.key ? 600 : 400 }}>
                 {f.label} <span style={{ color: "#D1D5DB" }}>{n}</span>
               </button>
             );
@@ -202,7 +202,7 @@ export default function MovimientosFeed({ email, timezone = "America/New_York" }
                       <Bot className="w-3 h-3 flex-shrink-0" />
                       <span className="truncate">whatsapp</span>
                     </span>
-                    <span className="text-sm flex items-center gap-1.5" style={{ color: "#27295C" }}>
+                    <span className="text-sm flex items-center gap-1.5" style={{ color: "#000000" }}>
                       <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#3C3489" }} />
                       Chat con Adriana
                       <span className="text-xs ml-2" style={{ color: "#9CA3AF" }}>

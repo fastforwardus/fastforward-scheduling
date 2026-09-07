@@ -134,7 +134,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#DCFCE7" }}>
           <Check className="w-8 h-8" style={{ color: "#22C55E" }} />
         </div>
-        <p className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>Propuesta enviada</p>
+        <p className="text-xl font-bold mb-2" style={{ color: "#000000" }}>Propuesta enviada</p>
         <p className="text-sm mb-1" style={{ color: "#6B7280" }}>
           Enviada a {validEmails.length} {validEmails.length === 1 ? "destinatario" : "destinatarios"}.
         </p>
@@ -145,7 +145,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
             Nueva propuesta
           </button>
           <button onClick={() => router.push("/dashboard")}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ background: "#27295C", color: "white" }}>
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ background: "#000000", color: "white" }}>
             Ir al dashboard
           </button>
         </div>
@@ -166,10 +166,10 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
             <ArrowLeft className="w-4 h-4" style={{ color: "#6B7280" }} />
           </button>
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "rgba(39,41,92,0.08)" }}>
-            <FileText className="w-5 h-5" style={{ color: "#27295C" }} />
+            <FileText className="w-5 h-5" style={{ color: "#000000" }} />
           </div>
           <div>
-            <h1 className="text-xl font-bold" style={{ color: "#27295C" }}>Enviar propuesta directa</h1>
+            <h1 className="text-xl font-bold" style={{ color: "#000000" }}>Enviar propuesta directa</h1>
             <p className="text-sm" style={{ color: "#9CA3AF" }}>Para clientes sin cita agendada · {user.fullName}</p>
           </div>
         </div>
@@ -179,33 +179,33 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
 
             {/* Client data */}
             <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: "#E5E7EB" }}>
-              <p className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Datos del cliente</p>
+              <p className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Datos del cliente</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>Nombre completo *</label>
                   <input value={clientName} onChange={e => setClientName(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Juan García" />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="Juan García" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>Empresa</label>
                   <input value={clientCompany} onChange={e => setClientCompany(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Empresa S.A." />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="Empresa S.A." />
                 </div>
 
                 {/* Multiple emails */}
                 <div className="sm:col-span-2">
                   <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>
                     Email(s) *
-                    <span className="ml-2 font-normal normal-case" style={{ color: "#C9A84C" }}>— se envía a cada dirección</span>
+                    <span className="ml-2 font-normal normal-case" style={{ color: "#0183FF" }}>— se envía a cada dirección</span>
                   </label>
                   <div className="space-y-2">
                     {clientEmails.map((email, i) => (
                       <div key={i} className="flex gap-2">
                         <input type="email" value={email} onChange={e => updateEmail(i, e.target.value)}
                           className="flex-1 px-4 py-2.5 rounded-xl border text-sm outline-none"
-                          style={{ borderColor: "#E5E7EB", color: "#27295C" }}
+                          style={{ borderColor: "#E5E7EB", color: "#000000" }}
                           placeholder="email@empresa.com" />
                         {clientEmails.length > 1 && (
                           <button onClick={() => removeEmail(i)} className="p-2.5 rounded-xl border hover:bg-red-50"
@@ -217,7 +217,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                     ))}
                     <button onClick={addEmail}
                       className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border"
-                      style={{ borderColor: "#C9A84C", color: "#C9A84C" }}>
+                      style={{ borderColor: "#0183FF", color: "#0183FF" }}>
                       <Plus className="w-3.5 h-3.5" /> Agregar email
                     </button>
                   </div>
@@ -225,17 +225,17 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
 
                 <div className="sm:col-span-2">
                   <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>
-                    Dirección <span style={{ color: "#C9A84C", fontWeight: 400, textTransform: "none" }}>(opcional)</span>
+                    Dirección <span style={{ color: "#0183FF", fontWeight: 400, textTransform: "none" }}>(opcional)</span>
                   </label>
                   <input type="text" value={clientAddress} onChange={e => setClientAddress(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Calle 123, Ciudad, País" />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="Calle 123, Ciudad, País" />
                 </div>
                 <div>
-                  <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>ID Tributario <span style={{ color: "#C9A84C", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
+                  <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>ID Tributario <span style={{ color: "#0183FF", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
                   <input type="text" value={clientTaxId} onChange={e => setClientTaxId(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="EIN, RFC, CUIT..." />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="EIN, RFC, CUIT..." />
                 </div>
               </div>
 
@@ -243,7 +243,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                 {(["es", "en", "pt"] as const).map(l => (
                   <button key={l} onClick={() => handleLangChange(l)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold uppercase"
-                    style={{ background: lang === l ? "#27295C" : "#F3F4F6", color: lang === l ? "white" : "#6B7280" }}>
+                    style={{ background: lang === l ? "#000000" : "#F3F4F6", color: lang === l ? "white" : "#6B7280" }}>
                     {l === "es" ? "🇪🇸 ES" : l === "en" ? "🇺🇸 EN" : "🇧🇷 PT"}
                   </button>
                 ))}
@@ -252,12 +252,12 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
 
             {/* Email body */}
             <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: "#E5E7EB" }}>
-              <p className="text-sm font-semibold mb-2" style={{ color: "#27295C" }}>
+              <p className="text-sm font-semibold mb-2" style={{ color: "#000000" }}>
                 Mensaje del email <span className="font-normal text-xs" style={{ color: "#9CA3AF" }}>(opcional)</span>
               </p>
               <textarea value={emailText} onChange={e => setEmailText(e.target.value)} rows={3}
                 className="w-full px-4 py-3 rounded-xl border text-sm outline-none resize-none"
-                style={{ borderColor: "#E5E7EB", color: "#27295C" }}
+                style={{ borderColor: "#E5E7EB", color: "#000000" }}
                 placeholder="Texto personalizado para el cuerpo del email..." />
             </div>
 
@@ -266,18 +266,18 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
               <div className="px-5 py-3 border-b" style={{ borderColor: "#F0F0F0" }}>
                 <input value={searchQ} onChange={e => setSearchQ(e.target.value)}
                   className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
-                  style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Buscar servicio..." />
+                  style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="Buscar servicio..." />
               </div>
               <div className="flex flex-wrap gap-1.5 px-4 py-2.5 border-b" style={{ borderColor: "#F0F0F0" }}>
                 <button onClick={() => setSelectedCat(null)}
                   className="px-2.5 py-1 rounded-full text-xs font-medium"
-                  style={{ background: !selectedCat ? "#27295C" : "#F3F4F6", color: !selectedCat ? "white" : "#6B7280" }}>
+                  style={{ background: !selectedCat ? "#000000" : "#F3F4F6", color: !selectedCat ? "white" : "#6B7280" }}>
                   Todos
                 </button>
                 {categories.map(cat => (
                   <button key={cat} onClick={() => setSelectedCat(selectedCat === cat ? null : cat)}
                     className="px-2.5 py-1 rounded-full text-xs font-medium"
-                    style={{ background: selectedCat === cat ? "#27295C" : "#F3F4F6", color: selectedCat === cat ? "white" : "#6B7280" }}>
+                    style={{ background: selectedCat === cat ? "#000000" : "#F3F4F6", color: selectedCat === cat ? "white" : "#6B7280" }}>
                     {cat}
                   </button>
                 ))}
@@ -290,26 +290,26 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                     <div key={i} className="flex items-center px-5 py-3 hover:bg-gray-50"
                       style={{ cursor: "pointer" }} onClick={() => toggleService(svc)}>
                       <div className="flex-1 pr-4" onClick={e => isSelected && e.stopPropagation()}>
-                        <p className="text-sm font-medium" style={{ color: "#27295C" }}>{svc.name}</p>
+                        <p className="text-sm font-medium" style={{ color: "#000000" }}>{svc.name}</p>
                         <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{svc.description}</p>
                       </div>
                       <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="text-sm font-bold" style={{ color: "#C9A84C" }}>${svc.price.toLocaleString("en-US")}</span>
+                        <span className="text-sm font-bold" style={{ color: "#0183FF" }}>${svc.price.toLocaleString("en-US")}</span>
                         {isSelected && (
                           <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                             <button onClick={() => updateQty(svc.name, (selectedItem?.qty || 1) - 1)}
                               className="w-6 h-6 rounded-lg flex items-center justify-center text-sm font-bold"
-                              style={{ background: "#F3F4F6", color: "#27295C" }}>−</button>
-                            <span className="w-6 text-center text-sm font-semibold" style={{ color: "#27295C" }}>
+                              style={{ background: "#F3F4F6", color: "#000000" }}>−</button>
+                            <span className="w-6 text-center text-sm font-semibold" style={{ color: "#000000" }}>
                               {selectedItem?.qty || 1}
                             </span>
                             <button onClick={() => updateQty(svc.name, (selectedItem?.qty || 1) + 1)}
                               className="w-6 h-6 rounded-lg flex items-center justify-center text-sm font-bold"
-                              style={{ background: "#F3F4F6", color: "#27295C" }}>+</button>
+                              style={{ background: "#F3F4F6", color: "#000000" }}>+</button>
                           </div>
                         )}
                         <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center"
-                          style={{ borderColor: isSelected ? "#27295C" : "#E5E7EB", background: isSelected ? "#27295C" : "white" }}>
+                          style={{ borderColor: isSelected ? "#000000" : "#E5E7EB", background: isSelected ? "#000000" : "white" }}>
                           {isSelected && <Check className="w-3 h-3 text-white" />}
                         </div>
                       </div>
@@ -321,7 +321,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
 
             {/* Custom service */}
             <div className="bg-white rounded-2xl border p-5" style={{ borderColor: "#E5E7EB" }}>
-              <p className="text-sm font-semibold mb-3" style={{ color: "#27295C" }}>
+              <p className="text-sm font-semibold mb-3" style={{ color: "#000000" }}>
                 Servicio personalizado <span className="font-normal text-xs" style={{ color: "#9CA3AF" }}>(no está en el catálogo)</span>
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -329,24 +329,24 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                   <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>Nombre del servicio</label>
                   <input value={customName} onChange={e => setCustomName(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Ej: Consultoría especial" />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="Ej: Consultoría especial" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>Precio USD</label>
                   <input type="number" value={customPrice} onChange={e => setCustomPrice(e.target.value)} min={0}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="0" />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="0" />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>Descripción <span style={{ fontWeight: 400, textTransform: "none" as const, color: "#C9A84C" }}>(opcional)</span></label>
+                  <label className="block text-xs uppercase tracking-widest font-semibold mb-1.5" style={{ color: "#9CA3AF" }}>Descripción <span style={{ fontWeight: 400, textTransform: "none" as const, color: "#0183FF" }}>(opcional)</span></label>
                   <input value={customDesc} onChange={e => setCustomDesc(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border text-sm outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} placeholder="Descripción del servicio..." />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} placeholder="Descripción del servicio..." />
                 </div>
                 <div className="flex items-end">
                   <button onClick={addCustomService} disabled={!customName || !customPrice}
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                    style={{ background: (!customName || !customPrice) ? "#F3F4F6" : "#27295C", color: (!customName || !customPrice) ? "#9CA3AF" : "white" }}>
+                    style={{ background: (!customName || !customPrice) ? "#F3F4F6" : "#000000", color: (!customName || !customPrice) ? "#9CA3AF" : "white" }}>
                     <Plus className="w-4 h-4" /> Agregar
                   </button>
                 </div>
@@ -358,7 +358,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
           {/* RIGHT */}
           <div className="space-y-4">
             <div className="bg-white rounded-2xl border p-5 sticky top-6" style={{ borderColor: "#E5E7EB" }}>
-              <p className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Resumen</p>
+              <p className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Resumen</p>
               {selected.length === 0 ? (
                 <p className="text-sm text-center py-6" style={{ color: "#9CA3AF" }}>Seleccioná servicios del catálogo</p>
               ) : (
@@ -375,12 +375,12 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                         <span className="text-xs" style={{ color: "#9CA3AF" }}>$</span>
                         <input type="number" value={svc.price} onChange={e => updatePrice(svc.name, Number(e.target.value))} min={0}
                           className="w-20 px-2 py-1 rounded-md border text-xs text-right outline-none"
-                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                          style={{ borderColor: "#E5E7EB", color: "#000000" }} />
                         <span className="text-xs" style={{ color: "#9CA3AF" }}>x</span>
                         <input type="number" value={svc.qty} onChange={e => updateQty(svc.name, Number(e.target.value))} min={1}
                           className="w-12 px-2 py-1 rounded-md border text-xs text-right outline-none"
-                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
-                        <span className="text-xs font-semibold ml-auto" style={{ color: "#27295C" }}>${(svc.price * svc.qty).toLocaleString("en-US")}</span>
+                          style={{ borderColor: "#E5E7EB", color: "#000000" }} />
+                        <span className="text-xs font-semibold ml-auto" style={{ color: "#000000" }}>${(svc.price * svc.qty).toLocaleString("en-US")}</span>
                       </div>
                     </div>
                   ))}
@@ -391,11 +391,11 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                   <label className="text-xs whitespace-nowrap" style={{ color: "#9CA3AF" }}>Descuento USD</label>
                   <input type="number" value={discount} onChange={e => setDiscount(Number(e.target.value))} min={0}
                     className="flex-1 px-3 py-1.5 rounded-lg border text-sm text-right outline-none"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }} />
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold" style={{ color: "#27295C" }}>Total</span>
-                  <span className="text-xl font-bold" style={{ color: "#C9A84C" }}>USD ${total.toLocaleString("en-US")}</span>
+                  <span className="text-sm font-bold" style={{ color: "#000000" }}>Total</span>
+                  <span className="text-xl font-bold" style={{ color: "#0183FF" }}>USD ${total.toLocaleString("en-US")}</span>
                 </div>
                 {validEmails.length > 1 && (
                   <p className="text-xs" style={{ color: "#6B7280" }}>
@@ -425,8 +425,8 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                 disabled={sending || !clientName || validEmails.length === 0 || selected.length === 0}
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm mt-4 transition-all"
                 style={{
-                  background: (!clientName || validEmails.length === 0 || selected.length === 0) ? "#F3F4F6" : "#C9A84C",
-                  color: (!clientName || validEmails.length === 0 || selected.length === 0) ? "#9CA3AF" : "#1A1C3E"
+                  background: (!clientName || validEmails.length === 0 || selected.length === 0) ? "#F3F4F6" : "#0183FF",
+                  color: (!clientName || validEmails.length === 0 || selected.length === 0) ? "#9CA3AF" : "#000000"
                 }}>
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 {sending ? "Enviando..." : "Enviar propuesta →"}

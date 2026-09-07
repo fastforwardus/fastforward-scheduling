@@ -122,14 +122,14 @@ export function ReminderBell() {
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
         style={{
           background: vencidos > 0 ? "rgba(239,68,68,0.16)" : "rgba(201,168,76,0.16)",
-          color: vencidos > 0 ? "#FCA5A5" : "#C9A84C",
+          color: vencidos > 0 ? "#FCA5A5" : "#0183FF",
         }}>
         <Bell className="w-4 h-4 flex-shrink-0" />
         <span className="flex-1 text-left">Pendientes</span>
         <span className="px-2 py-0.5 rounded-full text-xs font-bold"
           style={{
-            background: vencidos > 0 ? "#EF4444" : "#C9A84C",
-            color: vencidos > 0 ? "white" : "#1A1C3E",
+            background: vencidos > 0 ? "#EF4444" : "#0183FF",
+            color: vencidos > 0 ? "white" : "#000000",
           }}>{items.length}</span>
       </button>
 
@@ -138,7 +138,7 @@ export function ReminderBell() {
           style={{ background: "white", boxShadow: "0 -4px 28px rgba(0,0,0,0.28)", maxWidth: "calc(100% - 1.5rem)" }}>
           <div className="px-4 py-2.5 flex items-center justify-between"
             style={{ background: "#F8F9FB", borderBottom: "1px solid #E5E7EB" }}>
-            <span className="text-xs font-semibold" style={{ color: "#27295C" }}>
+            <span className="text-xs font-semibold" style={{ color: "#000000" }}>
               {vencidos > 0 ? `${vencidos} vencido${vencidos === 1 ? "" : "s"}` : "Pendientes"}
             </span>
             <button onClick={() => setAbierto(false)} aria-label="Cerrar">
@@ -183,7 +183,7 @@ export function ReminderBell() {
 
           <Link href="/dashboard" onClick={() => setAbierto(false)}
             className="block px-4 py-2.5 text-xs font-semibold text-center"
-            style={{ background: "#27295C", color: "white" }}>
+            style={{ background: "#000000", color: "white" }}>
             Ver mi dia →
           </Link>
         </div>

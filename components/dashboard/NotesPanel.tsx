@@ -111,13 +111,13 @@ export function NotesPanel({
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b"
            style={{ borderColor: "#E5E7EB", background: "#F8F9FB" }}>
-        <StickyNote className="w-4 h-4" style={{ color: "#27295C" }} />
-        <span className="text-sm font-semibold" style={{ color: "#27295C" }}>
+        <StickyNote className="w-4 h-4" style={{ color: "#000000" }} />
+        <span className="text-sm font-semibold" style={{ color: "#000000" }}>
           Notas internas
         </span>
         {notes.length > 0 && (
           <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold"
-                style={{ background: "rgba(39,41,92,0.08)", color: "#27295C" }}>
+                style={{ background: "rgba(39,41,92,0.08)", color: "#000000" }}>
             {notes.length}
           </span>
         )}
@@ -205,7 +205,7 @@ export function NotesPanel({
               color: "#111827",
               background: "#F8F9FB",
             }}
-            onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+            onFocus={e => e.currentTarget.style.borderColor = "#000000"}
             onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"}
           />
           <button
@@ -213,7 +213,7 @@ export function NotesPanel({
             disabled={!text.trim() || sending}
             className="flex-shrink-0 w-10 h-10 self-end rounded-xl flex items-center justify-center transition-all"
             style={{
-              background: !text.trim() ? "#E5E7EB" : "#27295C",
+              background: !text.trim() ? "#E5E7EB" : "#000000",
               color: !text.trim() ? "#9CA3AF" : "white",
             }}>
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

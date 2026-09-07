@@ -130,7 +130,7 @@ function AppointmentHistoryRow({ appt, currentUserId, currentRole, onRefresh }: 
                 )}
                 <button onClick={() => setShowNotes(!showNotes)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border"
-                  style={{ borderColor: showNotes ? "#27295C" : "#E5E7EB", color: showNotes ? "#27295C" : "#6B7280" }}>
+                  style={{ borderColor: showNotes ? "#000000" : "#E5E7EB", color: showNotes ? "#000000" : "#6B7280" }}>
                   📝 Notas
                 </button>
               </div>
@@ -195,11 +195,11 @@ export default function ClientHistoryClient({ user, clientEmail }: {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-full flex items-center justify-center text-white text-xl font-bold flex-shrink-0"
-                         style={{ background: "#27295C" }}>
+                         style={{ background: "#000000" }}>
                       {(data.profile?.name || clientEmail)[0].toUpperCase()}
                     </div>
                     <div>
-                      <h1 className="text-xl font-bold" style={{ color: "#27295C" }}>
+                      <h1 className="text-xl font-bold" style={{ color: "#000000" }}>
                         {data.profile?.name || clientEmail}
                       </h1>
                       {data.profile?.company && (
@@ -230,7 +230,7 @@ export default function ClientHistoryClient({ user, clientEmail }: {
                     { label: "Satisfaccion", value: avgRating ? `${avgRating}/5 ⭐` : "—" },
                   ].map(s => (
                     <div key={s.label} className="text-center p-3 rounded-xl" style={{ background: "#F8F9FB" }}>
-                      <p className="text-xl font-bold" style={{ color: "#27295C" }}>{s.value}</p>
+                      <p className="text-xl font-bold" style={{ color: "#000000" }}>{s.value}</p>
                       <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{s.label}</p>
                     </div>
                   ))}
@@ -264,7 +264,7 @@ export default function ClientHistoryClient({ user, clientEmail }: {
               {data.surveys.length > 0 && (
                 <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
                   <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-                    <h2 className="text-sm font-semibold" style={{ color: "#27295C" }}>Encuestas de satisfaccion</h2>
+                    <h2 className="text-sm font-semibold" style={{ color: "#000000" }}>Encuestas de satisfaccion</h2>
                   </div>
                   <div className="divide-y" style={{ borderColor: "#F0F0F0" }}>
                     {data.surveys.map(sv => (
@@ -289,7 +289,7 @@ export default function ClientHistoryClient({ user, clientEmail }: {
               {/* Appointment history */}
               <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
                 <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-                  <h2 className="text-sm font-semibold" style={{ color: "#27295C" }}>
+                  <h2 className="text-sm font-semibold" style={{ color: "#000000" }}>
                     Historial de citas ({data.appointments.length})
                   </h2>
                 </div>

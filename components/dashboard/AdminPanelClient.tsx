@@ -94,7 +94,7 @@ function AvailabilityEditor({ userId }: { userId: string }) {
       {rules.map(rule => (
         <div key={rule.dayOfWeek} className="flex items-center gap-3 p-3 rounded-xl"
              style={{ background: rule.isActive ? "#F8F9FB" : "#F3F4F6", border: "1px solid #E5E7EB" }}>
-          <div className="w-10 text-xs font-bold" style={{ color: "#27295C" }}>{DAYS[rule.dayOfWeek]}</div>
+          <div className="w-10 text-xs font-bold" style={{ color: "#000000" }}>{DAYS[rule.dayOfWeek]}</div>
           <label className="flex items-center gap-1.5 cursor-pointer">
             <input type="checkbox" checked={rule.isActive}
               onChange={e => setRules(prev => prev.map(r => r.dayOfWeek === rule.dayOfWeek ? { ...r, isActive: e.target.checked } : r))}
@@ -106,17 +106,17 @@ function AvailabilityEditor({ userId }: { userId: string }) {
               <input type="time" value={rule.startTime}
                 onChange={e => setRules(prev => prev.map(r => r.dayOfWeek === rule.dayOfWeek ? { ...r, startTime: e.target.value } : r))}
                 className="px-2 py-1 rounded-lg border text-xs outline-none"
-                style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                style={{ borderColor: "#E5E7EB", color: "#000000" }} />
               <span className="text-xs" style={{ color: "#9CA3AF" }}>a</span>
               <input type="time" value={rule.endTime}
                 onChange={e => setRules(prev => prev.map(r => r.dayOfWeek === rule.dayOfWeek ? { ...r, endTime: e.target.value } : r))}
                 className="px-2 py-1 rounded-lg border text-xs outline-none"
-                style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                style={{ borderColor: "#E5E7EB", color: "#000000" }} />
             </>
           )}
           <button onClick={() => saveRule(rule)}
             className="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-            style={{ background: "#27295C", color: "white", opacity: saving === rule.dayOfWeek ? 0.7 : 1 }}>
+            style={{ background: "#000000", color: "white", opacity: saving === rule.dayOfWeek ? 0.7 : 1 }}>
             {saving === rule.dayOfWeek ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Check className="w-3 h-3" /> Guardar</>}
           </button>
         </div>
@@ -150,7 +150,7 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
       <div className="flex items-center gap-3 px-5 py-3.5 cursor-pointer hover:bg-gray-50"
            onClick={() => setExpanded(!expanded)}>
         <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-             style={{ background: ROLE_COLORS[user.role] || "#27295C" }}>
+             style={{ background: ROLE_COLORS[user.role] || "#000000" }}>
           {user.fullName[0]}
         </div>
         <div className="flex-1 min-w-0">
@@ -176,7 +176,7 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
             <div className="flex gap-2">
               <button onClick={() => setEditing(!editing)}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border"
-                style={{ borderColor: "#27295C", color: "#27295C" }}>
+                style={{ borderColor: "#000000", color: "#000000" }}>
                 <Edit2 className="w-3 h-3" /> {editing ? "Cancelar" : "Editar usuario"}
               </button>
             </div>
@@ -196,8 +196,8 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                     <input type={field.type} value={form[field.key as keyof typeof form] as string}
                       onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value } as typeof prev))}
                       className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
-                      style={{ borderColor: "#E5E7EB", color: "#27295C" }}
-                      onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                      style={{ borderColor: "#E5E7EB", color: "#000000" }}
+                      onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                       onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
                   </div>
                 ))}
@@ -205,8 +205,8 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={form.canRecovery}
                       onChange={e => setForm(prev => ({ ...prev, canRecovery: e.target.checked }))}
-                      className="w-4 h-4" style={{ accentColor: "#27295C" }} />
-                    <span className="text-sm" style={{ color: "#27295C" }}>
+                      className="w-4 h-4" style={{ accentColor: "#000000" }} />
+                    <span className="text-sm" style={{ color: "#000000" }}>
                       Acceso a Recupero
                       <span className="block text-xs" style={{ color: "#9CA3AF" }}>
                         Solo ve sus propias propuestas y citas. Debe volver a iniciar sesion para que aparezca en el menu.
@@ -218,7 +218,7 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                   <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Rol</label>
                   <select value={form.role} onChange={e => setForm(prev => ({ ...prev, role: e.target.value }))}
                     className="w-full px-3 py-2 rounded-lg border text-sm outline-none bg-white"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }}>
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }}>
                     <option value="sales_rep">Sales Rep</option>
                     <option value="sales_manager">Sales Manager</option>
                     <option value="admin">Admin</option>
@@ -228,19 +228,19 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                   <label className="block text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Zona horaria</label>
                   <select value={form.timezone} onChange={e => setForm(prev => ({ ...prev, timezone: e.target.value } as typeof prev))}
                     className="w-full px-3 py-2 rounded-lg border text-sm outline-none bg-white"
-                    style={{ borderColor: "#E5E7EB", color: "#27295C" }}>
+                    style={{ borderColor: "#E5E7EB", color: "#000000" }}>
                     {TIMEZONES.map(tz => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
                   </select>
                 </div>
                 <div className="flex items-center gap-2 pt-4">
                   <input type="checkbox" id={`active-${user.id}`} checked={form.isActive}
                     onChange={e => setForm(prev => ({ ...prev, isActive: e.target.checked }))} />
-                  <label htmlFor={`active-${user.id}`} className="text-xs font-medium" style={{ color: "#27295C" }}>Usuario activo</label>
+                  <label htmlFor={`active-${user.id}`} className="text-xs font-medium" style={{ color: "#000000" }}>Usuario activo</label>
                 </div>
                 <div className="col-span-2">
                   <button onClick={handleSave} disabled={saving}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                    style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+                    style={{ background: "#0183FF", color: "#000000" }}>
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Guardar cambios</>}
                   </button>
                 </div>
@@ -285,7 +285,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.6)" }} onClick={onClose}>
       <div className="w-full max-w-md rounded-2xl overflow-hidden" style={{ background: "white" }} onClick={e => e.stopPropagation()}>
-        <div className="px-6 py-4 flex items-center justify-between" style={{ background: "#27295C" }}>
+        <div className="px-6 py-4 flex items-center justify-between" style={{ background: "#000000" }}>
           <p className="text-white font-semibold">Nuevo usuario</p>
           <button onClick={onClose} style={{ color: "rgba(255,255,255,0.4)" }}><X className="w-4 h-4" /></button>
         </div>
@@ -302,8 +302,8 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
               <input type={field.type} value={form[field.key as keyof typeof form] as string} placeholder={field.placeholder}
                 onChange={e => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
                 className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
-                style={{ borderColor: "#E5E7EB", color: "#27295C" }}
-                onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                style={{ borderColor: "#E5E7EB", color: "#000000" }}
+                onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                 onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
             </div>
           ))}
@@ -311,7 +311,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
             <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>Rol</label>
             <select value={form.role} onChange={e => setForm(prev => ({ ...prev, role: e.target.value }))}
               className="w-full px-4 py-3 rounded-xl border text-sm outline-none bg-white"
-              style={{ borderColor: "#E5E7EB", color: "#27295C" }}>
+              style={{ borderColor: "#E5E7EB", color: "#000000" }}>
               <option value="sales_rep">Sales Rep</option>
               <option value="sales_manager">Sales Manager</option>
               <option value="admin">Admin</option>
@@ -321,14 +321,14 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
             <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>Zona horaria</label>
             <select value={form.timezone} onChange={e => setForm(prev => ({ ...prev, timezone: e.target.value } as typeof prev))}
               className="w-full px-4 py-3 rounded-xl border text-sm outline-none bg-white"
-              style={{ borderColor: "#E5E7EB", color: "#27295C" }}>
+              style={{ borderColor: "#E5E7EB", color: "#000000" }}>
               {TIMEZONES.map(tz => <option key={tz.value} value={tz.value}>{tz.label}</option>)}
             </select>
           </div>
           {error && <p className="text-xs text-red-500 px-1">{error}</p>}
           <button onClick={handleCreate} disabled={saving}
             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm"
-            style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+            style={{ background: "#0183FF", color: "#000000" }}>
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Crear usuario</>}
           </button>
         </div>
@@ -352,9 +352,9 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Total citas", value: summary.total, sub: `+${last7.total} esta semana`, color: "#27295C" },
+          { label: "Total citas", value: summary.total, sub: `+${last7.total} esta semana`, color: "#000000" },
           { label: "Show rate", value: `${summary.showRate}%`, sub: `${summary.completed} completadas`, color: "#22C55E" },
-          { label: "Conversion", value: `${summary.conversionRate}%`, sub: `${summary.closed} cerradas`, color: "#C9A84C" },
+          { label: "Conversion", value: `${summary.conversionRate}%`, sub: `${summary.closed} cerradas`, color: "#0183FF" },
           { label: "No-shows", value: summary.noShow, sub: `${summary.total - summary.noShow - summary.completed} pendientes`, color: "#EF4444" },
         { label: "Satisfaccion", value: satisfaction.avg ? `${satisfaction.avg}/5 ⭐` : "—", sub: `${satisfaction.total} encuestas`, color: "#F59E0B", onClick: () => setShowSurveys(true) },
         { label: "Propuestas enviadas", value: proposalsDetail.length, sub: `${proposalsDetail.filter(p => p.status === "accepted").length} aceptadas`, color: "#8B5CF6", onClick: () => setShowProposals(true) },
@@ -365,16 +365,16 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
             onMouseEnter={e => { if ((s as { onClick?: () => void }).onClick) (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 12px rgba(39,41,92,0.1)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}>
             <p className="text-3xl font-bold mb-1" style={{ color: s.color }}>{s.value}</p>
-            <p className="text-xs font-semibold" style={{ color: "#27295C" }}>{s.label}</p>
+            <p className="text-xs font-semibold" style={{ color: "#000000" }}>{s.label}</p>
             <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{s.sub}</p>
-            {(s as { onClick?: () => void }).onClick && <p className="text-xs mt-1" style={{ color: "#C9A84C" }}>Ver detalle →</p>}
+            {(s as { onClick?: () => void }).onClick && <p className="text-xs mt-1" style={{ color: "#0183FF" }}>Ver detalle →</p>}
           </div>
         ))}
       </div>
 
       {/* Funnel */}
       <div className="rounded-2xl border bg-white p-5" style={{ borderColor: "#E5E7EB" }}>
-        <h3 className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Embudo de conversion</h3>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Embudo de conversion</h3>
         <div className="space-y-2">
           {[
             { label: "Agendadas", value: summary.total, pct: 100 },
@@ -388,7 +388,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
               <div className="w-24 text-xs font-medium text-right flex-shrink-0" style={{ color: "#6B7280" }}>{step.label}</div>
               <div className="flex-1 h-6 rounded-lg overflow-hidden" style={{ background: "#F3F4F6" }}>
                 <div className="h-full rounded-lg flex items-center px-2 transition-all"
-                     style={{ width: `${step.pct}%`, background: i === 5 ? "#22C55E" : i === 0 ? "#27295C" : "#C9A84C", minWidth: "32px" }}>
+                     style={{ width: `${step.pct}%`, background: i === 5 ? "#22C55E" : i === 0 ? "#000000" : "#0183FF", minWidth: "32px" }}>
                   <span className="text-white text-xs font-bold">{step.value}</span>
                 </div>
               </div>
@@ -400,12 +400,12 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
 
       {/* Daily chart */}
       <div className="rounded-2xl border bg-white p-5" style={{ borderColor: "#E5E7EB" }}>
-        <h3 className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Citas ultimos 14 dias</h3>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Citas ultimos 14 dias</h3>
         <div className="flex items-end gap-1 h-24">
           {daily.map(d => (
             <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
               <div className="w-full rounded-t-sm transition-all"
-                   style={{ height: `${Math.round((d.count / maxDaily) * 80)}px`, background: "#27295C", minHeight: d.count > 0 ? "4px" : "0" }} />
+                   style={{ height: `${Math.round((d.count / maxDaily) * 80)}px`, background: "#000000", minHeight: d.count > 0 ? "4px" : "0" }} />
               <span className="text-xs" style={{ color: "#9CA3AF", fontSize: "9px" }}>
                 {new Date(d.date + "T12:00:00").toLocaleDateString("es-ES", { day: "numeric", month: "numeric" })}
               </span>
@@ -428,7 +428,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                 <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
                 <span className="text-xs" style={{ color: "#374151" }}>{p.label}</span>
               </div>
-              <span className="text-xs font-bold" style={{ color: "#27295C" }}>{p.value}</span>
+              <span className="text-xs font-bold" style={{ color: "#000000" }}>{p.value}</span>
             </div>
           ))}
         </div>
@@ -436,14 +436,14 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
           <h3 className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>Origen</h3>
           {[
             { label: "Link general", value: bySource.general, color: "#6366F1" },
-            { label: "Link personal", value: bySource.personal, color: "#C9A84C" },
+            { label: "Link personal", value: bySource.personal, color: "#0183FF" },
           ].map(p => (
             <div key={p.label} className="flex items-center justify-between py-1.5">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
                 <span className="text-xs" style={{ color: "#374151" }}>{p.label}</span>
               </div>
-              <span className="text-xs font-bold" style={{ color: "#27295C" }}>{p.value}</span>
+              <span className="text-xs font-bold" style={{ color: "#000000" }}>{p.value}</span>
             </div>
           ))}
         </div>
@@ -456,7 +456,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
           ].map(p => (
             <div key={p.label} className="flex items-center justify-between py-1.5">
               <span className="text-xs" style={{ color: "#374151" }}>{p.label}</span>
-              <span className="text-xs font-bold" style={{ color: "#27295C" }}>{p.value}</span>
+              <span className="text-xs font-bold" style={{ color: "#000000" }}>{p.value}</span>
             </div>
           ))}
         </div>
@@ -465,7 +465,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
       {/* By rep */}
       <div className="rounded-2xl border bg-white overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
         <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-          <h3 className="text-sm font-semibold" style={{ color: "#27295C" }}>Performance por rep</h3>
+          <h3 className="text-sm font-semibold" style={{ color: "#000000" }}>Performance por rep</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -482,11 +482,11 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full flex items-center justify-center text-white font-bold"
-                           style={{ background: ROLE_COLORS[rep.role] || "#27295C", fontSize: "10px" }}>{rep.name[0]}</div>
-                      <span className="font-medium" style={{ color: "#27295C" }}>{rep.name.split(" ")[0]}</span>
+                           style={{ background: ROLE_COLORS[rep.role] || "#000000", fontSize: "10px" }}>{rep.name[0]}</div>
+                      <span className="font-medium" style={{ color: "#000000" }}>{rep.name.split(" ")[0]}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-bold" style={{ color: "#27295C" }}>{rep.total}</td>
+                  <td className="px-4 py-3 font-bold" style={{ color: "#000000" }}>{rep.total}</td>
                   <td className="px-4 py-3" style={{ color: "#22C55E" }}>{rep.completed}</td>
                   <td className="px-4 py-3" style={{ color: "#EF4444" }}>{rep.noShow}</td>
                   <td className="px-4 py-3">
@@ -496,7 +496,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                     </span>
                   </td>
                   <td className="px-4 py-3" style={{ color: "#3B82F6" }}>{rep.proposal}</td>
-                  <td className="px-4 py-3 font-bold" style={{ color: "#C9A84C" }}>{rep.closed}</td>
+                  <td className="px-4 py-3 font-bold" style={{ color: "#0183FF" }}>{rep.closed}</td>
                   <td className="px-4 py-3">
                     <span className="px-2 py-0.5 rounded-full font-semibold"
                           style={{ background: rep.convRate >= 20 ? "rgba(201,168,76,0.1)" : "rgba(156,163,175,0.1)", color: rep.convRate >= 20 ? "#92400E" : "#6B7280" }}>
@@ -516,7 +516,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="bg-white rounded-2xl shadow-2xl w-full flex flex-col" style={{ maxWidth: 700, maxHeight: "85vh" }}>
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "#E5E7EB" }}>
-              <p className="font-bold" style={{ color: "#27295C" }}>Encuestas de satisfacción</p>
+              <p className="font-bold" style={{ color: "#000000" }}>Encuestas de satisfacción</p>
               <button onClick={() => setShowSurveys(false)} className="p-2 hover:bg-gray-100 rounded-lg">✕</button>
             </div>
             <div className="overflow-y-auto flex-1">
@@ -537,7 +537,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                       const stars = "⭐".repeat(s.rating) + "☆".repeat(5 - s.rating);
                       return (
                         <tr key={s.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium" style={{ color: "#27295C" }}>{s.clientName || s.clientEmail}</td>
+                          <td className="px-4 py-3 font-medium" style={{ color: "#000000" }}>{s.clientName || s.clientEmail}</td>
                           <td className="px-4 py-3 text-xs" style={{ color: "#6B7280" }}>{s.clientCompany || "—"}</td>
                           <td className="px-4 py-3 text-xs" style={{ color: "#6B7280" }}>{rep?.fullName?.split(" ")[0] || "—"}</td>
                           <td className="px-4 py-3 text-xs">{stars}</td>
@@ -559,7 +559,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
           <div className="bg-white rounded-2xl shadow-2xl w-full flex flex-col" style={{ maxWidth: 900, maxHeight: "85vh" }}>
             <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "#E5E7EB" }}>
-              <p className="font-bold" style={{ color: "#27295C" }}>Propuestas enviadas</p>
+              <p className="font-bold" style={{ color: "#000000" }}>Propuestas enviadas</p>
               <button onClick={() => setShowProposals(false)} className="p-2 hover:bg-gray-100 rounded-lg">✕</button>
             </div>
             <div className="overflow-y-auto flex-1 p-5 space-y-5">
@@ -571,8 +571,8 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                     return { name: u.fullName.split(" ")[0], count };
                   }).sort((a, b) => b.count - a.count).map((r, i) => (
                     <div key={r.name} className="flex items-center justify-between py-1.5">
-                      <span className="text-sm" style={{ color: "#27295C" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {r.name}</span>
-                      <span className="text-sm font-bold" style={{ color: "#27295C" }}>{r.count}</span>
+                      <span className="text-sm" style={{ color: "#000000" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {r.name}</span>
+                      <span className="text-sm font-bold" style={{ color: "#000000" }}>{r.count}</span>
                     </div>
                   ))}
                 </div>
@@ -584,10 +584,10 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                     return { name: u.fullName.split(" ")[0], count, total };
                   }).sort((a, b) => b.count - a.count).map((r, i) => (
                     <div key={r.name} className="flex items-center justify-between py-1.5">
-                      <span className="text-sm" style={{ color: "#27295C" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {r.name}</span>
+                      <span className="text-sm" style={{ color: "#000000" }}>{i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"} {r.name}</span>
                       <div className="text-right">
                         <span className="text-sm font-bold" style={{ color: "#22C55E" }}>{r.count} · </span>
-                        <span className="text-sm font-bold" style={{ color: "#C9A84C" }}>USD ${r.total.toLocaleString("en-US")}</span>
+                        <span className="text-sm font-bold" style={{ color: "#0183FF" }}>USD ${r.total.toLocaleString("en-US")}</span>
                       </div>
                     </div>
                   ))}
@@ -609,10 +609,10 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                       <tr key={p.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => setTimelineId(p.id)}>
                         <td className="px-3 py-3 font-mono text-xs" style={{ color: "#6B7280" }}>{p.proposalNum}</td>
                         <td className="px-3 py-3">
-                          <p className="font-medium text-sm" style={{ color: "#27295C" }}>{p.clientName || "—"}</p>
+                          <p className="font-medium text-sm" style={{ color: "#000000" }}>{p.clientName || "—"}</p>
                           <p className="text-xs" style={{ color: "#9CA3AF" }}>{p.clientEmail || ""}</p>
                         </td>
-                        <td className="px-3 py-3 font-bold text-sm" style={{ color: "#C9A84C" }}>USD ${p.total.toLocaleString("en-US")}</td>
+                        <td className="px-3 py-3 font-bold text-sm" style={{ color: "#0183FF" }}>USD ${p.total.toLocaleString("en-US")}</td>
                         <td className="px-3 py-3 text-sm" style={{ color: "#374151" }}>{rep?.fullName?.split(" ")[0] || "—"}</td>
                         <td className="px-3 py-3">
                           <span className="text-xs px-2 py-1 rounded-full font-semibold"
@@ -622,7 +622,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
                         </td>
                         <td className="px-3 py-3 text-xs" style={{ color: "#9CA3AF" }}>
                           {new Date(p.createdAt).toLocaleDateString("es-ES")}
-                          <span className="ml-2" style={{ color: "#C9A84C" }}>ver &rarr;</span>
+                          <span className="ml-2" style={{ color: "#0183FF" }}>ver &rarr;</span>
                         </td>
                       </tr>
                     );
@@ -779,12 +779,12 @@ export default function AdminPanelClient({ user }: {
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Admin</p>
-              <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Panel de administracion</h1>
+              <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Panel de administracion</h1>
             </div>
             {tab === "users" && (
               <button onClick={() => setShowCreate(true)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
-                style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+                style={{ background: "#0183FF", color: "#000000" }}>
                 <Plus className="w-4 h-4" /> Nuevo usuario
               </button>
             )}
@@ -810,7 +810,7 @@ export default function AdminPanelClient({ user }: {
             ].map(t => (
               <button key={t.key} onClick={() => setTab(t.key as typeof tab)}
                 className="flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 -mb-px transition-all"
-                style={{ borderBottomColor: tab === t.key ? "#27295C" : "transparent", color: tab === t.key ? "#27295C" : "#9CA3AF" }}>
+                style={{ borderBottomColor: tab === t.key ? "#000000" : "transparent", color: tab === t.key ? "#000000" : "#9CA3AF" }}>
                 <t.icon className="w-4 h-4" /> {t.label}
               </button>
             ))}
@@ -844,14 +844,14 @@ export default function AdminPanelClient({ user }: {
             <div className="space-y-4">
               {/* Add holiday */}
               <div className="rounded-2xl bg-white border p-5" style={{ borderColor: "#E5E7EB" }}>
-                <h3 className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Agregar dia bloqueado</h3>
+                <h3 className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Agregar dia bloqueado</h3>
                 <div className="flex gap-3 flex-wrap">
                   <div>
                     <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>Fecha</label>
                     <input type="date" value={newHolidayDate} onChange={e => setNewHolidayDate(e.target.value)}
                       className="px-3 py-2.5 rounded-xl border text-sm outline-none"
-                      style={{ borderColor: "#E5E7EB", color: "#27295C" }}
-                      onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                      style={{ borderColor: "#E5E7EB", color: "#000000" }}
+                      onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                       onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
                   </div>
                   <div className="flex-1 min-w-48">
@@ -859,14 +859,14 @@ export default function AdminPanelClient({ user }: {
                     <input type="text" value={newHolidayReason} onChange={e => setNewHolidayReason(e.target.value)}
                       placeholder="Ej: Feriado nacional, Evento interno..."
                       className="w-full px-3 py-2.5 rounded-xl border text-sm outline-none"
-                      style={{ borderColor: "#E5E7EB", color: "#27295C" }}
-                      onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+                      style={{ borderColor: "#E5E7EB", color: "#000000" }}
+                      onFocus={e => e.currentTarget.style.borderColor = "#000000"}
                       onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
                   </div>
                   <div className="flex items-end">
                     <button onClick={addHoliday} disabled={!newHolidayDate || savingHoliday}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-                      style={{ background: newHolidayDate ? "#C9A84C" : "#E5E7EB", color: newHolidayDate ? "#1A1C3E" : "#9CA3AF" }}>
+                      style={{ background: newHolidayDate ? "#0183FF" : "#E5E7EB", color: newHolidayDate ? "#000000" : "#9CA3AF" }}>
                       {savingHoliday ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Agregar</>}
                     </button>
                   </div>
@@ -876,7 +876,7 @@ export default function AdminPanelClient({ user }: {
               {/* List */}
               <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
                 <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-                  <p className="text-sm font-semibold" style={{ color: "#27295C" }}>
+                  <p className="text-sm font-semibold" style={{ color: "#000000" }}>
                     Dias bloqueados ({holidays.length})
                   </p>
                 </div>
@@ -894,7 +894,7 @@ export default function AdminPanelClient({ user }: {
                             <Clock className="w-4 h-4" style={{ color: "#EAB308" }} />
                           </div>
                           <div>
-                            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>
+                            <p className="text-sm font-semibold" style={{ color: "#000000" }}>
                               {new Date(h.date + "T12:00:00").toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                             </p>
                             {h.reason && <p className="text-xs" style={{ color: "#6B7280" }}>{h.reason}</p>}
@@ -919,14 +919,14 @@ export default function AdminPanelClient({ user }: {
               <div className="flex justify-end">
                 <button onClick={() => setShowCreatePartner(true)}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+                  style={{ background: "#0183FF", color: "#000000" }}>
                   <Plus className="w-4 h-4" /> Nuevo partner
                 </button>
               </div>
 
               {showCreatePartner && (
                 <div className="rounded-2xl bg-white border p-5" style={{ borderColor: "#E5E7EB" }}>
-                  <h3 className="text-sm font-semibold mb-4" style={{ color: "#27295C" }}>Crear partner</h3>
+                  <h3 className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>Crear partner</h3>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { label: "Nombre", key: "name", placeholder: "Nombre del partner" },
@@ -942,14 +942,14 @@ export default function AdminPanelClient({ user }: {
                           onChange={e => setPartnerForm(prev => ({ ...prev, [f.key]: e.target.value }))}
                           placeholder={f.placeholder}
                           className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
-                          style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                          style={{ borderColor: "#E5E7EB", color: "#000000" }} />
                       </div>
                     ))}
                   </div>
                   <div className="flex gap-2 mt-4">
                     <button onClick={createPartner} disabled={savingPartner}
                       className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold"
-                      style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+                      style={{ background: "#0183FF", color: "#000000" }}>
                       {savingPartner ? <Loader2 className="w-4 h-4 animate-spin" /> : "Crear"}
                     </button>
                     <button onClick={() => setShowCreatePartner(false)}
@@ -961,7 +961,7 @@ export default function AdminPanelClient({ user }: {
 
               <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
                 <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-                  <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Partners ({partnersList.length})</p>
+                  <p className="text-sm font-semibold" style={{ color: "#000000" }}>Partners ({partnersList.length})</p>
                 </div>
                 {partnersList.length === 0 ? (
                   <div className="text-center py-10">
@@ -973,7 +973,7 @@ export default function AdminPanelClient({ user }: {
                     {partnersList.map(partner => (
                       <div key={partner.id} className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => loadPartnerReferrals(partner.slug)}>
                         <div>
-                          <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{partner.name}</p>
+                          <p className="text-sm font-semibold" style={{ color: "#000000" }}>{partner.name}</p>
                           <p className="text-xs" style={{ color: "#6B7280" }}>{partner.email} · scheduling.fastfwdus.com/partner/{partner.slug}</p>
                         </div>
                         <div className="flex items-center gap-3">
@@ -993,8 +993,8 @@ export default function AdminPanelClient({ user }: {
               {selectedPartner && (
                 <div className="rounded-2xl bg-white border overflow-hidden mt-4" style={{ borderColor: "#E5E7EB" }}>
                   <div className="px-5 py-3.5 border-b flex items-center justify-between" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-                    <p className="text-sm font-semibold" style={{ color: "#27295C" }}>
-                      Referidos de: <span style={{ color: "#C9A84C" }}>{selectedPartner}</span>
+                    <p className="text-sm font-semibold" style={{ color: "#000000" }}>
+                      Referidos de: <span style={{ color: "#0183FF" }}>{selectedPartner}</span>
                     </p>
                     <button onClick={() => { setSelectedPartner(null); setPartnerReferrals([]); }}
                       className="text-xs px-3 py-1 rounded-lg border" style={{ borderColor: "#E5E7EB", color: "#6B7280" }}>
@@ -1010,7 +1010,7 @@ export default function AdminPanelClient({ user }: {
                       {partnerReferrals.map(appt => (
                         <div key={appt.id} className="flex items-center justify-between px-5 py-3">
                           <div>
-                            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{appt.clientName}</p>
+                            <p className="text-sm font-semibold" style={{ color: "#000000" }}>{appt.clientName}</p>
                             <p className="text-xs" style={{ color: "#6B7280" }}>{appt.clientCompany} · {new Date(appt.scheduledAt).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}</p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -1033,7 +1033,7 @@ export default function AdminPanelClient({ user }: {
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white rounded-2xl p-5 border" style={{ borderColor: "#E5E7EB" }}>
                   <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Facturado</p>
-                  <p className="text-2xl font-bold" style={{ color: "#27295C" }}>
+                  <p className="text-2xl font-bold" style={{ color: "#000000" }}>
                     USD ${invoices.reduce((s, inv) => s + (inv.totalAmt || inv.total || 0), 0).toLocaleString("en-US")}
                   </p>
                 </div>
@@ -1051,10 +1051,10 @@ export default function AdminPanelClient({ user }: {
               </div>
               <div className="rounded-2xl bg-white border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
                 <div className="px-5 py-3.5 border-b" style={{ borderColor: "#F0F0F0", background: "#F8F9FB" }}>
-                  <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Invoices ({invoices.length})</p>
+                  <p className="text-sm font-semibold" style={{ color: "#000000" }}>Invoices ({invoices.length})</p>
                 </div>
                 {loadingInvoices ? (
-                  <div className="text-center py-10"><Loader2 className="w-5 h-5 animate-spin mx-auto" style={{ color: "#C9A84C" }} /></div>
+                  <div className="text-center py-10"><Loader2 className="w-5 h-5 animate-spin mx-auto" style={{ color: "#0183FF" }} /></div>
                 ) : invoices.length === 0 ? (
                   <div className="text-center py-10"><p className="text-sm" style={{ color: "#9CA3AF" }}>No hay invoices pendientes</p></div>
                 ) : (
@@ -1063,7 +1063,7 @@ export default function AdminPanelClient({ user }: {
                       <div key={inv.id} className="flex items-center justify-between px-5 py-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-1">
-                            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>{inv.customerName || inv.proposalNum}</p>
+                            <p className="text-sm font-semibold" style={{ color: "#000000" }}>{inv.customerName || inv.proposalNum}</p>
                             <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: inv.invoiceSentAt ? "#DCFCE7" : "#FEF9C3", color: inv.invoiceSentAt ? "#166534" : "#854D0E" }}>
                               {inv.invoiceSentAt ? "✅ Enviado" : "⏳ Pendiente"}
                             </span>
@@ -1077,7 +1077,7 @@ export default function AdminPanelClient({ user }: {
                           onClick={() => sendInvoice(inv.id)}
                           disabled={sendingInvoice === inv.id}
                           className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold"
-                          style={{ background: inv.invoiceSentAt ? "#F3F4F6" : "#C9A84C", color: inv.invoiceSentAt ? "#6B7280" : "#1A1C3E" }}>
+                          style={{ background: inv.invoiceSentAt ? "#F3F4F6" : "#0183FF", color: inv.invoiceSentAt ? "#6B7280" : "#000000" }}>
                           {sendingInvoice === inv.id ? <Loader2 className="w-3 h-3 animate-spin" /> : inv.invoiceSentAt ? "↻ Reenviar" : "📧 Enviar factura"}
                         </button>
                       </div>
@@ -1092,7 +1092,7 @@ export default function AdminPanelClient({ user }: {
           {tab === "metrics" && (
             loadingMetrics ? (
               <div className="text-center py-16">
-                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" style={{ color: "#C9A84C" }} />
+                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" style={{ color: "#0183FF" }} />
                 <p className="text-sm" style={{ color: "#9CA3AF" }}>Cargando metricas...</p>
               </div>
             ) : metrics ? (

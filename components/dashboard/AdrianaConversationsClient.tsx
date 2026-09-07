@@ -364,7 +364,7 @@ export default function AdrianaConversationsClient({ user }: { user: SessionUser
                       <div className="max-w-[80%] rounded-xl px-3 py-2 text-sm"
                         style={isUser
                           ? { background: "white", border: "1px solid #D8DCE5", color: "#1F2937" }
-                          : { background: "#27295C", color: "white" }}>
+                          : { background: "#000000", color: "white" }}>
                         <div className="flex items-center gap-1 text-[10px] mb-1"
                           style={{ color: isUser ? "#6B7280" : "rgba(255,255,255,.75)" }}>
                           {isUser ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}

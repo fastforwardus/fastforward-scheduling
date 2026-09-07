@@ -78,7 +78,7 @@ export default function PropuestasClient({ user }: {
               <p className="text-xs uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>
                 {user.role === "admin" ? "Equipo" : "Mis propuestas"}
               </p>
-              <h1 className="text-2xl font-bold" style={{ color: "#27295C" }}>Propuestas</h1>
+              <h1 className="text-2xl font-bold" style={{ color: "#000000" }}>Propuestas</h1>
             </div>
             <button onClick={cargar} className="p-2 rounded-lg border"
               style={{ borderColor: "#E5E7EB", background: "white" }} aria-label="Actualizar">
@@ -92,7 +92,7 @@ export default function PropuestasClient({ user }: {
               <input value={q} onChange={e => setQ(e.target.value)}
                 placeholder="Buscar cliente, empresa, numero…"
                 className="w-full text-sm pl-9 pr-3 py-2 rounded-lg border"
-                style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+                style={{ borderColor: "#E5E7EB", color: "#000000" }} />
             </div>
             {FILTROS.map(f => {
               const n = f.key === "todas" ? items.length : items.filter(p => estadoDe(p) === f.key).length;
@@ -100,8 +100,8 @@ export default function PropuestasClient({ user }: {
                 <button key={f.key} onClick={() => setFiltro(f.key)}
                   className="text-xs px-3 py-2 rounded-lg border"
                   style={{
-                    borderColor: filtro === f.key ? "#27295C" : "#E5E7EB",
-                    background: filtro === f.key ? "#27295C" : "white",
+                    borderColor: filtro === f.key ? "#000000" : "#E5E7EB",
+                    background: filtro === f.key ? "#000000" : "white",
                     color: filtro === f.key ? "white" : "#6B7280",
                   }}>
                   {f.label} <span style={{ opacity: 0.6 }}>{n}</span>
@@ -128,7 +128,7 @@ export default function PropuestasClient({ user }: {
                      style={{ borderColor: "#F0F0F0" }}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <p className="text-sm font-semibold truncate" style={{ color: "#27295C" }}>
+                      <p className="text-sm font-semibold truncate" style={{ color: "#000000" }}>
                         {p.client_name || p.client_email}
                       </p>
                       <span className="text-xs px-2 py-0.5 rounded-full font-semibold"

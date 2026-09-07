@@ -111,13 +111,13 @@ export default function PanelDia({ timezone = "America/New_York" }: {
       <div>
         {rems.length === 0 ? (
           <div className="bg-white rounded-2xl border p-8 text-center" style={{ borderColor: "#E5E7EB" }}>
-            <p className="text-sm font-semibold" style={{ color: "#27295C" }}>Sin pendientes</p>
+            <p className="text-sm font-semibold" style={{ color: "#000000" }}>Sin pendientes</p>
             <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>Agenda uno desde el calendario</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: "#E5E7EB" }}>
             <div className="px-5 py-3.5 border-b flex items-center gap-2" style={{ borderColor: "#F0F0F0" }}>
-              <p className="font-semibold text-sm" style={{ color: "#27295C" }}>Pendientes</p>
+              <p className="font-semibold text-sm" style={{ color: "#000000" }}>Pendientes</p>
               {vencidos.length > 0 && (
                 <span className="text-xs px-2 py-0.5 rounded-full font-bold"
                       style={{ background: "#FEE2E2", color: "#991B1B" }}>{vencidos.length} vencidos</span>
@@ -166,7 +166,7 @@ export default function PanelDia({ timezone = "America/New_York" }: {
           <button onClick={() => setMes(p => p.m === 0 ? { a: p.a - 1, m: 11 } : { ...p, m: p.m - 1 })} aria-label="Mes anterior">
             <ChevronLeft className="w-4 h-4" style={{ color: "#9CA3AF" }} />
           </button>
-          <span className="text-xs font-semibold" style={{ color: "#27295C" }}>{MESES[mes.m]} {mes.a}</span>
+          <span className="text-xs font-semibold" style={{ color: "#000000" }}>{MESES[mes.m]} {mes.a}</span>
           <button onClick={() => setMes(p => p.m === 11 ? { a: p.a + 1, m: 0 } : { ...p, m: p.m + 1 })} aria-label="Mes siguiente">
             <ChevronRight className="w-4 h-4" style={{ color: "#9CA3AF" }} />
           </button>
@@ -189,13 +189,13 @@ export default function PanelDia({ timezone = "America/New_York" }: {
                 <button key={i} onClick={() => setSel(esSel ? null : d)}
                   className="text-xs py-1 rounded-lg transition-colors"
                   style={{
-                    background: esHoy ? "#27295C" : esSel ? "rgba(39,41,92,0.08)" : "transparent",
+                    background: esHoy ? "#000000" : esSel ? "rgba(39,41,92,0.08)" : "transparent",
                     color: esHoy ? "white" : "#374151",
-                    border: esSel && !esHoy ? "1px solid #27295C" : "1px solid transparent",
+                    border: esSel && !esHoy ? "1px solid #000000" : "1px solid transparent",
                   }}>
                   {n}
                   {tiene && !esHoy && (
-                    <span className="block w-1 h-1 rounded-full mx-auto mt-0.5" style={{ background: "#C9A84C" }} />
+                    <span className="block w-1 h-1 rounded-full mx-auto mt-0.5" style={{ background: "#0183FF" }} />
                   )}
                 </button>
               );
@@ -212,18 +212,18 @@ export default function PanelDia({ timezone = "America/New_York" }: {
               onKeyDown={e => { if (e.key === "Enter") crear(); if (e.key === "Escape") setSel(null); }}
               placeholder="Recordarme…"
               className="w-full text-xs px-2 py-1.5 rounded-lg border"
-              style={{ borderColor: "#E5E7EB", color: "#27295C" }} />
+              style={{ borderColor: "#E5E7EB", color: "#000000" }} />
             <div className="flex gap-1.5 mt-1.5">
               {["09:00","14:00","17:00"].map(h => (
                 <button key={h} onClick={() => setHora(h)}
                   className="text-xs px-2 py-0.5 rounded-md"
-                  style={{ background: hora === h ? "#27295C" : "transparent",
+                  style={{ background: hora === h ? "#000000" : "transparent",
                            color: hora === h ? "white" : "#9CA3AF",
-                           border: `1px solid ${hora === h ? "#27295C" : "#E5E7EB"}` }}>{h}</button>
+                           border: `1px solid ${hora === h ? "#000000" : "#E5E7EB"}` }}>{h}</button>
               ))}
               <button onClick={crear} disabled={!texto.trim() || guardando}
                 className="ml-auto text-xs px-2 py-0.5 rounded-md font-semibold"
-                style={{ background: texto.trim() ? "#C9A84C" : "#F3F4F6", color: texto.trim() ? "white" : "#D1D5DB" }}>
+                style={{ background: texto.trim() ? "#0183FF" : "#F3F4F6", color: texto.trim() ? "white" : "#D1D5DB" }}>
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </button>
             </div>

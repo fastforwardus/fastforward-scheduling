@@ -55,7 +55,7 @@ export default function SaludClient() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <span className="text-sm font-semibold" style={{ color: "#27295C" }}>
+        <span className="text-sm font-semibold" style={{ color: "#000000" }}>
           {loading ? "Revisando…" : rotos === 0 ? "Todo funcionando" : `${rotos} proceso${rotos === 1 ? "" : "s"} sin actividad`}
         </span>
         <button onClick={cargar} aria-label="Actualizar">
@@ -67,7 +67,7 @@ export default function SaludClient() {
         {tarjetas.map(t => (
           <div key={t.label} className="rounded-xl p-4 border"
                style={{ background: t.malo ? "#FEF2F2" : "white", borderColor: t.malo ? "#FECACA" : "#E5E7EB" }}>
-            <p className="text-2xl font-bold" style={{ color: t.malo ? "#991B1B" : "#27295C" }}>{t.valor}</p>
+            <p className="text-2xl font-bold" style={{ color: t.malo ? "#991B1B" : "#000000" }}>{t.valor}</p>
             <p className="text-xs mt-0.5" style={{ color: t.malo ? "#B91C1C" : "#9CA3AF" }}>{t.label}</p>
           </div>
         ))}
@@ -75,7 +75,7 @@ export default function SaludClient() {
 
       <div className="rounded-2xl overflow-hidden" style={{ background: "white", border: "1px solid #E5E7EB" }}>
         <div className="px-5 py-3 border-b" style={{ borderColor: "#F0F0F0" }}>
-          <span className="text-sm font-semibold" style={{ color: "#27295C" }}>Actividad de cada proceso</span>
+          <span className="text-sm font-semibold" style={{ color: "#000000" }}>Actividad de cada proceso</span>
         </div>
 
         {loading ? (
