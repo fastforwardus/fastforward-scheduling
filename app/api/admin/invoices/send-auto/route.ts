@@ -34,7 +34,11 @@ export async function POST(req: NextRequest) {
   if (!clientEmail) return NextResponse.json({ error: "No client email" }, { status: 400 });
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
-  const payLink = (proposal as Record<string,unknown>).zohoPaymentLink as string || `${appUrl}/pay/${proposal.confirmToken}`;
+  // Nuestra pagina de pago: trilingue y con la marca. El portal de Zoho
+  // queda como fallback si no hay token.
+  const payLink = proposal.confirmToken
+    ? `${appUrl}/pay/${proposal.confirmToken}`
+    : ((proposal as Record<string,unknown>).zohoPaymentLink as string || "");
   // total y discount son numeric en la base: el driver los entrega como string.
   const fmt = (n: number | string) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
