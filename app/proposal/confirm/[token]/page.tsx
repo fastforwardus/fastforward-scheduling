@@ -48,8 +48,8 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
         clientName={appt?.client_name || ""}
         clientCompany={appt?.client_company || ""}
         services={services}
-        discount={proposal.discount || 0}
-        total={proposal.total}
+        discount={Number(proposal.discount) || 0}
+        total={Number(proposal.total) || 0}
         lang={(proposal.lang || "es") as "es" | "en" | "pt"}
         status={proposal.status || "pending"}
         repName={repName}

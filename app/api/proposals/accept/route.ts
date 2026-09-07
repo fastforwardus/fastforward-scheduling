@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       contactId: contact.contact_id,
       invoiceNumber: proposal.proposalNum,
       lineItems: services.map((s) => ({ name: s.name, rate: s.price, quantity: 1 })),
-      discount: proposal.discount || 0,
+      discount: Number(proposal.discount) || 0,
       notes: `Propuesta ${proposal.proposalNum} — FastForward`,
     });
 
@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
         : { subject: `Factura ${proposal.proposalNum} — FastForward`, greeting: `Estimado/a ${clientName},`, intro: "Adjunto encontrará la factura correspondiente al servicio solicitado.", payBtn: "Ver y Pagar Factura", secure: "Pago seguro vía Stripe · info@fastfwdus.com" };
 
       const services2 = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
-      const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+      const fmt = (n: number | string) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
       let pdfBuffer: Buffer | null = null;
       try { pdfBuffer = await getZohoBooksInvoicePdf(zohoInvoiceId); } catch {}
@@ -250,7 +250,7 @@ ${services2.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4
       clientCompany: clientCompany,
       clientWhatsapp: clientWhatsapp || "",
       outcome: "closed",
-      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Propuesta aceptada — Invoice Zoho Books: ${zohoInvoiceId || "pendiente"} — Total: USD $${proposal.total.toLocaleString("en-US")}`,
+      noteToAdd: `[${new Date().toLocaleString("es-ES", { timeZone: "America/New_York" })}] Propuesta aceptada — Invoice Zoho Books: ${zohoInvoiceId || "pendiente"} — Total: USD $${(Number(proposal.total) || 0).toLocaleString("en-US")}`,
     });
     console.log("Zoho updated on acceptance:", zohoRes);
   } catch (err) { console.error("Zoho accept error:", err); }
@@ -306,7 +306,7 @@ Obrigado por confiar na FastForward.` },
       <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;">${lang === "en" ? "Proposal" : "Propuesta"}</p>
       <p style="font-size:15px;font-weight:700;color:#27295C;margin:0 0 8px;">${proposal.proposalNum}</p>
       <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;">Total</p>
-      <p style="font-size:20px;font-weight:700;color:#C9A84C;margin:0;">USD $${proposal.total.toLocaleString("en-US")}</p>
+      <p style="font-size:20px;font-weight:700;color:#C9A84C;margin:0;">USD $${(Number(proposal.total) || 0).toLocaleString("en-US")}</p>
     </div>
     <div style="border-top:1px solid #F0F0F0;padding-top:20px;margin-top:24px;text-align:center;">
       <p style="font-size:12px;color:#9CA3AF;">FastForward Trading Company LLC · Miami, FL</p>
@@ -346,7 +346,7 @@ Obrigado por confiar na FastForward.` },
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Propuesta</p>
       <p style="font-size:14px;font-weight:600;color:#27295C;margin:0 0 12px;">${proposal.proposalNum}</p>
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Total</p>
-      <p style="font-size:20px;font-weight:700;color:#C9A84C;margin:0 0 12px;">USD $${proposal.total.toLocaleString("en-US")}</p>
+      <p style="font-size:20px;font-weight:700;color:#C9A84C;margin:0 0 12px;">USD $${(Number(proposal.total) || 0).toLocaleString("en-US")}</p>
       ${zohoInvoiceId ? `<p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Invoice Zoho Books</p><p style="font-size:13px;font-weight:600;color:#22C55E;margin:0;">✅ Creado — ID: ${zohoInvoiceId}</p>` : ""}
     </div>
     <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:20px;">

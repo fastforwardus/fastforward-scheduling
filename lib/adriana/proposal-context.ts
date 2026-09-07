@@ -47,7 +47,7 @@ export async function getProposalContext(waPhone: string): Promise<ProposalConte
 
     return {
       proposalNum: hit.proposalNum,
-      total: hit.total,
+      total: Number(hit.total) || 0,
       services: hit.services,
       lang: hit.lang,
       stage: hit.stage,

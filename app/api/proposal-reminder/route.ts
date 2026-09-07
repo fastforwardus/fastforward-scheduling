@@ -263,7 +263,7 @@ export async function GET(req: NextRequest) {
       if (!isPlausiblePhone(tel)) continue;
       const g = grupos.get(tel) || { ids: [], total: 0, nombre: "", lang: "es", etapaMax: 0 };
       g.ids.push(p.id);
-      g.total += p.total || 0;
+      g.total += Number(p.total) || 0;
       if (!g.nombre) g.nombre = (p.clientName || "").split(" ")[0] || "";
       if (["es", "en", "pt"].includes(p.lang || "")) g.lang = p.lang as string;
       if (t > g.etapaMax) g.etapaMax = t;
@@ -303,7 +303,7 @@ export async function GET(req: NextRequest) {
     const firstName = (p.clientName || "").split(" ")[0] || "";
     const confirmUrl = `${APP_URL}/proposal/confirm/${p.confirmToken}`;
 
-    const { subject, html } = render(target as 1 | 2 | 3 | 4, lang, firstName, p.proposalNum, p.total, confirmUrl);
+    const { subject, html } = render(target as 1 | 2 | 3 | 4, lang, firstName, p.proposalNum, Number(p.total) || 0, confirmUrl);
 
     await resend.emails.send({
       from: `${repName} — FastForward <info@fastfwdus.com>`,

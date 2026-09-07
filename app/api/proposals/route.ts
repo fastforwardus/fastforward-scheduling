@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
       pagada: proposals.paymentConfirmedAt,
     }).from(proposals).where(and(
       sql`lower(trim(${proposals.clientEmail})) = ${emailChequeo}`,
-      eq(proposals.total, totalChequeo),
+      eq(proposals.total, String(totalChequeo)),
       sql`${proposals.createdAt} > now() - interval '2 hours'`,
     ));
 
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
         .from(proposals)
         .where(andG(
           eqG(proposals.appointmentId, apptRef),
-          eqG(proposals.total, total),
+          eqG(proposals.total, String(total)),
           gteG(proposals.createdAt, dosMin),
         )).limit(1);
       if (dup) {
@@ -166,10 +166,10 @@ export async function POST(req: NextRequest) {
   await db.insert(proposals).values({
     appointmentId: appointmentId || "direct-" + randomBytes(8).toString("hex"),
     proposalNum,
-    total,
+    total: String(total),
     confirmToken,
     services: JSON.stringify(services),
-    discount,
+    discount: String(discount ?? 0),
     lang: lang as string,
     status: "pending",
     clientAddress: clientAddress || null,

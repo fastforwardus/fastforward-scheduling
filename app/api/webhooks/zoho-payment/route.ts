@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     if (!clientEmail) return NextResponse.json({ ok: true });
 
     const lang = (proposal.lang || "es") as "es" | "en" | "pt";
-    const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+    const fmt = (n: number | string) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
     const L = lang === "en"
       ? { subject: `Payment confirmed — ${proposal.proposalNum}`, greeting: `Hello ${clientName},`, msg: "We have received your payment successfully. Thank you for trusting FastForward.", detail: "Payment confirmed", team: "The FastForward Team" }

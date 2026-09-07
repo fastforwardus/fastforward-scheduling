@@ -109,8 +109,9 @@ export async function POST(req: NextRequest) {
     catch (e) { reenviada = false; errorEnvio = String(e).slice(0, 200); }
 
     await db.update(proposals).set({
-      total: totalFinal,
-      discount: descuento,
+      // numeric en la base: Drizzle exige string al escribir.
+      total: totalFinal.toFixed(2),
+      discount: descuento.toFixed(2),
       clientAddress: edits?.clientAddress?.trim() || p.clientAddress,
       clientTaxId: edits?.clientTaxId?.trim() || p.clientTaxId,
     }).where(eq(proposals.id, p.id));

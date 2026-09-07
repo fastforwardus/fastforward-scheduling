@@ -36,7 +36,8 @@ export async function POST(req: NextRequest) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
   const payLink = (proposal as Record<string,unknown>).zohoPaymentLink as string || `${appUrl}/pay/${proposal.confirmToken}`;
   const lang = (proposal.lang || "es") as "es" | "en" | "pt";
-  const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
+  // total y discount son numeric en la base: el driver los entrega como string.
+  const fmt = (n: number | string) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
   const L = lang === "en"
     ? { subject: `Invoice ${proposal.proposalNum} — FastForward`, greeting: `Hello ${clientName},`, intro: "Please find attached the invoice for the requested service.", payBtn: "View & Pay Invoice" }
