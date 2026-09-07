@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Send, Loader2, Check, X, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { CATALOGS, remapServices, Service } from "../../lib/catalog";
+import { Sidebar } from "@/components/dashboard/Sidebar";
 
 
 interface SelectedService { name: string; description: string; price: number; qty: number; }
@@ -106,7 +107,10 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
   }
 
   if (sent) return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: "#F8F9FB" }}>
+    <div className="flex min-h-screen" style={{ background: "#F8F9FB" }}>
+      <Sidebar user={user} />
+      <main className="flex-1 lg:ml-0 pt-14 lg:pt-0 overflow-auto">
+      <div className="flex-1 flex items-center justify-center p-6">
       <div className="bg-white rounded-2xl p-10 text-center shadow-sm border max-w-md w-full" style={{ borderColor: "#E5E7EB" }}>
         <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#DCFCE7" }}>
           <Check className="w-8 h-8" style={{ color: "#22C55E" }} />
@@ -128,10 +132,14 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
         </div>
       </div>
     </div>
+      </main>
+    </div>
   );
 
   return (
-    <div className="min-h-screen" style={{ background: "#F8F9FB" }}>
+    <div className="flex min-h-screen" style={{ background: "#F8F9FB" }}>
+      <Sidebar user={user} />
+      <main className="flex-1 lg:ml-0 pt-14 lg:pt-0 overflow-auto">
       <div className="max-w-5xl mx-auto px-4 py-6">
 
         <div className="flex items-center gap-3 mb-6">
@@ -391,6 +399,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
           </div>
         </div>
       </div>
+      </main>
     </div>
   );
 }
