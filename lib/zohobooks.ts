@@ -292,34 +292,17 @@ export async function updateZohoBooksInvoice(params: {
 // contact_person_id en to_mail_ids. Se leen de la propia factura.
 export async function emailZohoBooksInvoice(invoiceId: string): Promise<void> {
   const inv = await getZohoBooksInvoice(invoiceId);
-  let ids: string[] = (inv?.contact_persons ?? []).filter(Boolean);
+  const contactId = inv?.customer_id;
+  if (!contactId) throw new Error("La factura no tiene contacto asociado en Zoho");
 
-  // Los contactos creados antes de este arreglo no tienen persona de contacto
-  // y por lo tanto no tienen destinatario. Se crea sobre la marcha y se
-  // reintenta, asi los historicos quedan reparados sin script aparte.
+  // Las contact persons se leen del CONTACTO, no de la factura: el objeto
+  // invoice no las trae pobladas.
+  const cont = await booksReq("GET", `/contacts/${contactId}`);
+  const personas = (cont?.contact?.contact_persons ?? []) as Array<{ contact_person_id: string; email?: string }>;
+  const ids = personas.filter((x) => x?.contact_person_id && x.email).map((x) => x.contact_person_id);
+
   if (!ids.length) {
-    const contactId = inv?.customer_id;
-    const destino = inv?.email || inv?.contact_persons_details?.[0]?.email;
-    if (!contactId || !destino) {
-      throw new Error("La factura no tiene contacto ni email en Zoho: no hay a quien enviarla");
-    }
-    const nombre = String(inv?.customer_name ?? "Cliente").trim().split(/\s+/);
-    // Via PUT del contacto: es la llamada que ya se usa en este archivo y
-    // se sabe que funciona. Las rutas dedicadas de contactpersons fueron
-    // rechazadas por la API.
-    await booksReq("PUT", `/contacts/${contactId}`, {
-      contact_persons: [{
-        first_name: nombre[0] || "Cliente",
-        last_name: nombre.slice(1).join(" ") || "-",
-        email: destino,
-        is_primary_contact: true,
-      }],
-    });
-    const releido = await getZohoBooksInvoice(invoiceId);
-    ids = (releido?.contact_persons ?? []).filter(Boolean);
-    if (!ids.length) {
-      throw new Error(`Zoho sigue sin destinatario para el contacto ${contactId} (${destino}). Cargar la persona de contacto a mano en Zoho Books.`);
-    }
+    throw new Error(`El contacto ${contactId} no tiene ninguna persona de contacto con email en Zoho Books.`);
   }
 
   const data = await booksReq("POST", `/invoices/${invoiceId}/email`, {
