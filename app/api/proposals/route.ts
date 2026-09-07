@@ -12,11 +12,22 @@ import { createOrUpdateZohoLead } from "@/lib/zoho";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-function generateProposalNumber(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const rand = Math.floor(Math.random() * 9000) + 1000;
-  return `FF-${year}-${rand}`;
+// Antes era Math.random() entre 1000 y 9999: con ~700 propuestas la colision
+// era practicamente segura y hubo 24 numeros repetidos. Ahora es secuencial
+// por anio, tomando el maximo ya usado.
+async function generateProposalNumber(): Promise<string> {
+  const year = new Date().getFullYear();
+  const prefijo = `FF-${year}-`;
+  // 5 digitos desde 10000: los aleatorios viejos eran de 4, asi que la serie
+  // nueva no puede chocar con ellos. Se ignoran los sufijos no numericos.
+  const filas = await db.execute(sql`
+    select max((substring(proposal_num from ${"^" + prefijo.replace("-", "\\-") + "([0-9]+)$"}))::bigint) as maximo
+    from proposals
+    where proposal_num ~ ${"^" + prefijo + "[0-9]+$"}`);
+  const fila = (Array.isArray(filas) ? filas[0] : undefined) as { maximo?: string | number } | undefined;
+  const maximo = Number(fila?.maximo ?? 0);
+  const siguiente = maximo >= 10000 ? maximo + 1 : 10000;
+  return prefijo + String(siguiente);
 }
 
 function formatDate(date: Date): string {
@@ -104,7 +115,7 @@ export async function POST(req: NextRequest) {
 
   const now = new Date();
   const validUntil = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
-  const proposalNum = generateProposalNumber();
+  const proposalNum = await generateProposalNumber();
 
   const nameParts = appt!.clientName.split(" ");
   const firstName = nameParts[0];
