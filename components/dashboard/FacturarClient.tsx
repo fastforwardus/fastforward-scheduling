@@ -102,6 +102,11 @@ export default function FacturarClient({ user }: { user: { id: string; email: st
             {t === "pendientes" ? "Sin facturar" : "Ya emitidas"}
           </button>
         ))}
+        <a href="/dashboard/facturar/nueva"
+          className="px-4 py-2 rounded-lg text-sm font-medium border ml-auto"
+          style={{ borderColor: "#E5E7EB" }}>
+          + Factura sin propuesta
+        </a>
       </div>
 
       {msg && (
