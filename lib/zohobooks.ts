@@ -304,7 +304,8 @@ export async function emailZohoBooksInvoice(invoiceId: string): Promise<void> {
       throw new Error("La factura no tiene contacto ni email en Zoho: no hay a quien enviarla");
     }
     const nombre = String(inv?.customer_name ?? "Cliente").trim().split(/\s+/);
-    const creado = await booksReq("POST", `/contacts/${contactId}/contactpersons`, {
+    const creado = await booksReq("POST", "/contactpersons", {
+      contact_id: contactId,
       first_name: nombre[0] || "Cliente",
       last_name: nombre.slice(1).join(" ") || "-",
       email: destino,
