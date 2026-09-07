@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 type Prop = {
   id: string; proposal_num: string; total: number; discount: number;
-  services: string; client_name: string | null; client_email: string | null;
+  services: unknown; client_name: string | null; client_email: string | null;
   client_address: string | null; client_tax_id: string | null;
   rep_name: string | null; zoho_invoice_missing_at: string | null;
 };
@@ -27,7 +27,10 @@ export default function FacturarPage() {
   useEffect(cargar, []);
 
   const servicios = (p: Prop) => {
-    try { return JSON.parse(p.services) as { name: string; price: number }[]; } catch { return []; }
+    const raw = p.services as unknown;
+    if (Array.isArray(raw)) return raw as { name: string; price: number }[];
+    if (typeof raw === "string") { try { return JSON.parse(raw) as { name: string; price: number }[]; } catch { return []; } }
+    return [];
   };
 
   const emitir = async () => {

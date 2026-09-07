@@ -65,8 +65,12 @@ export async function POST(req: NextRequest) {
     if (!ok) return NextResponse.json({ error: "Esa propuesta no es tuya" }, { status: 403 });
   }
 
+  // services es jsonb en la base: el driver ya lo entrega parseado.
+  // El schema lo declara text, asi que puede llegar de las dos formas.
+  const raw = p.services as unknown;
   let servicios: { name: string; price: number }[] = [];
-  try { servicios = JSON.parse(p.services); } catch { servicios = []; }
+  if (Array.isArray(raw)) servicios = raw as { name: string; price: number }[];
+  else if (typeof raw === "string") { try { servicios = JSON.parse(raw); } catch { servicios = []; } }
   if (!servicios.length) return NextResponse.json({ error: "La propuesta no tiene servicios" }, { status: 400 });
 
   if (!p.clientEmail) {
