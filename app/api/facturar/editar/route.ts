@@ -108,6 +108,17 @@ export async function POST(req: NextRequest) {
       reason: razon,
     });
 
+    await db.update(proposals).set({
+      // numeric en la base: Drizzle exige string al escribir.
+      total: totalFinal.toFixed(2),
+      discount: descuento.toFixed(2),
+      // Sin esto la propuesta queda con los servicios viejos y la pantalla
+      // muestra importes distintos a los que se facturaron.
+      services: JSON.stringify(servicios),
+      clientAddress: edits?.clientAddress?.trim() || p.clientAddress,
+      clientTaxId: edits?.clientTaxId?.trim() || p.clientTaxId,
+    }).where(eq(proposals.id, p.id));
+
     // Reenvio con nuestra plantilla bilingue y el PDF ya corregido.
     let reenviada = true;
     let errorEnvio = "";
@@ -124,16 +135,6 @@ export async function POST(req: NextRequest) {
       if (!r.ok) { reenviada = false; errorEnvio = (await r.text()).slice(0, 200); }
     } catch (e) { reenviada = false; errorEnvio = String(e).slice(0, 200); }
 
-    await db.update(proposals).set({
-      // numeric en la base: Drizzle exige string al escribir.
-      total: totalFinal.toFixed(2),
-      discount: descuento.toFixed(2),
-      // Sin esto la propuesta queda con los servicios viejos y la pantalla
-      // muestra importes distintos a los que se facturaron.
-      services: JSON.stringify(servicios),
-      clientAddress: edits?.clientAddress?.trim() || p.clientAddress,
-      clientTaxId: edits?.clientTaxId?.trim() || p.clientTaxId,
-    }).where(eq(proposals.id, p.id));
 
     await db.insert(proposalEvents).values({
       proposalId: p.id, kind: "invoice_editada", channel: "dashboard",
