@@ -139,22 +139,22 @@ Formato: HTML simple con <strong> para títulos. Sin listas con viñetas, usar <
       subject: `🎯 Briefing pre-llamada — ${appt.clientName} (${apptTime} Miami)`,
       html: `
 <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:24px 28px;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:24px 28px;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="28" alt="FastForward">
     <p style="color:rgba(255,255,255,0.6);font-size:11px;margin:8px 0 0;text-transform:uppercase;letter-spacing:0.05em;">Briefing Pre-Llamada</p>
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:28px;border:1px solid #E5E7EB;border-top:none;">
     <div style="background:#F8F9FB;border-radius:10px;padding:14px;margin-bottom:20px;border:1px solid #E5E7EB;">
-      <p style="font-size:16px;font-weight:700;color:#27295C;margin:0 0 2px;">${appt.clientName}</p>
+      <p style="font-size:16px;font-weight:700;color:#000000;margin:0 0 2px;">${appt.clientName}</p>
       <p style="font-size:13px;color:#6B7280;margin:0 0 8px;">${appt.clientCompany}</p>
       <div style="display:flex;gap:16px;flex-wrap:wrap;">
         <span style="font-size:12px;color:#374151;">🕐 ${apptTime} (Miami)</span>
         <span style="font-size:12px;color:#374151;">📱 ${appt.platform === "meet" ? "Google Meet" : "WhatsApp"}</span>
-        ${appt.meetingLink ? `<a href="${appt.meetingLink}" style="font-size:12px;color:#C9A84C;font-weight:600;">🔗 Unirse ahora</a>` : ""}
+        ${appt.meetingLink ? `<a href="${appt.meetingLink}" style="font-size:12px;color:#0183FF;font-weight:600;">🔗 Unirse ahora</a>` : ""}
       </div>
     </div>
 
-    <div style="background:#EEF2FF;border-left:3px solid #27295C;border-radius:0 8px 8px 0;padding:14px;margin-bottom:20px;">
+    <div style="background:#EEF2FF;border-left:3px solid #000000;border-radius:0 8px 8px 0;padding:14px;margin-bottom:20px;">
       ${briefingHtml}
     </div>
 

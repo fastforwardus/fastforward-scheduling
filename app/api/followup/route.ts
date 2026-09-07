@@ -161,14 +161,14 @@ export async function GET(req: NextRequest) {
 <html><body style="margin:0;padding:0;background:#F8F9FB;font-family:system-ui,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
 <tr><td align="center"><table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
-<tr><td style="background:#27295C;border-radius:16px 16px 0 0;padding:24px 32px;text-align:center;">
+<tr><td style="background:#000000;border-radius:16px 16px 0 0;padding:24px 32px;text-align:center;">
   <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
 </td></tr>
 <tr><td style="background:white;padding:32px;border-radius:0 0 16px 16px;border:1px solid #E5E7EB;border-top:none;">
   ${emailBody}
   <div style="margin-top:24px;padding-top:20px;border-top:1px solid #F0F0F0;text-align:center;">
     <p style="font-size:12px;color:#9CA3AF;margin:0;">FastForward FDA Experts · Miami, FL</p>
-    <a href="https://fastfwdus.com" style="font-size:12px;color:#C9A84C;text-decoration:none;">fastfwdus.com</a>
+    <a href="https://fastfwdus.com" style="font-size:12px;color:#0183FF;text-decoration:none;">fastfwdus.com</a>
   </div>
 </td></tr>
 </table></td></tr>

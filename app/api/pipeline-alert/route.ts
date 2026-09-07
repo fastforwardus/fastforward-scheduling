@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
 
   const proposalRows = staleProposals.map(a => `
     <tr>
-      <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#27295C;font-weight:600;">${a.clientName}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#000000;font-weight:600;">${a.clientName}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#374151;">${a.clientCompany}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#374151;">${a.repName || "-"}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#EF4444;font-weight:600;">${Math.floor((Date.now() - new Date(a.scheduledAt).getTime()) / 86400000)} días</td>
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
 
   const needsTimeRows = staleNeedsTime.map(a => `
     <tr>
-      <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#27295C;font-weight:600;">${a.clientName}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#000000;font-weight:600;">${a.clientName}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#374151;">${a.clientCompany}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#374151;">${a.repName || "-"}</td>
       <td style="padding:8px 12px;border-bottom:1px solid #F0F0F0;font-size:13px;color:#F59E0B;font-weight:600;">${Math.floor((Date.now() - new Date(a.scheduledAt).getTime()) / 86400000)} días</td>
@@ -82,12 +82,12 @@ export async function GET(req: NextRequest) {
     subject: `⚠️ Pipeline en riesgo — ${staleProposals.length + staleNeedsTime.length} leads sin seguimiento`,
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:24px 28px;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:24px 28px;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="28" alt="FastForward">
     <p style="color:rgba(255,255,255,0.6);font-size:11px;margin:8px 0 0;text-transform:uppercase;">Alerta de Pipeline</p>
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:28px;border:1px solid #E5E7EB;border-top:none;">
-    <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 6px;">Hola, Carlos 👋</p>
+    <p style="font-size:18px;font-weight:700;color:#000000;margin:0 0 6px;">Hola, Carlos 👋</p>
     <p style="color:#6B7280;font-size:14px;margin:0 0 24px;">Hay leads en tu pipeline que necesitan atención.</p>
 
     ${staleProposals.length > 0 ? `
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
       </table>
     </div>` : ""}
 
-    <a href="${appUrl}/dashboard/admin" style="display:block;text-align:center;background:#27295C;color:white;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;">
+    <a href="${appUrl}/dashboard/admin" style="display:block;text-align:center;background:#000000;color:white;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;">
       Ver dashboard →
     </a>
 

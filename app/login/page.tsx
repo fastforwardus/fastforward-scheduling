@@ -40,7 +40,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4"
-         style={{ background: "linear-gradient(135deg, #1A1C3E 0%, #27295C 100%)" }}>
+         style={{ background: "linear-gradient(135deg, #000000 0%, #000000 100%)" }}>
       <div className="w-full max-w-sm">
 
         <div className="flex justify-center mb-10">
@@ -71,7 +71,7 @@ export default function LoginPage() {
                 required autoComplete="email"
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
                 style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.12)", color: "white" }}
-                onFocus={e => e.currentTarget.style.borderColor = "#C9A84C"}
+                onFocus={e => e.currentTarget.style.borderColor = "#0183FF"}
                 onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"}
               />
             </div>
@@ -88,7 +88,7 @@ export default function LoginPage() {
                   required autoComplete="current-password"
                   className="w-full px-4 py-3 pr-12 rounded-xl text-sm outline-none transition-all"
                   style={{ background: "rgba(255,255,255,0.08)", border: "1.5px solid rgba(255,255,255,0.12)", color: "white" }}
-                  onFocus={e => e.currentTarget.style.borderColor = "#C9A84C"}
+                  onFocus={e => e.currentTarget.style.borderColor = "#0183FF"}
                   onBlur={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"}
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)}
@@ -108,7 +108,7 @@ export default function LoginPage() {
 
             <button type="submit" disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold transition-all active:scale-95"
-              style={{ background: "#C9A84C", color: "#1A1C3E", opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
+              style={{ background: "#0183FF", color: "#000000", opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
               {loading
                 ? <Loader2 className="w-4 h-4 animate-spin" />
                 : <> Ingresar <ArrowRight className="w-4 h-4" /> </>}

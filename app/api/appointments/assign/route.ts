@@ -101,37 +101,37 @@ export async function POST(req: NextRequest) {
       subject: `Nueva cita asignada - ${appt.clientName} (${appt.clientCompany})`,
       html: `
         <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-          <div style="background:#27295C;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+          <div style="background:#000000;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
             <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
           </div>
           <div style="background:white;border-radius:12px;padding:24px;border:1px solid #E5E7EB;">
-            <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 4px;">Hola, ${rep.fullName}</p>
+            <p style="font-size:18px;font-weight:700;color:#000000;margin:0 0 4px;">Hola, ${rep.fullName}</p>
             <p style="color:#6B7280;font-size:14px;margin:0 0 20px;">Te fue asignada una nueva cita.</p>
             <div style="background:#F8F9FB;border-radius:10px;padding:16px;margin-bottom:20px;border:1px solid #E5E7EB;">
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr><td style="padding:8px 0;border-bottom:1px solid #F0F0F0;">
                   <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">Cliente</span><br>
-                  <span style="font-size:14px;font-weight:600;color:#27295C;">${appt.clientName} — ${appt.clientCompany}</span>
+                  <span style="font-size:14px;font-weight:600;color:#000000;">${appt.clientName} — ${appt.clientCompany}</span>
                 </td></tr>
                 <tr><td style="padding:8px 0;border-bottom:1px solid #F0F0F0;">
                   <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">Fecha y hora (Miami)</span><br>
-                  <span style="font-size:14px;font-weight:600;color:#27295C;">${formattedDate} · ${formattedTime}</span>
+                  <span style="font-size:14px;font-weight:600;color:#000000;">${formattedDate} · ${formattedTime}</span>
                 </td></tr>
                 <tr><td style="padding:8px 0;border-bottom:1px solid #F0F0F0;">
                   <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">Plataforma</span><br>
-                  <span style="font-size:14px;font-weight:600;color:#27295C;">${platformLabel}</span>
+                  <span style="font-size:14px;font-weight:600;color:#000000;">${platformLabel}</span>
                 </td></tr>
                 ${meetingLink ? `<tr><td style="padding:8px 0;border-bottom:1px solid #F0F0F0;">
                   <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">Link reunion</span><br>
-                  <a href="${meetingLink}" style="font-size:14px;font-weight:600;color:#C9A84C;">${meetingLink}</a>
+                  <a href="${meetingLink}" style="font-size:14px;font-weight:600;color:#0183FF;">${meetingLink}</a>
                 </td></tr>` : ""}
                 <tr><td style="padding:8px 0;">
                   <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">WhatsApp</span><br>
-                  <span style="font-size:14px;font-weight:600;color:#27295C;">${appt.clientWhatsapp}</span>
+                  <span style="font-size:14px;font-weight:600;color:#000000;">${appt.clientWhatsapp}</span>
                 </td></tr>
               </table>
             </div>
-            <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;">
+            <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#0183FF;color:#000000;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;">
               Ver en dashboard →
             </a>
             ${!rep.googleRefreshToken && appt.platform === "meet" ? `
@@ -149,22 +149,22 @@ export async function POST(req: NextRequest) {
       subject: `Tu cita fue confirmada - ${rep.fullName} te atendera`,
       html: `
         <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-          <div style="background:#27295C;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+          <div style="background:#000000;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
             <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
           </div>
           <div style="background:white;border-radius:12px;padding:24px;border:1px solid #E5E7EB;">
-            <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 16px;">Hola, ${appt.clientName}</p>
+            <p style="font-size:18px;font-weight:700;color:#000000;margin:0 0 16px;">Hola, ${appt.clientName}</p>
             <p style="color:#6B7280;font-size:14px;margin:0 0 20px;">
-              <strong style="color:#27295C;">${rep.fullName}</strong> de FastForward te atendera en tu cita.
+              <strong style="color:#000000;">${rep.fullName}</strong> de FastForward te atendera en tu cita.
             </p>
             <div style="background:#F8F9FB;border-radius:10px;padding:16px;margin-bottom:20px;border:1px solid #E5E7EB;">
-              <p style="font-size:14px;font-weight:600;color:#27295C;margin:0 0 4px;">${formattedDate} · ${formattedTime} (Miami)</p>
+              <p style="font-size:14px;font-weight:600;color:#000000;margin:0 0 4px;">${formattedDate} · ${formattedTime} (Miami)</p>
               <p style="font-size:13px;color:#6B7280;margin:0;">${platformLabel} · 30 minutos</p>
             </div>
-            ${meetingLink ? `<a href="${meetingLink}" style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-bottom:12px;">
+            ${meetingLink ? `<a href="${meetingLink}" style="display:block;text-align:center;background:#0183FF;color:#000000;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-bottom:12px;">
               🔗 Unirse a la reunion →
             </a>` : ""}
-            <a href="${appUrl}/book/confirm/${appt.confirmToken}" style="display:block;text-align:center;background:#27295C;color:white;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;">
+            <a href="${appUrl}/book/confirm/${appt.confirmToken}" style="display:block;text-align:center;background:#000000;color:white;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;">
               Ver detalles completos →
             </a>
           </div>

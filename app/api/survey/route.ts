@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         to: ["info@fastfwdus.com", "tmarino@fastfwdus.com"],
         subject: `Calificacion baja: ${rating}/5 - ${appt.clientName} (${appt.clientCompany})`,
         html: `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;">
+  <div style="background:#000000;border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="28" alt="FastForward">
   </div>
   <div style="background:white;border-radius:12px;padding:24px;border:1px solid #E5E7EB;">
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     <p style="color:#374151;font-size:14px;"><strong>Cliente:</strong> ${appt.clientName} — ${appt.clientCompany}</p>
     <p style="color:#374151;font-size:14px;"><strong>Email:</strong> ${appt.clientEmail}</p>
     ${feedback ? `<p style="color:#374151;font-size:14px;"><strong>Comentario:</strong> "${feedback}"</p>` : ""}
-    <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#27295C;color:white;padding:12px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;margin-top:16px;">Ver en dashboard</a>
+    <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#000000;color:white;padding:12px;border-radius:8px;font-weight:700;text-decoration:none;font-size:14px;margin-top:16px;">Ver en dashboard</a>
   </div>
 </div>`,
       }).catch(console.error);

@@ -291,7 +291,7 @@ Obrigado por confiar na FastForward.` },
     subject: msg.subject,
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
@@ -299,14 +299,14 @@ Obrigado por confiar na FastForward.` },
       <div style="width:56px;height:56px;background:#DCFCE7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
         <span style="font-size:28px;">✅</span>
       </div>
-      <h1 style="font-size:20px;font-weight:700;color:#27295C;margin:0 0 8px;">${lang === "en" ? "Proposal confirmed!" : lang === "pt" ? "Proposta confirmada!" : "¡Propuesta confirmada!"}</h1>
+      <h1 style="font-size:20px;font-weight:700;color:#000000;margin:0 0 8px;">${lang === "en" ? "Proposal confirmed!" : lang === "pt" ? "Proposta confirmada!" : "¡Propuesta confirmada!"}</h1>
     </div>
     <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 20px;white-space:pre-line;">${msg.body}</p>
     <div style="background:#F8F9FB;border-radius:10px;padding:14px;border:1px solid #E5E7EB;">
       <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;">${lang === "en" ? "Proposal" : "Propuesta"}</p>
-      <p style="font-size:15px;font-weight:700;color:#27295C;margin:0 0 8px;">${proposal.proposalNum}</p>
+      <p style="font-size:15px;font-weight:700;color:#000000;margin:0 0 8px;">${proposal.proposalNum}</p>
       <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;">Total</p>
-      <p style="font-size:20px;font-weight:700;color:#C9A84C;margin:0;">USD $${(Number(proposal.total) || 0).toLocaleString("en-US")}</p>
+      <p style="font-size:20px;font-weight:700;color:#0183FF;margin:0;">USD $${(Number(proposal.total) || 0).toLocaleString("en-US")}</p>
     </div>
     <div style="border-top:1px solid #F0F0F0;padding-top:20px;margin-top:24px;text-align:center;">
       <p style="font-size:12px;color:#9CA3AF;">FastForward Trading Company LLC · Miami, FL</p>
@@ -334,22 +334,22 @@ Obrigado por confiar na FastForward.` },
     subject: `🏆 Propuesta aceptada — ${clientName} (${clientCompany})`,
     html: `
 <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
-    <p style="font-size:20px;font-weight:700;color:#27295C;margin:0 0 4px;">🏆 Propuesta aceptada</p>
+    <p style="font-size:20px;font-weight:700;color:#000000;margin:0 0 4px;">🏆 Propuesta aceptada</p>
     <p style="color:#6B7280;font-size:14px;margin:0 0 24px;">${repName} — ${clientName} confirmó la propuesta.</p>
     <div style="background:#F8F9FB;border-radius:12px;padding:16px;border:1px solid #E5E7EB;">
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Cliente</p>
-      <p style="font-size:15px;font-weight:700;color:#27295C;margin:0 0 12px;">${clientName} — ${clientCompany}</p>
+      <p style="font-size:15px;font-weight:700;color:#000000;margin:0 0 12px;">${clientName} — ${clientCompany}</p>
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Propuesta</p>
-      <p style="font-size:14px;font-weight:600;color:#27295C;margin:0 0 12px;">${proposal.proposalNum}</p>
+      <p style="font-size:14px;font-weight:600;color:#000000;margin:0 0 12px;">${proposal.proposalNum}</p>
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Total</p>
-      <p style="font-size:20px;font-weight:700;color:#C9A84C;margin:0 0 12px;">USD $${(Number(proposal.total) || 0).toLocaleString("en-US")}</p>
+      <p style="font-size:20px;font-weight:700;color:#0183FF;margin:0 0 12px;">USD $${(Number(proposal.total) || 0).toLocaleString("en-US")}</p>
       ${zohoInvoiceId ? `<p style="font-size:11px;color:#9CA3AF;margin:0 0 2px;text-transform:uppercase;">Invoice Zoho Books</p><p style="font-size:13px;font-weight:600;color:#22C55E;margin:0;">✅ Creado — ID: ${zohoInvoiceId}</p>` : ""}
     </div>
-    <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:20px;">
+    <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#0183FF;color:#000000;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:20px;">
       Ver en dashboard →
     </a>
   </div>

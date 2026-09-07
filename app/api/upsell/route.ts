@@ -123,8 +123,8 @@ export async function GET(req: NextRequest) {
         const suggestionsHtml = suggestions.map(s => `
           <div style="background:#F8F9FB;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid #E5E7EB;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-              <strong style="color:#27295C;font-size:14px;">${s.name}</strong>
-              <span style="color:#C9A84C;font-weight:700;font-size:14px;">USD ${s.price.toLocaleString()}</span>
+              <strong style="color:#000000;font-size:14px;">${s.name}</strong>
+              <span style="color:#0183FF;font-weight:700;font-size:14px;">USD ${s.price.toLocaleString()}</span>
             </div>
             <p style="color:#6B7280;font-size:13px;margin:0;">${s.desc}</p>
           </div>
@@ -137,22 +137,22 @@ export async function GET(req: NextRequest) {
           subject: `${customer.name.split(" ")[0]}, una oportunidad para seguir creciendo en EE.UU.`,
           html: `
 <div style="font-family:system-ui,sans-serif;max-width:560px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
     ${emailBody}
     <div style="margin:24px 0;">
-      <p style="font-size:13px;font-weight:700;color:#27295C;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.05em;">Servicios complementarios</p>
+      <p style="font-size:13px;font-weight:700;color:#000000;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.05em;">Servicios complementarios</p>
       ${suggestionsHtml}
     </div>
     <a href="${appUrl}/book"
-       style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;margin-bottom:16px;">
+       style="display:block;text-align:center;background:#0183FF;color:#000000;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;margin-bottom:16px;">
       Agendar consulta gratuita →
     </a>
     <div style="border-top:1px solid #F0F0F0;padding-top:20px;text-align:center;">
       <p style="font-size:12px;color:#9CA3AF;margin:0;">FastForward Trading Company LLC · Miami, FL</p>
-      <a href="https://fastfwdus.com" style="font-size:12px;color:#C9A84C;">fastfwdus.com</a>
+      <a href="https://fastfwdus.com" style="font-size:12px;color:#0183FF;">fastfwdus.com</a>
     </div>
   </div>
 </div>`,

@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4"
-         style={{ background: "#1A1C3E" }}>
+         style={{ background: "#000000" }}>
       <Image
         src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
         alt="FastForward ® | FDA Experts"
@@ -15,7 +15,7 @@ export default function NotFound() {
       <p className="text-white/50 text-sm mb-8">Este link no existe o ya no está disponible.</p>
       <a href="/book"
          className="px-6 py-3 rounded-xl font-semibold text-sm transition-all"
-         style={{ background: "#C9A84C", color: "#1A1C3E" }}>
+         style={{ background: "#0183FF", color: "#000000" }}>
         Ir al agendamiento general
       </a>
     </div>

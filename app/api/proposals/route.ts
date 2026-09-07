@@ -218,11 +218,11 @@ export async function POST(req: NextRequest) {
 
   const emailHtml = `
 <div style="font-family:system-ui,sans-serif;max-width:580px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="34" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
-    <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 8px;">${L.greeting}</p>
+    <p style="font-size:18px;font-weight:700;color:#000000;margin:0 0 8px;">${L.greeting}</p>
     <div style="font-size:14px;color:#374151;line-height:1.6;margin-bottom:24px;">
       ${emailText || L.body}
     </div>
@@ -233,14 +233,14 @@ export async function POST(req: NextRequest) {
     <p style="text-align:center;font-size:11px;color:#9CA3AF;margin:-8px 0 20px;">${L.ctaNote}</p>
     <div style="background:#F8F9FB;border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid #E5E7EB;">
       <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.05em;">${L.totalLabel}</p>
-      <p style="font-size:24px;font-weight:700;color:#C9A84C;margin:0;">USD $${total.toLocaleString("en-US")}</p>
+      <p style="font-size:24px;font-weight:700;color:#0183FF;margin:0;">USD $${total.toLocaleString("en-US")}</p>
       <p style="font-size:12px;color:#6B7280;margin:4px 0 0;">${L.validLabel}</p>
     </div>
     <p style="font-size:13px;color:#6B7280;margin:0 0 4px;">${L.contact}</p>
-    <p style="font-size:13px;font-weight:600;color:#27295C;margin:0;">${rep.fullName} · FastForward FDA Experts</p>
+    <p style="font-size:13px;font-weight:600;color:#000000;margin:0;">${rep.fullName} · FastForward FDA Experts</p>
     <div style="border-top:1px solid #F0F0F0;padding-top:20px;margin-top:24px;text-align:center;">
       <p style="font-size:12px;color:#9CA3AF;margin:0;">FastForward Trading Company LLC · Miami, FL</p>
-      <a href="https://fastfwdus.com" style="font-size:12px;color:#C9A84C;">fastfwdus.com</a>
+      <a href="https://fastfwdus.com" style="font-size:12px;color:#0183FF;">fastfwdus.com</a>
     </div>
   </div>
 </div>`;

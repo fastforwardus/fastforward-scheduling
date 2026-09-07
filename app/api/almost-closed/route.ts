@@ -86,12 +86,12 @@ export async function GET(req: NextRequest) {
       subject,
       html: `
 <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
     ${emailBody}
-    <a href="${appUrl}/book" style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:20px;">
+    <a href="${appUrl}/book" style="display:block;text-align:center;background:#0183FF;color:#000000;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;margin-top:20px;">
       ${ctaText}
     </a>
     <div style="border-top:1px solid #F0F0F0;padding-top:16px;margin-top:20px;text-align:center;">

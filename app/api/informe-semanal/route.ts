@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
 
   const fila = (r: Record<string, unknown>) => `
     <tr>
-      <td style="padding:9px 8px;border-bottom:1px solid #F0F2F5;font-weight:600;color:#27295C;">${r.rep}</td>
+      <td style="padding:9px 8px;border-bottom:1px solid #F0F2F5;font-weight:600;color:#000000;">${r.rep}</td>
       <td style="padding:9px 8px;border-bottom:1px solid #F0F2F5;text-align:center;">${n(r.citas)}</td>
       <td style="padding:9px 8px;border-bottom:1px solid #F0F2F5;text-align:center;color:#16A34A;">${n(r.completadas)}</td>
       <td style="padding:9px 8px;border-bottom:1px solid #F0F2F5;text-align:center;color:${n(r.no_show) ? "#DC2626" : "#9CA3AF"};">${n(r.no_show)}</td>
@@ -163,7 +163,7 @@ export async function GET(req: NextRequest) {
     `<th style="padding:8px;text-align:${al};font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.85);font-weight:600;">${t}</th>`;
 
   const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:720px;color:#1a1a1a;">
-<div style="background:#27295C;border-radius:12px 12px 0 0;padding:22px 26px;">
+<div style="background:#000000;border-radius:12px 12px 0 0;padding:22px 26px;">
   <p style="margin:0;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;">FastForward</p>
   <h1 style="margin:5px 0 0;font-size:20px;color:#fff;">${cfg.titulo}</h1>
 </div>
@@ -172,12 +172,12 @@ export async function GET(req: NextRequest) {
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
     <tr>
       <td style="padding:12px;background:#F8F9FB;border-radius:9px;">
-        <p style="margin:0;font-size:22px;font-weight:700;color:#27295C;">${n(tot?.citas)}</p>
+        <p style="margin:0;font-size:22px;font-weight:700;color:#000000;">${n(tot?.citas)}</p>
         <p style="margin:2px 0 0;font-size:11px;color:#9CA3AF;">citas</p>
       </td>
       <td style="width:9px;"></td>
       <td style="padding:12px;background:#F8F9FB;border-radius:9px;">
-        <p style="margin:0;font-size:22px;font-weight:700;color:#27295C;">${n(tot?.enviadas)}</p>
+        <p style="margin:0;font-size:22px;font-weight:700;color:#000000;">${n(tot?.enviadas)}</p>
         <p style="margin:2px 0 0;font-size:11px;color:#9CA3AF;">propuestas · ${usd(n(tot?.monto_enviado))}</p>
       </td>
       <td style="width:9px;"></td>
@@ -195,7 +195,7 @@ export async function GET(req: NextRequest) {
 
   <p style="margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#9CA3AF;">Por consultor</p>
   <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
-    <thead><tr style="background:#27295C;">
+    <thead><tr style="background:#000000;">
       ${th("Consultor", "left")}${th("Citas")}${th("OK")}${th("No-show")}${th("Enviadas")}${th("Aceptadas")}${th("Cobrado", "right")}
     </tr></thead>
     <tbody>${porRep.length ? porRep.map(fila).join("") :
@@ -206,7 +206,7 @@ export async function GET(req: NextRequest) {
   <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
     ${resultados.map(r => `<tr>
       <td style="padding:7px 8px;border-bottom:1px solid #F0F2F5;">${OUTCOMES[String(r.outcome)] || "Sin cargar"}</td>
-      <td style="padding:7px 8px;border-bottom:1px solid #F0F2F5;text-align:right;font-weight:600;color:${String(r.outcome) === "sin_cargar" ? "#DC2626" : "#27295C"};">${n(r.n)}</td>
+      <td style="padding:7px 8px;border-bottom:1px solid #F0F2F5;text-align:right;font-weight:600;color:${String(r.outcome) === "sin_cargar" ? "#DC2626" : "#000000"};">${n(r.n)}</td>
     </tr>`).join("") || `<tr><td style="padding:14px;color:#9CA3AF;">Sin citas completadas</td></tr>`}
   </table>
   ${resultados.some(r => String(r.outcome) === "sin_cargar")

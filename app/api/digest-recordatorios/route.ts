@@ -73,8 +73,8 @@ export async function GET(req: NextRequest) {
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F8F9FB;padding:32px 0;">
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #E5E7EB;">
-<tr><td style="background:#27295C;padding:20px 28px;">
-  <p style="margin:0;color:#C9A84C;font-size:13px;">Tus pendientes</p>
+<tr><td style="background:#000000;padding:20px 28px;">
+  <p style="margin:0;color:#0183FF;font-size:13px;">Tus pendientes</p>
   <p style="margin:4px 0 0;color:#fff;font-size:20px;font-weight:600;">Hola, ${u.full_name.split(" ")[0]}</p>
 </td></tr>
 ${vencidos.length ? `<tr><td style="padding:14px 28px 6px;">
@@ -86,7 +86,7 @@ ${hoy.length ? `<tr><td style="padding:14px 28px 6px;">
 </td></tr>
 <tr><td style="padding:0 12px;"><table width="100%" style="border-collapse:collapse;">${hoy.map(r => fila(r, false)).join("")}</table></td></tr>` : ""}
 <tr><td style="padding:22px 28px;">
-  <a href="${APP_URL}/dashboard" style="display:inline-block;background:#27295C;color:#fff;text-decoration:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;">Ver mi día →</a>
+  <a href="${APP_URL}/dashboard" style="display:inline-block;background:#000000;color:#fff;text-decoration:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;">Ver mi día →</a>
 </td></tr>
 <tr><td style="background:#F8F9FB;padding:14px 28px;border-top:1px solid #E5E7EB;">
   <p style="margin:0;color:#9CA3AF;font-size:11px;">FastForward · Este aviso se manda solo cuando tenés pendientes.</p>

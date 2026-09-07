@@ -106,33 +106,33 @@ export async function GET(req: NextRequest) {
 <html><body style="margin:0;padding:0;background:#F8F9FB;font-family:system-ui,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="padding:32px 16px;">
 <tr><td align="center"><table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
-<tr><td style="background:#27295C;border-radius:16px 16px 0 0;padding:24px 32px;text-align:center;">
+<tr><td style="background:#000000;border-radius:16px 16px 0 0;padding:24px 32px;text-align:center;">
   <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
 </td></tr>
 <tr><td style="background:white;padding:32px;border-radius:0 0 16px 16px;border:1px solid #E5E7EB;border-top:none;">
-  <p style="font-size:13px;font-weight:600;color:#C9A84C;text-transform:uppercase;margin:0 0 8px;">
+  <p style="font-size:13px;font-weight:600;color:#0183FF;text-transform:uppercase;margin:0 0 8px;">
     ${isIn24h ? "Recordatorio 24 horas" : "Recordatorio 2 horas"}
   </p>
-  <p style="font-size:20px;font-weight:700;color:#27295C;margin:0 0 8px;">${lang === "en" ? "Hello" : lang === "pt" ? "Olá" : "Estimado/a"}, ${appt.clientName}</p>
+  <p style="font-size:20px;font-weight:700;color:#000000;margin:0 0 8px;">${lang === "en" ? "Hello" : lang === "pt" ? "Olá" : "Estimado/a"}, ${appt.clientName}</p>
   <p style="font-size:14px;color:#6B7280;margin:0 0 24px;">${intros[lang] || intros.es}</p>
   <div style="background:#F8F9FB;border-radius:12px;padding:20px;margin-bottom:24px;border:1px solid #E5E7EB;">
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr><td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
         <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">${lang === "en" ? "Date & Time" : lang === "pt" ? "Data e Hora" : "Fecha y Hora"}</span><br>
-        <span style="font-size:14px;font-weight:600;color:#27295C;">${formattedDate} · ${formattedTime}</span>
+        <span style="font-size:14px;font-weight:600;color:#000000;">${formattedDate} · ${formattedTime}</span>
       </td></tr>
       <tr><td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
         <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">${lang === "en" ? "Platform" : lang === "pt" ? "Plataforma" : "Plataforma"}</span><br>
-        <span style="font-size:14px;font-weight:600;color:#27295C;">${platformLabel}</span>
+        <span style="font-size:14px;font-weight:600;color:#000000;">${platformLabel}</span>
       </td></tr>
       <tr><td style="padding:6px 0;">
         <span style="font-size:11px;color:#9CA3AF;text-transform:uppercase;">${lang === "en" ? "Your expert" : lang === "pt" ? "Seu especialista" : "Su experto"}</span><br>
-        <span style="font-size:14px;font-weight:600;color:#27295C;">${repName}</span>
+        <span style="font-size:14px;font-weight:600;color:#000000;">${repName}</span>
       </td></tr>
     </table>
   </div>
   <a href="${appt.meetingLink || confirmUrl}"
-     style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;margin-bottom:12px;">
+     style="display:block;text-align:center;background:#0183FF;color:#000000;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;margin-bottom:12px;">
     ${ctas[lang] || ctas.es} →
   </a>
   <a href="${confirmUrl}" style="display:block;text-align:center;color:#9CA3AF;font-size:12px;text-decoration:none;">
@@ -140,7 +140,7 @@ export async function GET(req: NextRequest) {
   </a>
   <div style="border-top:1px solid #F0F0F0;padding-top:20px;margin-top:24px;text-align:center;">
     <p style="font-size:12px;color:#9CA3AF;margin:0;">FastForward FDA Experts · Miami, FL</p>
-    <a href="https://fastfwdus.com" style="font-size:12px;color:#C9A84C;text-decoration:none;">fastfwdus.com</a>
+    <a href="https://fastfwdus.com" style="font-size:12px;color:#0183FF;text-decoration:none;">fastfwdus.com</a>
   </div>
 </td></tr>
 </table></td></tr>

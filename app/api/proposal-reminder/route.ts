@@ -127,7 +127,7 @@ const STAGES: Record<1 | 2 | 3 | 4, StageDef> = {
     },
     badge: null,
     acceptLabel: { es: "Reactivar mi propuesta →", en: "Reactivate my proposal →", pt: "Reativar minha proposta →" },
-    acceptColor: "#27295C",
+    acceptColor: "#000000",
     secondary: "call",
   },
 };
@@ -141,23 +141,23 @@ function render(stageNum: 1 | 2 | 3 | 4, lang: Lang, firstName: string, proposal
     : "";
   const secondaryHtml =
     s.secondary === "book"
-      ? `<a href="${BOOK_URL}" style="display:block;text-align:center;border:1px solid #27295C;color:#27295C;padding:14px;border-radius:10px;font-weight:600;text-decoration:none;font-size:14px;">${T.book[lang]}</a>`
+      ? `<a href="${BOOK_URL}" style="display:block;text-align:center;border:1px solid #000000;color:#000000;padding:14px;border-radius:10px;font-weight:600;text-decoration:none;font-size:14px;">${T.book[lang]}</a>`
       : s.secondary === "call"
-      ? `<a href="${BOOK_URL}" style="display:block;text-align:center;border:1px solid #27295C;color:#27295C;padding:14px;border-radius:10px;font-weight:600;text-decoration:none;font-size:14px;">${T.bookCall[lang]}</a>`
+      ? `<a href="${BOOK_URL}" style="display:block;text-align:center;border:1px solid #000000;color:#000000;padding:14px;border-radius:10px;font-weight:600;text-decoration:none;font-size:14px;">${T.bookCall[lang]}</a>`
       : "";
 
   const html = `
 <div style="font-family:system-ui,-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
     ${badgeHtml}
-    <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 12px;">${greet} 👋</p>
+    <p style="font-size:18px;font-weight:700;color:#000000;margin:0 0 12px;">${greet} 👋</p>
     <p style="font-size:14px;color:#374151;line-height:1.6;margin:0 0 20px;">${s.body[lang]}</p>
     <div style="background:#F8F9FB;border-radius:12px;padding:16px;margin-bottom:20px;border:1px solid #E5E7EB;">
       <p style="font-size:12px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;">${proposalNum} · ${T.totalLabel[lang]}</p>
-      <p style="font-size:20px;font-weight:700;color:#C9A84C;margin:0;">${totalFmt}</p>
+      <p style="font-size:20px;font-weight:700;color:#0183FF;margin:0;">${totalFmt}</p>
     </div>
     <a href="${confirmUrl}" style="display:block;text-align:center;background:${s.acceptColor};color:white;padding:16px;border-radius:12px;font-weight:700;text-decoration:none;font-size:15px;margin-bottom:${secondaryHtml ? "12px" : "0"};">${s.acceptLabel[lang]}</a>
     ${secondaryHtml}

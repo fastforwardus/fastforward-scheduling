@@ -113,17 +113,17 @@ export async function GET(req: NextRequest) {
         to: appt.clientEmail,
         subject: subjects[lang] || subjects.es,
         html: `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+  <div style="background:#000000;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:12px;padding:24px;border:1px solid #E5E7EB;">
-    <p style="font-size:16px;font-weight:700;color:#27295C;margin:0 0 14px;">${saludos[lang] || saludos.es}</p>
+    <p style="font-size:16px;font-weight:700;color:#000000;margin:0 0 14px;">${saludos[lang] || saludos.es}</p>
     <p style="color:#4B5563;font-size:14px;line-height:1.6;margin:0 0 20px;">${bodies[lang] || bodies.es}</p>
-    <a href="${linkReagendar}" style="display:block;text-align:center;background:#C9A84C;color:#1A1C3E;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;">
+    <a href="${linkReagendar}" style="display:block;text-align:center;background:#0183FF;color:#000000;padding:14px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;">
       ${ctas[lang] || ctas.es} →
     </a>
     <p style="color:#6B7280;font-size:13px;line-height:1.6;margin:18px 0 0;">${cierres[lang] || cierres.es}</p>
-    <p style="color:#27295C;font-size:13px;font-weight:600;margin:16px 0 0;">Carlos Bisio<br>
+    <p style="color:#000000;font-size:13px;font-weight:600;margin:16px 0 0;">Carlos Bisio<br>
       <span style="color:#9CA3AF;font-weight:400;">FastForward Trading Company LLC</span></p>
   </div>
 </div>`,
@@ -183,11 +183,11 @@ export async function GET(req: NextRequest) {
             to: rep.email,
             subject: `No-show - ${appt.clientName} (${appt.clientCompany})`,
             html: `<div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+  <div style="background:#000000;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:12px;padding:24px;border:1px solid #E5E7EB;">
-    <p style="font-size:16px;font-weight:700;color:#27295C;margin:0 0 8px;">No-show detectado</p>
+    <p style="font-size:16px;font-weight:700;color:#000000;margin:0 0 8px;">No-show detectado</p>
     <p style="color:#6B7280;font-size:14px;margin:0 0 16px;">
       <strong>${appt.clientName}</strong> de <strong>${appt.clientCompany}</strong> no se presento a la cita.
       Le enviamos un email automatico para reagendar.
@@ -195,7 +195,7 @@ export async function GET(req: NextRequest) {
     <div style="background:#FEF9C3;border-radius:8px;padding:12px;margin-bottom:16px;">
       <p style="font-size:12px;color:#854D0E;margin:0;">WhatsApp: ${appt.clientWhatsapp}</p>
     </div>
-    <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#27295C;color:white;padding:12px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;">
+    <a href="${appUrl}/dashboard" style="display:block;text-align:center;background:#000000;color:white;padding:12px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;">
       Ver en dashboard →
     </a>
   </div>

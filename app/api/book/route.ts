@@ -267,15 +267,15 @@ export async function POST(req: NextRequest) {
             subject: `Nuevo referido: ${clientName} (${clientCompany})`,
             html: `
 <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
-  <div style="background:#27295C;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
+  <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="32" alt="FastForward">
   </div>
   <div style="background:white;border-radius:0 0 16px 16px;padding:32px;border:1px solid #E5E7EB;border-top:none;">
-    <p style="font-size:18px;font-weight:700;color:#27295C;margin:0 0 8px;">Hola, ${partner.name} 👋</p>
+    <p style="font-size:18px;font-weight:700;color:#000000;margin:0 0 8px;">Hola, ${partner.name} 👋</p>
     <p style="color:#6B7280;font-size:14px;margin:0 0 20px;">¡Uno de tus referidos acaba de agendar una consulta con FastForward!</p>
     <div style="background:#F8F9FB;border-radius:12px;padding:16px;margin-bottom:24px;border:1px solid #E5E7EB;">
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;">Cliente</p>
-      <p style="font-size:15px;font-weight:700;color:#27295C;margin:0 0 2px;">${clientName}</p>
+      <p style="font-size:15px;font-weight:700;color:#000000;margin:0 0 2px;">${clientName}</p>
       <p style="font-size:13px;color:#6B7280;margin:0 0 12px;">${clientCompany}</p>
       <p style="font-size:11px;color:#9CA3AF;margin:0 0 4px;text-transform:uppercase;">Email</p>
       <p style="font-size:13px;color:#374151;margin:0 0 12px;">${clientEmail}</p>
@@ -324,8 +324,8 @@ export async function POST(req: NextRequest) {
     const platformLabel = platform === "meet" ? "Google Meet" : platform === "zoom" ? "Zoom" : "WhatsApp";
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://fastforward-scheduling.vercel.app";
     const meetingLinkHtml = platform === "whatsapp"
-      ? `<span style="font-size:14px;font-weight:600;color:#27295C;">📞 ${clientWhatsapp}</span>`
-      : `<a href="${appUrl}/book/confirm/${confirmToken}" style="font-size:14px;font-weight:600;color:#C9A84C;text-decoration:none;">
+      ? `<span style="font-size:14px;font-weight:600;color:#000000;">📞 ${clientWhatsapp}</span>`
+      : `<a href="${appUrl}/book/confirm/${confirmToken}" style="font-size:14px;font-weight:600;color:#0183FF;text-decoration:none;">
           ${lang === "en" ? "Click here to get your meeting link" : lang === "pt" ? "Clique aqui para obter o link da reunião" : "Haga clic para obtener el enlace de la reunión"} →
          </a>`;
 
@@ -381,7 +381,7 @@ export async function POST(req: NextRequest) {
       <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
 
         <!-- Header -->
-        <tr><td style="background:#27295C;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;">
+        <tr><td style="background:#000000;border-radius:16px 16px 0 0;padding:28px 32px;text-align:center;">
           <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
                alt="FastForward ® | FDA Experts" height="36" style="object-fit:contain;">
         </td></tr>
@@ -394,14 +394,14 @@ export async function POST(req: NextRequest) {
             <tr><td align="center">
               <table cellpadding="0" cellspacing="0">
                 <tr><td width="56" height="56" align="center" valign="middle"
-                    style="background:#C9A84C;border-radius:28px;font-size:26px;color:#ffffff;font-weight:700;line-height:56px;">
+                    style="background:#0183FF;border-radius:28px;font-size:26px;color:#ffffff;font-weight:700;line-height:56px;">
                   ✓
                 </td></tr>
               </table>
             </td></tr>
           </table>
 
-          <p style="font-size:22px;font-weight:700;color:#27295C;margin:0 0 8px;text-align:center;">${greeting}</p>
+          <p style="font-size:22px;font-weight:700;color:#000000;margin:0 0 8px;text-align:center;">${greeting}</p>
           <p style="font-size:15px;color:#6B7280;margin:0 0 28px;text-align:center;">${bodyIntro}</p>
 
           <!-- Appointment details -->
@@ -410,13 +410,13 @@ export async function POST(req: NextRequest) {
               <tr>
                 <td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
                   <span style="font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;">📅 ${lang === "en" ? "Date & Time" : lang === "pt" ? "Data e Hora" : "Fecha y Hora"}</span><br>
-                  <span style="font-size:14px;font-weight:600;color:#27295C;">${formattedDate} · ${formattedTime}</span>
+                  <span style="font-size:14px;font-weight:600;color:#000000;">${formattedDate} · ${formattedTime}</span>
                 </td>
               </tr>
               <tr>
                 <td style="padding:6px 0;border-bottom:1px solid #F0F0F0;">
                   <span style="font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;">🎥 ${lang === "en" ? "Platform" : lang === "pt" ? "Plataforma" : "Plataforma"}</span><br>
-                  <span style="font-size:14px;font-weight:600;color:#27295C;">${platformLabel}</span>
+                  <span style="font-size:14px;font-weight:600;color:#000000;">${platformLabel}</span>
                 </td>
               </tr>
               <tr>
@@ -428,7 +428,7 @@ export async function POST(req: NextRequest) {
               <tr>
                 <td style="padding:6px 0;">
                   <span style="font-size:12px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.05em;">👤 ${lang === "en" ? "Expert" : lang === "pt" ? "Especialista" : "Experto"}</span><br>
-                  <span style="font-size:14px;font-weight:600;color:#27295C;">${assignedText}</span>
+                  <span style="font-size:14px;font-weight:600;color:#000000;">${assignedText}</span>
                 </td>
               </tr>
             </table>
@@ -440,11 +440,11 @@ export async function POST(req: NextRequest) {
 
           <!-- Presentation CTA -->
           <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
-            <tr><td style="background:#27295C;border-radius:12px;padding:24px;text-align:center;">
-              <p style="font-size:11px;color:#C9A84C;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">${presoLabel}</p>
+            <tr><td style="background:#000000;border-radius:12px;padding:24px;text-align:center;">
+              <p style="font-size:11px;color:#0183FF;letter-spacing:2px;text-transform:uppercase;margin:0 0 8px;">${presoLabel}</p>
               <p style="font-size:18px;color:#ffffff;font-weight:600;margin:0 0 6px;">${presoTitle}</p>
               <p style="font-size:13px;color:#B9BAD1;margin:0 0 16px;line-height:1.5;">${presoText}</p>
-              <a href="${presentationUrl}" style="display:inline-block;background:#C9A84C;color:#27295C;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;">${presoCta}</a>
+              <a href="${presentationUrl}" style="display:inline-block;background:#0183FF;color:#000000;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;">${presoCta}</a>
             </td></tr>
           </table>
 
@@ -452,7 +452,7 @@ export async function POST(req: NextRequest) {
           <div style="border-top:1px solid #F0F0F0;padding-top:20px;text-align:center;">
             <p style="font-size:12px;color:#9CA3AF;margin:0;">FastForward ® | FDA Experts · Miami, FL</p>
             <p style="font-size:12px;color:#9CA3AF;margin:4px 0 0;">
-              <a href="https://fastfwdus.com" style="color:#C9A84C;text-decoration:none;">fastfwdus.com</a>
+              <a href="https://fastfwdus.com" style="color:#0183FF;text-decoration:none;">fastfwdus.com</a>
             </p>
           </div>
         </td></tr>
@@ -488,7 +488,7 @@ export async function POST(req: NextRequest) {
             <p><strong>Servicio:</strong> ${serviceInterest || "No especificado"}</p>
             <br>
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/manager"
-               style="background:#C9A84C;color:#27295C;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">
+               style="background:#0183FF;color:#000000;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">
               Asignar ahora →
             </a>
           `,
@@ -540,7 +540,7 @@ export async function POST(req: NextRequest) {
           subject: `🎯 Nuevo lead asignado — ${clientName}`,
           html: `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:system-ui,sans-serif;background:#F8F9FB;margin:0;padding:0}*{box-sizing:border-box}</style></head><body>
 <div style="max-width:580px;margin:0 auto;padding:24px">
-  <div style="background:linear-gradient(135deg,#27295C,#1e2150);border-radius:20px;padding:32px;text-align:center;margin-bottom:20px">
+  <div style="background:linear-gradient(135deg,#000000,#1e2150);border-radius:20px;padding:32px;text-align:center;margin-bottom:20px">
     <img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" height="36" style="margin-bottom:16px" />
     <p style="color:rgba(201,168,76,0.9);font-size:13px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:2px">Nuevo Lead Asignado</p>
     <h1 style="color:white;font-size:26px;font-weight:800;margin:0">${clientName}</h1>
@@ -550,19 +550,19 @@ export async function POST(req: NextRequest) {
   <div style="background:white;border-radius:16px;padding:24px;margin-bottom:16px;border:1px solid #E5E7EB">
     <p style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9CA3AF;margin:0 0 16px">Datos del Lead</p>
     <table style="width:100%;border-collapse:collapse">
-      <tr><td style="padding:8px 0;color:#6B7280;font-size:13px;width:130px">Nombre</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${clientName}</td></tr>
-      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Empresa</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${clientCompany}</td></tr>
-      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Email</td><td style="padding:8px 0;font-size:13px"><a href="mailto:${clientEmail}" style="color:#C9A84C">${clientEmail}</a></td></tr>
-      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">WhatsApp</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${clientWhatsapp}</td></tr>
-      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Servicio</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${serviceLabel[serviceInterest] || serviceInterest || "Sin definir"}</td></tr>
-      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Cita</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${apptDate} (EST)</td></tr>
-      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Plataforma</td><td style="padding:8px 0;color:#27295C;font-size:13px;font-weight:600">${platform === "meet" ? "Google Meet" : "WhatsApp"}</td></tr>
-      ${clientNotes ? `<tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Notas</td><td style="padding:8px 0;color:#27295C;font-size:13px">${clientNotes}</td></tr>` : ""}
+      <tr><td style="padding:8px 0;color:#6B7280;font-size:13px;width:130px">Nombre</td><td style="padding:8px 0;color:#000000;font-size:13px;font-weight:600">${clientName}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Empresa</td><td style="padding:8px 0;color:#000000;font-size:13px;font-weight:600">${clientCompany}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Email</td><td style="padding:8px 0;font-size:13px"><a href="mailto:${clientEmail}" style="color:#0183FF">${clientEmail}</a></td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">WhatsApp</td><td style="padding:8px 0;color:#000000;font-size:13px;font-weight:600">${clientWhatsapp}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Servicio</td><td style="padding:8px 0;color:#000000;font-size:13px;font-weight:600">${serviceLabel[serviceInterest] || serviceInterest || "Sin definir"}</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Cita</td><td style="padding:8px 0;color:#000000;font-size:13px;font-weight:600">${apptDate} (EST)</td></tr>
+      <tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Plataforma</td><td style="padding:8px 0;color:#000000;font-size:13px;font-weight:600">${platform === "meet" ? "Google Meet" : "WhatsApp"}</td></tr>
+      ${clientNotes ? `<tr style="border-top:1px solid #F3F4F6"><td style="padding:8px 0;color:#6B7280;font-size:13px">Notas</td><td style="padding:8px 0;color:#000000;font-size:13px">${clientNotes}</td></tr>` : ""}
     </table>
   </div>
 
   <div style="background:#EEF2FF;border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid #C7D2FE">
-    <p style="font-size:13px;font-weight:700;color:#27295C;margin:0 0 8px">📋 Cómo dar seguimiento en Zoho CRM</p>
+    <p style="font-size:13px;font-weight:700;color:#000000;margin:0 0 8px">📋 Cómo dar seguimiento en Zoho CRM</p>
     <p style="font-size:13px;color:#374151;margin:0 0 8px">Este lead ya está registrado en Zoho CRM con vos como owner. Para darle seguimiento:</p>
     <ol style="font-size:13px;color:#374151;margin:0;padding-left:20px;line-height:2">
       <li>Abrí Zoho CRM → <strong>Leads</strong></li>
@@ -573,7 +573,7 @@ export async function POST(req: NextRequest) {
   </div>
 
   <div style="text-align:center;padding:16px">
-    <a href="https://scheduling.fastfwdus.com/dashboard" style="display:inline-block;background:#C9A84C;color:#1A1C3E;padding:14px 32px;border-radius:12px;font-weight:700;text-decoration:none;font-size:14px">Ver en el Dashboard →</a>
+    <a href="https://scheduling.fastfwdus.com/dashboard" style="display:inline-block;background:#0183FF;color:#000000;padding:14px 32px;border-radius:12px;font-weight:700;text-decoration:none;font-size:14px">Ver en el Dashboard →</a>
   </div>
 
   <p style="text-align:center;font-size:11px;color:#9CA3AF;margin:16px 0 0">FastForward FDA Experts · Miami, FL</p>
