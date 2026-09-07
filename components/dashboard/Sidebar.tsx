@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReminderBell } from "@/components/dashboard/ReminderBell";
-import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield, Receipt, History } from "lucide-react";
 
 interface SidebarProps {
   user: { fullName: string; email: string; role: string; canRecovery?: boolean };
@@ -20,6 +20,8 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/appointments", icon: Calendar, label: "Todas las citas", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/propuestas", icon: FileText, label: "Propuestas", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/propuesta", icon: FileText, label: "Enviar propuesta", roles: ["admin","sales_manager","sales_rep"] },
+    { href: "/dashboard/facturar", icon: Receipt, label: "Facturar", roles: ["admin","sales_manager","sales_rep"] },
+    { href: "/dashboard/actividad", icon: History, label: "Actividad", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/recovery", icon: PhoneCall, label: "Recupero", roles: ["admin","sales_manager","recovery"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
     { href: "/dashboard/admin", icon: Shield, label: "Administracion", roles: ["admin"] },
