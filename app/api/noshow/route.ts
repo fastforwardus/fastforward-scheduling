@@ -9,8 +9,10 @@ import { calidadWhatsApp } from "@/lib/calidad-wa";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function GET(req: NextRequest) {
+  // ?test=email manda una cita ficticia solo a esa casilla.
+  const test = new URL(req.url).searchParams.get("test");
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!test && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -45,15 +47,29 @@ export async function GET(req: NextRequest) {
 
   let processed = 0;
 
-  for (const appt of missed) {
-    const already = await db.select().from(remindersLog).where(
+  const lista = test ? ([{
+    id: "00000000-0000-0000-0000-000000000000",
+    clientName: "Cliente de prueba",
+    clientEmail: test,
+    clientCompany: "Empresa de prueba",
+    clientWhatsapp: "",
+    clientLanguage: "es",
+    platform: "meet",
+    scheduledAt: new Date(Date.now() - 60 * 60 * 1000),
+    confirmToken: "prueba",
+    assignedTo: null,
+    noShowCount: 0,
+  }] as unknown as typeof missed) : missed;
+
+  for (const appt of lista) {
+    const already = test ? [] : await db.select().from(remindersLog).where(
       and(eq(remindersLog.appointmentId, appt.id),
           eq(remindersLog.type, "noshow_client"),
           eq(remindersLog.channel, "email"))
     ).limit(1);
     if (already.length) continue;
 
-    await db.update(appointments)
+    if (!test) await db.update(appointments)
       .set({ status: "no_show", noShowCount: appt.noShowCount + 1 })
       .where(eq(appointments.id, appt.id));
 
@@ -128,12 +144,12 @@ export async function GET(req: NextRequest) {
   </div>
 </div>`,
       });
-      await db.insert(remindersLog).values({
+      if (!test) await db.insert(remindersLog).values({
         appointmentId: appt.id, type: "noshow_client",
         channel: "email", sentAt: new Date(), status: "sent",
       });
     } catch (err) {
-      await db.insert(remindersLog).values({
+      if (!test) await db.insert(remindersLog).values({
         appointmentId: appt.id, type: "noshow_client",
         channel: "email", sentAt: new Date(), status: "failed", errorMessage: String(err),
       });
@@ -156,7 +172,7 @@ export async function GET(req: NextRequest) {
             languageCode: lang === "pt" ? "pt_BR" : lang,
             bodyParams: [nombre],
           });
-          await db.insert(remindersLog).values({
+          if (!test) await db.insert(remindersLog).values({
             appointmentId: appt.id, type: "noshow_client",
             channel: "whatsapp", sentAt: new Date(),
             status: r?.ok === false ? "failed" : "sent",
@@ -164,7 +180,7 @@ export async function GET(req: NextRequest) {
           });
         } catch (err) {
           console.error("[noshow] wa error:", err);
-          await db.insert(remindersLog).values({
+          if (!test) await db.insert(remindersLog).values({
             appointmentId: appt.id, type: "noshow_client",
             channel: "whatsapp", sentAt: new Date(), status: "failed",
             errorMessage: String(err).slice(0, 240),
@@ -201,7 +217,7 @@ export async function GET(req: NextRequest) {
   </div>
 </div>`,
           });
-          await db.insert(remindersLog).values({
+          if (!test) await db.insert(remindersLog).values({
             appointmentId: appt.id, type: "noshow_sales",
             channel: "email", sentAt: new Date(), status: "sent",
           });
