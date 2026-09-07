@@ -10,6 +10,7 @@ import { getOrCreateConversation, appendMessage, updateConversation } from "@/li
 import { renderTemplate } from "@/lib/whatsapp-templates";
 import { Resend } from "resend";
 import { autorizarOps } from "@/lib/ops-auth";
+import { calidadWhatsApp } from "@/lib/calidad-wa";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
@@ -170,6 +171,10 @@ function render(stageNum: 1 | 2 | 3 | 4, lang: Lang, firstName: string, proposal
 }
 
 export async function GET(req: NextRequest) {
+  // El numero es compartido con la campaña y con Adriana: si esta degradado,
+  // seguir mandando recordatorios lo empuja a rojo. El email sale igual.
+  const calWa = await calidadWhatsApp();
+  if (!calWa.ok) console.warn("[proposal-reminder] WhatsApp frenado — calidad:", calWa.rating);
   const { searchParams } = new URL(req.url);
   const testEmail = searchParams.get("test");
 
@@ -247,6 +252,7 @@ export async function GET(req: NextRequest) {
   const grupos = new Map<string, { ids: string[]; total: number; nombre: string; lang: string; etapaMax: number }>();
   if (WA_ENABLED) {
     const now2 = Date.now();
+
     for (const p of rows) {
       if (!p.clientPhone) continue;
       const dias = (now2 - new Date(p.createdAt).getTime()) / 86400000;
@@ -316,7 +322,7 @@ export async function GET(req: NextRequest) {
 
     // ── WhatsApp: etapa propia, no depende de que el email haya salido ──
     const waCurrent = p.whatsappStage ?? 0;
-    if (WA_ENABLED && p.clientPhone && target > waCurrent && waSent < WA_DAILY_CAP) {
+    if (WA_ENABLED && calWa.ok && p.clientPhone && target > waCurrent && waSent < WA_DAILY_CAP) {
       const phone = normalizeWhatsAppPhone(p.clientPhone);
       const baja = optedOut.has(phone) || optedOut.has(phoneTail(phone));
       const enfriando = enfriamiento.has(phone) || enfriamiento.has(phoneTail(phone));

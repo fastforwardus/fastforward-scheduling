@@ -4,6 +4,7 @@ import { appointments, users, remindersLog } from "@/db/schema";
 import { and, eq, lte, gte } from "drizzle-orm";
 import { Resend } from "resend";
 import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
+import { calidadWhatsApp } from "@/lib/calidad-wa";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -36,6 +37,11 @@ export async function GET(req: NextRequest) {
       eq(appointments.status, "scheduled"),
     )
   );
+
+  // Con el numero degradado no se inician conversaciones nuevas. El email de
+  // recupero sale igual: no depende de WhatsApp.
+  const cal = await calidadWhatsApp();
+  if (!cal.ok) console.warn("[noshow] WhatsApp frenado — calidad:", cal.rating);
 
   let processed = 0;
 
@@ -135,7 +141,7 @@ export async function GET(req: NextRequest) {
 
     // WhatsApp ademas del email: en LATAM convierte bastante mejor, y el que
     // no aparecio a una cita que el mismo agendo sigue siendo un lead tibio.
-    if (appt.clientWhatsapp) {
+    if (appt.clientWhatsapp && cal.ok) {
       const yaWa = await db.select().from(remindersLog).where(
         and(eq(remindersLog.appointmentId, appt.id),
             eq(remindersLog.type, "noshow_client"),
