@@ -134,11 +134,21 @@ export async function findOrCreateZohoBooksContact(params: {
     }
   }
 
+  // contact_persons es obligatorio para poder enviar la factura por correo:
+  // el email a nivel raiz no crea destinatario y el envio queda sin efecto.
+  const partes = params.name.trim().split(/\s+/);
   const data = await booksReq("POST", "/contacts", {
     contact_name: params.name,
     company_name: params.company || params.name,
     contact_type: "customer",
     email: params.email,
+    contact_persons: [{
+      first_name: partes[0] || params.name,
+      last_name: partes.slice(1).join(" ") || "-",
+      email: params.email,
+      ...(params.phone ? { mobile: params.phone } : {}),
+      is_primary_contact: true,
+    }],
     ...(params.phone ? { mobile: params.phone } : {}),
     ...(params.address ? { billing_address: { address: params.address, country: "US" } } : {}),
     ...(params.taxId ? { tax_id_value: params.taxId } : {}),
@@ -282,10 +292,29 @@ export async function updateZohoBooksInvoice(params: {
 // contact_person_id en to_mail_ids. Se leen de la propia factura.
 export async function emailZohoBooksInvoice(invoiceId: string): Promise<void> {
   const inv = await getZohoBooksInvoice(invoiceId);
-  const ids: string[] = (inv?.contact_persons ?? []).filter(Boolean);
+  let ids: string[] = (inv?.contact_persons ?? []).filter(Boolean);
 
+  // Los contactos creados antes de este arreglo no tienen persona de contacto
+  // y por lo tanto no tienen destinatario. Se crea sobre la marcha y se
+  // reintenta, asi los historicos quedan reparados sin script aparte.
   if (!ids.length) {
-    throw new Error("La factura no tiene contact persons cargados en Zoho: no hay a quien enviarla");
+    const contactId = inv?.customer_id;
+    const destino = inv?.email || inv?.contact_persons_details?.[0]?.email;
+    if (!contactId || !destino) {
+      throw new Error("La factura no tiene contacto ni email en Zoho: no hay a quien enviarla");
+    }
+    const nombre = String(inv?.customer_name ?? "Cliente").trim().split(/\s+/);
+    const creado = await booksReq("POST", `/contacts/${contactId}/contactpersons`, {
+      first_name: nombre[0] || "Cliente",
+      last_name: nombre.slice(1).join(" ") || "-",
+      email: destino,
+      is_primary_contact: true,
+    });
+    const nuevoId = creado?.contact_person?.contact_person_id;
+    if (!nuevoId) {
+      throw new Error(`No se pudo crear la persona de contacto en Zoho: ${JSON.stringify(creado)}`);
+    }
+    ids = [nuevoId];
   }
 
   const data = await booksReq("POST", `/invoices/${invoiceId}/email`, {
