@@ -32,12 +32,15 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
     const appt = filas[0];
 
     let repName = "FastForward FDA Experts";
-    if (appt?.assigned_to) {
+    // Mismo caso que arriba: el driver devuelve el array directo. Y si la
+    // propuesta no tiene cita, el dueño esta en sent_by_id.
+    const repId = appt?.assigned_to || proposal.sentById;
+    if (repId) {
       const repRows = await db.execute(
-        sql`SELECT full_name FROM users WHERE id::text = ${appt.assigned_to} LIMIT 1`
-      ) as unknown as { rows: { full_name: string }[] };
-      const rep = repRows.rows?.[0];
-      if (rep) repName = rep.full_name;
+        sql`SELECT full_name FROM users WHERE id::text = ${repId} LIMIT 1`
+      ) as unknown as { rows?: { full_name: string }[] };
+      const reps = (Array.isArray(repRows) ? repRows : repRows.rows ?? []) as { full_name: string }[];
+      if (reps[0]?.full_name) repName = reps[0].full_name;
     }
 
     const services = (typeof proposal.services === "string"
