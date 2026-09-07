@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { sql } from "drizzle-orm";
 import { proposals, proposalEvents, activityLogs } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent } from "@/lib/zohobooks";
+import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, emailZohoBooksInvoice } from "@/lib/zohobooks";
 
 // Lista las propuestas facturables del usuario: aceptadas y todavia sin
 // factura en Zoho. El admin ve las de todos.
@@ -125,6 +125,13 @@ export async function POST(req: NextRequest) {
     });
     await markZohoBooksInvoiceSent(invoice.invoice_id);
 
+    // markSent solo cambia el estado: NO manda el correo. El envio al cliente
+    // es una llamada aparte.
+    let enviada = true;
+    let errorEnvio = "";
+    try { await emailZohoBooksInvoice(invoice.invoice_id); }
+    catch (e) { enviada = false; errorEnvio = String(e).slice(0, 200); }
+
     await db.update(proposals).set({
       zohoInvoiceId: invoice.invoice_id,
       zohoContactId: contact.contact_id,
@@ -143,7 +150,7 @@ export async function POST(req: NextRequest) {
       details: `invoice ${invoice.invoice_id} (${invoice.invoice_number}) — USD ${invoice.total} — cliente ${datos.clientName}${edits ? " — EDITADA antes de emitir" : ""}`,
     }).catch(() => {});
 
-    return NextResponse.json({ ok: true, invoice });
+    return NextResponse.json({ ok: true, invoice, enviada, errorEnvio });
   } catch (err) {
     await db.insert(activityLogs).values({
       userId: session.id, action: "factura_manual_error", entityType: "proposal", entityId: p.id,

@@ -56,7 +56,9 @@ export default function FacturarPage() {
         setMsg({
           tipo: "ok",
           texto: tab === "pendientes"
-            ? `Factura ${d.invoice.invoice_number} emitida y enviada al cliente.`
+            ? (d.enviada
+                ? `Factura ${d.invoice.invoice_number} emitida y enviada al cliente.`
+                : `Factura ${d.invoice.invoice_number} emitida, pero NO se pudo enviar el correo: ${d.errorEnvio}`)
             : d.reenviada
               ? `Factura ${d.invoice.invoice_number} corregida y reenviada al cliente.`
               : `Factura ${d.invoice.invoice_number} corregida, pero NO se pudo reenviar: ${d.errorEnvio}`,
