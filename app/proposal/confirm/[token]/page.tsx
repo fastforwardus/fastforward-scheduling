@@ -25,8 +25,11 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
     // Raw query para evitar el problema UUID
     const apptRows = await db.execute(
       sql`SELECT client_name, client_company, client_email, assigned_to FROM appointments WHERE id::text = ${proposal.appointmentId} LIMIT 1`
-    ) as unknown as { rows: { client_name: string; client_company: string; client_email: string; assigned_to: string }[] };
-    const appt = apptRows.rows?.[0];
+    ) as unknown as { rows?: { client_name: string; client_company: string; client_email: string; assigned_to: string }[] };
+    // El driver devuelve el array directo; .rows queda undefined y el bloque
+    // "Para" salia vacio aunque la cita existiera.
+    const filas = (Array.isArray(apptRows) ? apptRows : apptRows.rows ?? []) as { client_name: string; client_company: string; client_email: string; assigned_to: string }[];
+    const appt = filas[0];
 
     let repName = "FastForward FDA Experts";
     if (appt?.assigned_to) {
@@ -45,7 +48,7 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
       <ProposalConfirmClient
         token={params.token}
         proposalNum={proposal.proposalNum}
-        clientName={appt?.client_name || ""}
+        clientName={appt?.client_name || proposal.clientName || ""}
         clientCompany={appt?.client_company || ""}
         services={services}
         discount={Number(proposal.discount) || 0}
