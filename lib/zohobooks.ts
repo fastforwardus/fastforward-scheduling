@@ -231,6 +231,55 @@ export async function markZohoBooksInvoiceSent(invoiceId: string): Promise<void>
   await booksReq("POST", `/invoices/${invoiceId}/status/sent`);
 }
 
+// Zoho no permite modificar una factura con pago aplicado o anulada.
+// Se consulta el estado real antes de tocar nada: sin esto se puede
+// alterar una factura que el cliente ya pago.
+export async function puedeEditarZohoBooksInvoice(invoiceId: string): Promise<{ ok: boolean; status: string }> {
+  const inv = await getZohoBooksInvoice(invoiceId);
+  const status = String(inv?.status ?? "desconocido");
+  const bloqueados = ["paid", "partially_paid", "void", "voided"];
+  return { ok: !bloqueados.includes(status), status };
+}
+
+export async function updateZohoBooksInvoice(params: {
+  invoiceId: string;
+  contactId?: string;
+  lineItems: ZBLineItem[];
+  discount?: number;
+  notes?: string;
+  clientAddress?: string;
+  clientTaxId?: string;
+}): Promise<{ invoice_id: string; invoice_number: string; total: number }> {
+  const data = await booksReq("PUT", `/invoices/${params.invoiceId}`, {
+    ...(params.contactId ? { customer_id: params.contactId } : {}),
+    line_items: params.lineItems.map((item) => ({
+      name: item.name,
+      rate: item.rate,
+      quantity: item.quantity ?? 1,
+    })),
+    ...(params.discount
+      ? { discount: params.discount, is_discount_before_tax: true, discount_type: "entity_level" }
+      : { discount: 0 }),
+    ...(params.clientAddress ? { billing_address: { address: params.clientAddress, country: "US" } } : {}),
+    ...(params.notes ? { notes: params.notes } : {}),
+    ...(params.clientTaxId
+      ? { custom_fields: [{ api_name: "cf_tax_id_identificaci_n_tributaria", value: params.clientTaxId }] }
+      : {}),
+  });
+  if (!data?.invoice?.invoice_id)
+    throw new Error(`No se pudo actualizar invoice en Zoho Books: ${JSON.stringify(data)}`);
+  const inv = data.invoice;
+  return { invoice_id: inv.invoice_id, invoice_number: inv.invoice_number, total: inv.total };
+}
+
+// Reenvia la factura al cliente con los datos ya corregidos.
+export async function emailZohoBooksInvoice(invoiceId: string): Promise<void> {
+  const data = await booksReq("POST", `/invoices/${invoiceId}/email`, {});
+  if (data && typeof data.code === "number" && data.code !== 0) {
+    throw new Error(`No se pudo reenviar la factura: ${JSON.stringify(data)}`);
+  }
+}
+
 export async function registerZohoBooksPayment(params: {
   contactId: string;
   invoiceId: string;
