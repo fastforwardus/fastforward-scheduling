@@ -35,21 +35,23 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
   const payLink = (proposal as Record<string,unknown>).zohoPaymentLink as string || `${appUrl}/pay/${proposal.confirmToken}`;
-  const lang = (proposal.lang || "es") as "es" | "en" | "pt";
   // total y discount son numeric en la base: el driver los entrega como string.
   const fmt = (n: number | string) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
-  // Un solo correo bilingue: espanol arriba, ingles abajo.
+  const lang = (proposal.lang || "es") as "es" | "en" | "pt";
+  // Un solo correo bilingue: primero el idioma del cliente.
   const L = {
-    subject: `Factura / Invoice ${proposal.proposalNum} — FastForward`,
+    subject: lang === "en"
+      ? `Invoice / Factura ${proposal.proposalNum} — FastForward`
+      : `Factura / Invoice ${proposal.proposalNum} — FastForward`,
     es: {
       greeting: `Hola ${clientName},`,
-      intro: "Adjuntamos la factura correspondiente al servicio contratado. Puede abonarla en linea con el boton de abajo o descargar el PDF adjunto.",
+      intro: "Adjuntamos la factura correspondiente al servicio contratado. Puede abonarla en línea con el botón de abajo o descargar el PDF adjunto.",
       detalle: "Detalle",
       due: "Total a pagar",
       payBtn: "Ver y pagar factura",
       seguro: "Pago seguro procesado por Stripe",
-      dudas: "Cualquier consulta, responda a este correo.",
+      dudas: "Ante cualquier consulta, responda a este correo.",
     },
     en: {
       greeting: `Hello ${clientName},`,
@@ -78,6 +80,10 @@ export async function POST(req: NextRequest) {
     <p style="margin:0 0 22px;color:#5b6472;font-size:14px;line-height:1.65;">${t.intro}</p>
   </td></tr>`;
 
+  const enPrimero = lang === "en";
+  const primero = enPrimero ? { t: L.en, label: "English" } : { t: L.es, label: "Español" };
+  const segundo = enPrimero ? { t: L.es, label: "Español" } : { t: L.en, label: "English" };
+
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#eef1f5;font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f5;padding:32px 12px;">
@@ -95,9 +101,9 @@ export async function POST(req: NextRequest) {
 </td></tr>
 
 <tr><td style="height:28px;"></td></tr>
-${bloque(L.es, "Espa\u00f1ol")}
+${bloque(primero.t, primero.label)}
 <tr><td style="padding:6px 36px 20px;"><div style="height:1px;background:#eef0f3;"></div></td></tr>
-${bloque(L.en, "English")}
+${bloque(segundo.t, segundo.label)}
 
 <tr><td style="padding:8px 36px 0;">
 <p style="margin:0 0 8px;color:#9aa3af;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">${L.es.detalle} · ${L.en.detalle}</p>
