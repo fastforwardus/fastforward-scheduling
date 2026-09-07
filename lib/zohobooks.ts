@@ -304,18 +304,22 @@ export async function emailZohoBooksInvoice(invoiceId: string): Promise<void> {
       throw new Error("La factura no tiene contacto ni email en Zoho: no hay a quien enviarla");
     }
     const nombre = String(inv?.customer_name ?? "Cliente").trim().split(/\s+/);
-    const creado = await booksReq("POST", "/contactpersons", {
-      contact_id: contactId,
-      first_name: nombre[0] || "Cliente",
-      last_name: nombre.slice(1).join(" ") || "-",
-      email: destino,
-      is_primary_contact: true,
+    // Via PUT del contacto: es la llamada que ya se usa en este archivo y
+    // se sabe que funciona. Las rutas dedicadas de contactpersons fueron
+    // rechazadas por la API.
+    await booksReq("PUT", `/contacts/${contactId}`, {
+      contact_persons: [{
+        first_name: nombre[0] || "Cliente",
+        last_name: nombre.slice(1).join(" ") || "-",
+        email: destino,
+        is_primary_contact: true,
+      }],
     });
-    const nuevoId = creado?.contact_person?.contact_person_id;
-    if (!nuevoId) {
-      throw new Error(`No se pudo crear la persona de contacto en Zoho: ${JSON.stringify(creado)}`);
+    const releido = await getZohoBooksInvoice(invoiceId);
+    ids = (releido?.contact_persons ?? []).filter(Boolean);
+    if (!ids.length) {
+      throw new Error(`Zoho sigue sin destinatario para el contacto ${contactId} (${destino}). Cargar la persona de contacto a mano en Zoho Books.`);
     }
-    ids = [nuevoId];
   }
 
   const data = await booksReq("POST", `/invoices/${invoiceId}/email`, {
