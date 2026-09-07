@@ -29,6 +29,7 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [duplicado, setDuplicado] = useState<string | null>(null);
 
   const subtotal = selected.reduce((s, svc) => s + svc.price * svc.qty, 0);
   const total = subtotal - discount;
@@ -82,11 +83,17 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
       setError("Completá nombre, al menos un email válido y un servicio.");
       return;
     }
+    await enviar(false);
+  }
+
+  // Antes el fetch no miraba la respuesta: cualquier error del backend
+  // terminaba igual en "Propuesta enviada" sin que el cliente reciba nada.
+  async function enviar(force: boolean) {
     setSending(true);
+    setDuplicado(null);
     try {
-      // Send to each email
       for (const email of validEmails) {
-        await fetch("/api/proposals", {
+        const res = await fetch("/api/proposals", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -98,8 +105,20 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
             directClientEmail: email.trim(),
             emailText: emailText || undefined,
             clientAddress: clientAddress || undefined,
+            force,
           }),
         });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          if (res.status === 409 && d.error === "posible_duplicado") {
+            setDuplicado(d.mensaje || "Ya existe una propuesta igual para este cliente.");
+            setSending(false);
+            return;
+          }
+          setError(d.mensaje || d.error || `No se pudo enviar a ${email.trim()}`);
+          setSending(false);
+          return;
+        }
       }
       setSent(true);
     } catch { setError("Error de conexión"); }
@@ -385,6 +404,23 @@ export default function PropuestaDirectaClient({ user }: { user: User }) {
                 )}
               </div>
               {error && <p className="text-xs mt-3" style={{ color: "#EF4444" }}>{error}</p>}
+              {duplicado && (
+                <div className="mt-3 p-3 rounded-xl border" style={{ background: "#FEF9C3", borderColor: "#FDE047" }}>
+                  <p className="text-xs mb-2" style={{ color: "#854D0E" }}>{duplicado}</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => enviar(true)} disabled={sending}
+                      className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                      style={{ background: "#854D0E", color: "white" }}>
+                      Enviar igual
+                    </button>
+                    <button onClick={() => setDuplicado(null)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium border"
+                      style={{ borderColor: "#FDE047", color: "#854D0E" }}>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
               <button onClick={handleSend}
                 disabled={sending || !clientName || validEmails.length === 0 || selected.length === 0}
                 className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm mt-4 transition-all"

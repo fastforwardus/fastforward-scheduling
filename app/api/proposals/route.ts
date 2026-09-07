@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
     if (previas.length > 0) {
       return NextResponse.json({
         error: "posible_duplicado",
-        mensaje: `Ya existe una propuesta por USD ${totalChequeo} para este cliente en los ultimos 30 dias.`,
+        mensaje: `Ya existe una propuesta por USD ${totalChequeo} para este cliente en las ultimas 2 horas.`,
         previas,
       }, { status: 409 });
     }
