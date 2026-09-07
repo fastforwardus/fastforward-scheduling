@@ -260,7 +260,9 @@ export async function updateZohoBooksInvoice(params: {
     ...(params.discount
       ? { discount: params.discount, is_discount_before_tax: true, discount_type: "entity_level" }
       : { discount: 0 }),
-    ...(params.clientAddress ? { billing_address: { address: params.clientAddress, country: "US" } } : {}),
+    // billing_address NO se manda en el update: el domicilio vive en el
+    // contacto de Zoho y reenviarlo dispara una validacion de largo que
+    // rechaza el PUT aun con direcciones cortas.
     ...(params.notes ? { notes: params.notes } : {}),
     ...(params.clientTaxId
       ? { custom_fields: [{ api_name: "cf_tax_id_identificaci_n_tributaria", value: params.clientTaxId }] }
