@@ -299,18 +299,18 @@ export async function emailZohoBooksInvoice(invoiceId: string): Promise<void> {
   // invoice no las trae pobladas.
   const cont = await booksReq("GET", `/contacts/${contactId}`);
   const personas = (cont?.contact?.contact_persons ?? []) as Array<{ contact_person_id: string; email?: string }>;
-  const ids = personas.filter((x) => x?.contact_person_id && x.email).map((x) => x.contact_person_id);
+  const correos = personas.filter((x) => x?.email).map((x) => x.email as string);
 
-  if (!ids.length) {
+  if (!correos.length) {
     throw new Error(`El contacto ${contactId} no tiene ninguna persona de contacto con email en Zoho Books.`);
   }
 
   const data = await booksReq("POST", `/invoices/${invoiceId}/email`, {
-    to_mail_ids: ids,
+    to_mail_ids: correos,
     send_customer_statement: false,
   });
   if (data && typeof data.code === "number" && data.code !== 0) {
-    throw new Error(`No se pudo enviar la factura: ${JSON.stringify(data)}`);
+    throw new Error(`No se pudo enviar la factura a ${correos.join(", ")}: ${JSON.stringify(data)}`);
   }
 }
 
