@@ -119,6 +119,9 @@ export async function POST(req: NextRequest) {
       // numeric en la base: Drizzle exige string al escribir.
       total: totalFinal.toFixed(2),
       discount: descuento.toFixed(2),
+      // Sin esto la propuesta queda con los servicios viejos y la pantalla
+      // muestra importes distintos a los que se facturaron.
+      services: JSON.stringify(servicios),
       clientAddress: edits?.clientAddress?.trim() || p.clientAddress,
       clientTaxId: edits?.clientTaxId?.trim() || p.clientTaxId,
     }).where(eq(proposals.id, p.id));
