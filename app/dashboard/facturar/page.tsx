@@ -20,16 +20,18 @@ export default function FacturarPage() {
   const [enviando, setEnviando] = useState(false);
   const [msg, setMsg] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [tab, setTab] = useState<"pendientes" | "emitidas">("pendientes");
 
   const cargar = () => {
     setCargando(true);
-    fetch("/api/facturar")
+    const url = tab === "pendientes" ? "/api/facturar" : "/api/facturar/editar";
+    fetch(url)
       .then((r) => r.json())
-      .then((d) => setItems(d.propuestas ?? []))
+      .then((d) => setItems(d.propuestas ?? d.facturas ?? []))
       .catch(() => setItems([]))
       .finally(() => setCargando(false));
   };
-  useEffect(cargar, []);
+  useEffect(() => { setSel(null); setEditando(false); setMsg(null); cargar(); }, [tab]);
 
   const servicios = (p: Prop) => {
     const raw = p.services as unknown;
@@ -42,7 +44,7 @@ export default function FacturarPage() {
     if (!sel || !confirmado) return;
     setEnviando(true); setMsg(null);
     try {
-      const r = await fetch("/api/facturar", {
+      const r = await fetch(tab === "pendientes" ? "/api/facturar" : "/api/facturar/editar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ proposalId: sel.id, confirmado: true, edits: ed }),
@@ -50,7 +52,14 @@ export default function FacturarPage() {
       const d = await r.json();
       if (!r.ok) { setMsg({ tipo: "error", texto: d.error || "Error al emitir" }); }
       else {
-        setMsg({ tipo: "ok", texto: `Factura ${d.invoice.invoice_number} emitida y enviada al cliente.` });
+        setMsg({
+          tipo: "ok",
+          texto: tab === "pendientes"
+            ? `Factura ${d.invoice.invoice_number} emitida y enviada al cliente.`
+            : d.reenviada
+              ? `Factura ${d.invoice.invoice_number} corregida y reenviada al cliente.`
+              : `Factura ${d.invoice.invoice_number} corregida, pero NO se pudo reenviar: ${d.errorEnvio}`,
+        });
         setSel(null); setConfirmado(false); cargar();
       }
     } catch (e) {
@@ -73,9 +82,20 @@ export default function FacturarPage() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-1">Emitir factura</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Solo aparecen las propuestas que todavia no tienen factura en Zoho Books.
+      <p className="text-sm text-gray-500 mb-4">
+        {tab === "pendientes"
+          ? "Propuestas que todavia no tienen factura en Zoho Books."
+          : "Facturas ya emitidas. Editarlas corrige el documento en Zoho y se lo reenvia al cliente."}
       </p>
+
+      <div className="flex gap-2 mb-6">
+        {(["pendientes", "emitidas"] as const).map((t) => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium border ${tab === t ? "bg-black text-white border-black" : "bg-white"}`}>
+            {t === "pendientes" ? "Sin facturar" : "Ya emitidas"}
+          </button>
+        ))}
+      </div>
 
       {msg && (
         <div className={`mb-4 rounded-lg p-3 text-sm ${msg.tipo === "ok" ? "bg-green-50 text-green-800 border border-green-200" : "bg-red-50 text-red-800 border border-red-200"}`}>
@@ -87,7 +107,7 @@ export default function FacturarPage() {
         <div className="space-y-2">
           {cargando && <p className="text-sm text-gray-500">Cargando...</p>}
           {!cargando && items.length === 0 && (
-            <p className="text-sm text-gray-500">No hay propuestas pendientes de facturar.</p>
+            <p className="text-sm text-gray-500">{tab === "pendientes" ? "No hay propuestas pendientes de facturar." : "No hay facturas emitidas."}</p>
           )}
           {items.map((p) => (
             <button key={p.id}
@@ -213,7 +233,9 @@ export default function FacturarPage() {
 
           <div className="mt-6 rounded-xl border-2 border-amber-300 bg-amber-50 p-4">
             <p className="text-sm text-amber-900 font-medium mb-3">
-              Al confirmar, la factura se emite y se envia al cliente de inmediato. No se puede deshacer desde aqui.
+              {tab === "pendientes"
+                ? "Al confirmar, la factura se emite y se envia al cliente de inmediato. No se puede deshacer desde aqui."
+                : "Esta factura ya la recibio el cliente. Al confirmar se corrige en Zoho y se le reenvia la version nueva."}
             </p>
             <label className={`flex items-center gap-2 text-sm font-medium ${editando ? "opacity-40" : ""}`}>
               <input type="checkbox" checked={confirmado} disabled={editando}
@@ -232,7 +254,7 @@ export default function FacturarPage() {
             </button>
             <button onClick={emitir} disabled={!confirmado || enviando || editando}
               className="px-6 py-2 rounded-lg bg-black text-white text-sm font-semibold disabled:opacity-40">
-              {enviando ? "Emitiendo..." : "Emitir factura"}
+              {enviando ? "Guardando..." : tab === "pendientes" ? "Emitir factura" : "Corregir y reenviar"}
             </button>
           </div>
         </div>
