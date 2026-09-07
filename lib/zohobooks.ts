@@ -277,11 +277,23 @@ export async function updateZohoBooksInvoice(params: {
   return { invoice_id: inv.invoice_id, invoice_number: inv.invoice_number, total: inv.total };
 }
 
-// Reenvia la factura al cliente con los datos ya corregidos.
+// Envia la factura al cliente por correo.
+// Con body vacio Zoho responde 200 pero NO envia nada: hay que pasar los
+// contact_person_id en to_mail_ids. Se leen de la propia factura.
 export async function emailZohoBooksInvoice(invoiceId: string): Promise<void> {
-  const data = await booksReq("POST", `/invoices/${invoiceId}/email`, {});
+  const inv = await getZohoBooksInvoice(invoiceId);
+  const ids: string[] = (inv?.contact_persons ?? []).filter(Boolean);
+
+  if (!ids.length) {
+    throw new Error("La factura no tiene contact persons cargados en Zoho: no hay a quien enviarla");
+  }
+
+  const data = await booksReq("POST", `/invoices/${invoiceId}/email`, {
+    to_mail_ids: ids,
+    send_customer_statement: false,
+  });
   if (data && typeof data.code === "number" && data.code !== 0) {
-    throw new Error(`No se pudo reenviar la factura: ${JSON.stringify(data)}`);
+    throw new Error(`No se pudo enviar la factura: ${JSON.stringify(data)}`);
   }
 }
 
