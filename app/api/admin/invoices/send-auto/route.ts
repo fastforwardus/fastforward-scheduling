@@ -39,51 +39,88 @@ export async function POST(req: NextRequest) {
   // total y discount son numeric en la base: el driver los entrega como string.
   const fmt = (n: number | string) => "$" + (Number(n) || 0).toLocaleString("en-US", { minimumFractionDigits: 2 });
 
-  const L = lang === "en"
-    ? { subject: `Invoice ${proposal.proposalNum} — FastForward`, greeting: `Hello ${clientName},`, intro: "Please find attached the invoice for the requested service.", payBtn: "View & Pay Invoice" }
-    : lang === "pt"
-    ? { subject: `Fatura ${proposal.proposalNum} — FastForward`, greeting: `Olá ${clientName},`, intro: "Segue em anexo a fatura referente ao serviço solicitado.", payBtn: "Ver e Pagar Fatura" }
-    : { subject: `Factura ${proposal.proposalNum} — FastForward`, greeting: `Hola ${clientName},`, intro: "Adjunto encontrarás la factura correspondiente al servicio solicitado.", payBtn: "Ver y Pagar Factura" };
-
+  // Un solo correo bilingue: espanol arriba, ingles abajo.
+  const L = {
+    subject: `Factura / Invoice ${proposal.proposalNum} — FastForward`,
+    es: {
+      greeting: `Hola ${clientName},`,
+      intro: "Adjuntamos la factura correspondiente al servicio contratado. Puede abonarla en linea con el boton de abajo o descargar el PDF adjunto.",
+      detalle: "Detalle",
+      due: "Total a pagar",
+      payBtn: "Ver y pagar factura",
+      seguro: "Pago seguro procesado por Stripe",
+      dudas: "Cualquier consulta, responda a este correo.",
+    },
+    en: {
+      greeting: `Hello ${clientName},`,
+      intro: "Attached is the invoice for the contracted service. You can pay online using the button below or download the attached PDF.",
+      detalle: "Details",
+      due: "Amount due",
+      payBtn: "View and pay invoice",
+      seguro: "Secure payment processed by Stripe",
+      dudas: "If you have any questions, just reply to this email.",
+    },
+  };
   const services = (typeof proposal.services === "string" ? JSON.parse(proposal.services || "[]") : proposal.services) as { name: string; price: number }[];
 
   let pdfBuffer: Buffer | null = null;
   try { pdfBuffer = await getZohoBooksInvoicePdf(proposal.zohoInvoiceId); } catch {}
 
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f9fafb;font-family:'Helvetica Neue',sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:40px 0;">
+  const filas = services.map(sv => `<tr>
+    <td style="padding:10px 0;border-bottom:1px solid #eef0f3;color:#3f4753;font-size:14px;line-height:1.4;">${sv.name}</td>
+    <td style="padding:10px 0;border-bottom:1px solid #eef0f3;color:#11161d;font-size:14px;font-weight:600;text-align:right;white-space:nowrap;">${fmt(sv.price)}</td>
+  </tr>`).join("");
+
+  const bloque = (t: typeof L.es, idioma: string) => `
+  <tr><td style="padding:0 36px 4px;">
+    <p style="margin:0 0 6px;color:#9aa3af;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">${idioma}</p>
+    <p style="margin:0 0 10px;color:#11161d;font-size:16px;font-weight:600;">${t.greeting}</p>
+    <p style="margin:0 0 22px;color:#5b6472;font-size:14px;line-height:1.65;">${t.intro}</p>
+  </td></tr>`;
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#eef1f5;font-family:-apple-system,'Segoe UI','Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f5;padding:32px 12px;">
 <tr><td align="center">
-<table width="560" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
-<tr><td style="background:#111827;padding:24px 32px;">
-<img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" alt="FastForward" height="32">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(16,24,40,.08);">
+
+<tr><td style="background:#0d1117;padding:26px 36px;">
+<img src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png" alt="FastForward" height="30">
 </td></tr>
-<tr><td style="background:#1f2937;padding:28px 32px;text-align:center;">
-<p style="margin:0 0 4px;color:#9ca3af;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Balance Due</p>
-<p style="margin:0;color:#fff;font-size:40px;font-weight:700;">${fmt(proposal.total)}</p>
-<p style="margin:8px 0 0;color:#6b7280;font-size:13px;">${proposal.proposalNum}</p>
+
+<tr><td style="background:linear-gradient(180deg,#151b24,#0d1117);padding:34px 36px;text-align:center;">
+<p style="margin:0 0 6px;color:#8b95a5;font-size:11px;letter-spacing:2px;text-transform:uppercase;">${L.es.due} · ${L.en.due}</p>
+<p style="margin:0;color:#fff;font-size:44px;font-weight:700;letter-spacing:-1px;">${fmt(proposal.total)}</p>
+<p style="margin:10px 0 0;color:#6b7480;font-size:13px;">${proposal.proposalNum}</p>
 </td></tr>
-<tr><td style="padding:32px;">
-<p style="margin:0 0 16px;color:#111827;font-size:15px;font-weight:600;">${L.greeting}</p>
-<p style="margin:0 0 24px;color:#6b7280;font-size:14px;line-height:1.6;">${L.intro}</p>
-<table width="100%" style="margin-bottom:20px;border-collapse:collapse;">
-${services.map(s => `<tr><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#374151;font-size:14px;">${s.name}</td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6;color:#111827;font-size:14px;font-weight:500;text-align:right;">${fmt(s.price)}</td></tr>`).join("")}
-</table>
-<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-<tr><td align="center">
-<a href="${payLink}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:14px 36px;border-radius:8px;font-size:15px;font-weight:600;">${L.payBtn} →</a>
+
+<tr><td style="height:28px;"></td></tr>
+${bloque(L.es, "Espa\u00f1ol")}
+<tr><td style="padding:6px 36px 20px;"><div style="height:1px;background:#eef0f3;"></div></td></tr>
+${bloque(L.en, "English")}
+
+<tr><td style="padding:8px 36px 0;">
+<p style="margin:0 0 8px;color:#9aa3af;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">${L.es.detalle} · ${L.en.detalle}</p>
+<table width="100%" style="border-collapse:collapse;">${filas}</table>
 </td></tr>
-</table>
-<p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">🔒 Pago seguro via Stripe · info@fastfwdus.com</p>
+
+<tr><td style="padding:26px 36px 8px;" align="center">
+<a href="${payLink}" style="display:inline-block;background:#1a56db;color:#fff;text-decoration:none;padding:15px 40px;border-radius:9px;font-size:15px;font-weight:600;">${L.es.payBtn} · ${L.en.payBtn}</a>
 </td></tr>
-<tr><td style="background:#f9fafb;padding:16px 32px;text-align:center;border-top:1px solid #e5e7eb;">
-<p style="margin:0;color:#9ca3af;font-size:11px;">FastForward Trading Company LLC · 33 SW 2nd Ave Ste 1202, Miami FL 33130</p>
+
+<tr><td style="padding:14px 36px 30px;text-align:center;">
+<p style="margin:0 0 4px;color:#9aa3af;font-size:12px;">${L.es.seguro} · ${L.en.seguro}</p>
+<p style="margin:0;color:#9aa3af;font-size:12px;">${L.es.dudas}</p>
 </td></tr>
+
+<tr><td style="background:#f7f8fa;padding:18px 36px;text-align:center;border-top:1px solid #eef0f3;">
+<p style="margin:0;color:#9aa3af;font-size:11px;line-height:1.6;">FastForward Trading Company LLC · 33 SW 2nd Ave, Suite 702, Miami, FL 33130<br>info@fastfwdus.com · fastfwdus.com</p>
+</td></tr>
+
 </table>
 </td></tr>
 </table>
 </body></html>`;
-
   await resend.emails.send({
     from: "FastForward <info@fastfwdus.com>",
     to: clientEmail,

@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { sql } from "drizzle-orm";
 import { proposals, proposalEvents, activityLogs } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent, emailZohoBooksInvoice } from "@/lib/zohobooks";
+import { findOrCreateZohoBooksContact, createZohoBooksInvoice, markZohoBooksInvoiceSent } from "@/lib/zohobooks";
 
 // Lista las propuestas facturables del usuario: aceptadas y todavia sin
 // factura en Zoho. El admin ve las de todos.
@@ -125,12 +125,22 @@ export async function POST(req: NextRequest) {
     });
     await markZohoBooksInvoiceSent(invoice.invoice_id);
 
-    // markSent solo cambia el estado: NO manda el correo. El envio al cliente
-    // es una llamada aparte.
+    // El correo al cliente sale por send-auto (plantilla propia bilingue con
+    // el PDF adjunto), no por el mail generico de Zoho: un solo correo.
     let enviada = true;
     let errorEnvio = "";
-    try { await emailZohoBooksInvoice(invoice.invoice_id); }
-    catch (e) { enviada = false; errorEnvio = String(e).slice(0, 200); }
+    try {
+      const base = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
+      const r = await fetch(`${base}/api/admin/invoices/send-auto`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-key": process.env.INTERNAL_API_KEY || "ff-internal-2024",
+        },
+        body: JSON.stringify({ proposalId: p.id }),
+      });
+      if (!r.ok) { enviada = false; errorEnvio = (await r.text()).slice(0, 200); }
+    } catch (e) { enviada = false; errorEnvio = String(e).slice(0, 200); }
 
     await db.update(proposals).set({
       zohoInvoiceId: invoice.invoice_id,

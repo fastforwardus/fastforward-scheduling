@@ -7,7 +7,6 @@ import { proposals, proposalEvents, activityLogs } from "@/db/schema";
 import {
   puedeEditarZohoBooksInvoice,
   updateZohoBooksInvoice,
-  emailZohoBooksInvoice,
 } from "@/lib/zohobooks";
 
 // Facturas ya emitidas: las del usuario, o todas si es admin.
@@ -109,11 +108,21 @@ export async function POST(req: NextRequest) {
       reason: razon,
     });
 
-    // Zoho no reenvia solo tras un update: el cliente tiene la version vieja.
+    // Reenvio con nuestra plantilla bilingue y el PDF ya corregido.
     let reenviada = true;
     let errorEnvio = "";
-    try { await emailZohoBooksInvoice(p.zohoInvoiceId); }
-    catch (e) { reenviada = false; errorEnvio = String(e).slice(0, 200); }
+    try {
+      const base = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
+      const r = await fetch(`${base}/api/admin/invoices/send-auto`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-key": process.env.INTERNAL_API_KEY || "ff-internal-2024",
+        },
+        body: JSON.stringify({ proposalId: p.id }),
+      });
+      if (!r.ok) { reenviada = false; errorEnvio = (await r.text()).slice(0, 200); }
+    } catch (e) { reenviada = false; errorEnvio = String(e).slice(0, 200); }
 
     await db.update(proposals).set({
       // numeric en la base: Drizzle exige string al escribir.
