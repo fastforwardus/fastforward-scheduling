@@ -92,14 +92,14 @@ export default function SignPage({ params }: { params: { token: string } }) {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#F8F9FB" }}>
-      <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#27295C" }} />
+      <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#000000" }} />
     </div>
   );
 
   if (error) return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: "#F8F9FB" }}>
       <div className="text-center">
-        <p className="text-lg font-semibold" style={{ color: "#27295C" }}>{t.invalid}</p>
+        <p className="text-lg font-semibold" style={{ color: "#000000" }}>{t.invalid}</p>
       </div>
     </div>
   );
@@ -117,12 +117,12 @@ export default function SignPage({ params }: { params: { token: string } }) {
             <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#DCFCE7" }}>
               <Check className="w-8 h-8" style={{ color: "#22C55E" }} />
             </div>
-            <p className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>{t.signed}</p>
+            <p className="text-xl font-bold mb-2" style={{ color: "#000000" }}>{t.signed}</p>
             <p className="text-sm" style={{ color: "#6B7280" }}>{t.signedSub}</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", boxShadow: "0 4px 24px rgba(39,41,92,0.08)" }}>
-            <div style={{ background: "#27295C", padding: "20px 24px" }}>
+            <div style={{ background: "#000000", padding: "20px 24px" }}>
               <div className="flex items-center gap-3">
                 <FileText className="w-5 h-5" style={{ color: GOLD }} />
                 <div>
@@ -136,15 +136,15 @@ export default function SignPage({ params }: { params: { token: string } }) {
               <div className="rounded-xl p-4 mb-6" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
                 <div className="flex justify-between mb-2">
                   <span className="text-xs" style={{ color: "#9CA3AF" }}>{t.proposalNum}</span>
-                  <span className="text-xs font-semibold" style={{ color: "#27295C" }}>{proposal?.proposalNum}</span>
+                  <span className="text-xs font-semibold" style={{ color: "#000000" }}>{proposal?.proposalNum}</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-xs" style={{ color: "#9CA3AF" }}>{t.client}</span>
-                  <span className="text-xs font-semibold" style={{ color: "#27295C" }}>{proposal?.clientName}</span>
+                  <span className="text-xs font-semibold" style={{ color: "#000000" }}>{proposal?.clientName}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-xs" style={{ color: "#9CA3AF" }}>{t.total}</span>
-                  <span className="text-sm font-bold" style={{ color: "#C9A84C" }}>USD ${proposal?.total.toLocaleString("en-US")}</span>
+                  <span className="text-sm font-bold" style={{ color: "#0183FF" }}>USD ${proposal?.total.toLocaleString("en-US")}</span>
                 </div>
               </div>
 
@@ -156,7 +156,7 @@ export default function SignPage({ params }: { params: { token: string } }) {
 
               <button onClick={handleSign} disabled={!accepted || signing}
                 className="w-full py-3.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
-                style={{ background: accepted ? "#27295C" : "#E5E7EB", color: accepted ? "white" : "#9CA3AF" }}>
+                style={{ background: accepted ? "#000000" : "#E5E7EB", color: accepted ? "white" : "#9CA3AF" }}>
                 {signing ? <><Loader2 className="w-4 h-4 animate-spin" /> {t.signing}</> : t.sign}
               </button>
             </div>
@@ -168,4 +168,4 @@ export default function SignPage({ params }: { params: { token: string } }) {
   );
 }
 
-const GOLD = "#C9A84C";
+const GOLD = "#0183FF";

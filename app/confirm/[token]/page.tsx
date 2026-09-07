@@ -90,9 +90,9 @@ export default async function ConfirmAttendancePage({
              style={{ boxShadow: "0 4px 32px rgba(39,41,92,0.08)", border: "1px solid #E5E7EB" }}>
 
           {/* Header */}
-          <div className="px-6 py-5 text-center" style={{ background: "#27295C" }}>
+          <div className="px-6 py-5 text-center" style={{ background: "#000000" }}>
             <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                 style={{ background: "#C9A84C" }}>
+                 style={{ background: "#0183FF" }}>
               <CheckCircle className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-lg font-bold text-white">{t.title}</h1>
@@ -107,21 +107,21 @@ export default async function ConfirmAttendancePage({
                   <tr>
                     <td className="py-2 border-b" style={{ borderColor: "#F0F0F0" }}>
                       <p className="text-xs uppercase tracking-widest" style={{ color: "#9CA3AF" }}>{t.date}</p>
-                      <p className="font-semibold text-sm capitalize mt-0.5" style={{ color: "#27295C" }}>{formattedDate}</p>
-                      <p className="font-bold" style={{ color: "#C9A84C" }}>{formattedTime}</p>
+                      <p className="font-semibold text-sm capitalize mt-0.5" style={{ color: "#000000" }}>{formattedDate}</p>
+                      <p className="font-bold" style={{ color: "#0183FF" }}>{formattedTime}</p>
                     </td>
                   </tr>
                   <tr>
                     <td className="py-2 border-b" style={{ borderColor: "#F0F0F0" }}>
                       <p className="text-xs uppercase tracking-widest" style={{ color: "#9CA3AF" }}>{t.platform}</p>
-                      <p className="font-semibold text-sm mt-0.5" style={{ color: "#27295C" }}>{platformLabel}</p>
+                      <p className="font-semibold text-sm mt-0.5" style={{ color: "#000000" }}>{platformLabel}</p>
                     </td>
                   </tr>
                   {repName && (
                     <tr>
                       <td className="py-2">
                         <p className="text-xs uppercase tracking-widest" style={{ color: "#9CA3AF" }}>{t.expert}</p>
-                        <p className="font-semibold text-sm mt-0.5" style={{ color: "#27295C" }}>{repName}</p>
+                        <p className="font-semibold text-sm mt-0.5" style={{ color: "#000000" }}>{repName}</p>
                         <p className="text-xs" style={{ color: "#9CA3AF" }}>FastForward FDA Experts</p>
                       </td>
                     </tr>
@@ -134,7 +134,7 @@ export default async function ConfirmAttendancePage({
               {appt.meetingLink && appt.platform !== "whatsapp" && (
                 <a href={appt.meetingLink} target="_blank" rel="noreferrer"
                    className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold"
-                   style={{ background: "#27295C", color: "white" }}>
+                   style={{ background: "#000000", color: "white" }}>
                   🎥 {t.join}
                 </a>
               )}
@@ -149,7 +149,7 @@ export default async function ConfirmAttendancePage({
 
         <p className="text-center text-xs mt-6" style={{ color: "#9CA3AF" }}>
           FastForward FDA Experts · Miami, FL ·{" "}
-          <a href="https://fastfwdus.com" style={{ color: "#C9A84C" }}>fastfwdus.com</a>
+          <a href="https://fastfwdus.com" style={{ color: "#0183FF" }}>fastfwdus.com</a>
         </p>
       </div>
     </div>

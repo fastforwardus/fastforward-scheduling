@@ -150,14 +150,14 @@ export default function PartnerPage({ params }: { params: { slug: string } }) {
   if (showTerms) {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: "#F8F9FB" }}>
-        <div style={{ background: "#27295C" }} className="px-6 py-4 flex items-center justify-between">
+        <div style={{ background: "#000000" }} className="px-6 py-4 flex items-center justify-between">
           <Image src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
             alt="FastForward" width={140} height={32} className="object-contain" unoptimized />
           <div className="flex gap-2">
             {(["es","en"] as const).map(l => (
               <button key={l} onClick={() => setLang(l)}
                 className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                style={{ background: lang === l ? "#C9A84C" : "rgba(255,255,255,0.1)", color: lang === l ? "#1A1C3E" : "white" }}>
+                style={{ background: lang === l ? "#0183FF" : "rgba(255,255,255,0.1)", color: lang === l ? "#000000" : "white" }}>
                 {l === "es" ? "Español" : "English"}
               </button>
             ))}
@@ -166,7 +166,7 @@ export default function PartnerPage({ params }: { params: { slug: string } }) {
         <div className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
           <div className="bg-white rounded-2xl overflow-hidden" style={{ border: "1px solid #E5E7EB", boxShadow: "0 4px 24px rgba(39,41,92,0.08)" }}>
             <div className="px-6 py-4 border-b" style={{ borderColor: "#E5E7EB", background: "#F8F9FB" }}>
-              <h1 className="font-bold" style={{ color: "#27295C" }}>
+              <h1 className="font-bold" style={{ color: "#000000" }}>
                 {lang === "es" ? "Acuerdo de Partnership — Terminos y Condiciones" : "Partnership Agreement — Terms & Conditions"}
               </h1>
               <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
@@ -188,7 +188,7 @@ export default function PartnerPage({ params }: { params: { slug: string } }) {
               </label>
               <button onClick={handleAcceptTerms} disabled={!accepted || accepting}
                 className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all"
-                style={{ background: accepted ? "#27295C" : "#E5E7EB", color: accepted ? "white" : "#9CA3AF" }}>
+                style={{ background: accepted ? "#000000" : "#E5E7EB", color: accepted ? "white" : "#9CA3AF" }}>
                 {accepting
                   ? (lang === "es" ? "Procesando..." : "Processing...")
                   : (lang === "es" ? "Acepto y continuar →" : "I Agree and Continue →")}
@@ -208,21 +208,21 @@ export default function PartnerPage({ params }: { params: { slug: string } }) {
             alt="FastForward" width={160} height={36} className="object-contain" unoptimized />
         </div>
         <div className="bg-white rounded-2xl p-8" style={{ border: "1px solid #E5E7EB", boxShadow: "0 4px 24px rgba(39,41,92,0.08)" }}>
-          <h1 className="text-xl font-bold mb-2" style={{ color: "#27295C" }}>Portal de Partner</h1>
+          <h1 className="text-xl font-bold mb-2" style={{ color: "#000000" }}>Portal de Partner</h1>
           <p className="text-sm mb-6" style={{ color: "#6B7280" }}>Ingresa tu contrasena para acceder</p>
           <div className="mb-4">
             <label className="block text-xs uppercase tracking-widest mb-1.5" style={{ color: "#9CA3AF" }}>Contrasena</label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleLogin()}
               className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
-              style={{ borderColor: "#E5E7EB", color: "#27295C" }}
-              onFocus={e => e.currentTarget.style.borderColor = "#27295C"}
+              style={{ borderColor: "#E5E7EB", color: "#000000" }}
+              onFocus={e => e.currentTarget.style.borderColor = "#000000"}
               onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
           </div>
           {error && <p className="text-xs mb-4" style={{ color: "#EF4444" }}>{error}</p>}
           <button onClick={handleLogin} disabled={loading || !password}
             className="w-full py-3 rounded-xl font-semibold text-sm"
-            style={{ background: password ? "#27295C" : "#E5E7EB", color: password ? "white" : "#9CA3AF" }}>
+            style={{ background: password ? "#000000" : "#E5E7EB", color: password ? "white" : "#9CA3AF" }}>
             {loading ? "Ingresando..." : "Ingresar →"}
           </button>
         </div>

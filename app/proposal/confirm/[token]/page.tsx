@@ -15,7 +15,7 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
         <div className="min-h-screen flex items-center justify-center" style={{ background: "#F8F9FB" }}>
           <div className="text-center p-8">
             <p className="text-2xl mb-2">❌</p>
-            <p className="font-bold" style={{ color: "#27295C" }}>Propuesta no encontrada</p>
+            <p className="font-bold" style={{ color: "#000000" }}>Propuesta no encontrada</p>
             <p className="text-sm mt-2" style={{ color: "#6B7280" }}>El link puede haber expirado o ser inválido.</p>
           </div>
         </div>
@@ -61,7 +61,7 @@ export default async function ProposalConfirmPage({ params }: { params: { token:
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#F8F9FB" }}>
         <div className="text-center p-8">
           <p className="text-2xl mb-2">⚠️</p>
-          <p className="font-bold" style={{ color: "#27295C" }}>Error cargando la propuesta</p>
+          <p className="font-bold" style={{ color: "#000000" }}>Error cargando la propuesta</p>
           <p className="text-sm mt-2" style={{ color: "#6B7280" }}>Por favor contactanos a info@fastfwdus.com</p>
         </div>
       </div>

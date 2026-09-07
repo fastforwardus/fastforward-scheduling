@@ -50,7 +50,7 @@ interface InvoiceData {
 }
 
 const fmt = (n: number) => "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2 });
-const GOLD = "#B8952A";
+const GOLD = "#0183FF";
 const DARK = "#1A1A1A";
 
 export default function PayClient({ token }: { token: string }) {

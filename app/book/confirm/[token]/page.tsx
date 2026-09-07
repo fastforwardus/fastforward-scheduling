@@ -85,7 +85,7 @@ export default async function ConfirmPage({ params }: { params: { token: string 
     <div className="min-h-screen flex flex-col" style={{ background: "#F8F9FB" }}>
 
       {/* Header */}
-      <header className="h-14 flex items-center justify-center px-4" style={{ background: "#27295C" }}>
+      <header className="h-14 flex items-center justify-center px-4" style={{ background: "#000000" }}>
         <Image
           src="https://fastfwdus.com/wp-content/uploads/2025/04/logorwhitehorizontal.png"
           alt="FastForward ® | FDA Experts"
@@ -104,9 +104,9 @@ export default async function ConfirmPage({ params }: { params: { token: string 
                style={{ background: "white", boxShadow: "0 4px 32px rgba(39,41,92,0.08)", border: "1px solid rgba(39,41,92,0.06)" }}>
 
             {/* Top bar */}
-            <div className="px-8 py-6 text-center" style={{ background: "#27295C" }}>
+            <div className="px-8 py-6 text-center" style={{ background: "#000000" }}>
               <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                   style={{ background: "#C9A84C", fontSize: "24px", color: "white", fontWeight: 700, lineHeight: "56px" }}>
+                   style={{ background: "#0183FF", fontSize: "24px", color: "white", fontWeight: 700, lineHeight: "56px" }}>
                 ✓
               </div>
               <h1 className="text-xl font-bold text-white mb-1">{t.title}</h1>
@@ -119,13 +119,13 @@ export default async function ConfirmPage({ params }: { params: { token: string 
               {/* Date */}
               <div className="flex items-start gap-4 p-4 rounded-xl" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-lg"
-                     style={{ background: "#27295C" }}>
+                     style={{ background: "#000000" }}>
                   📅
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: "#9CA3AF" }}>{t.date}</p>
-                  <p className="font-semibold text-sm capitalize" style={{ color: "#27295C" }}>{formattedDate}</p>
-                  <p className="font-bold" style={{ color: "#C9A84C" }}>{formattedTime}</p>
+                  <p className="font-semibold text-sm capitalize" style={{ color: "#000000" }}>{formattedDate}</p>
+                  <p className="font-bold" style={{ color: "#0183FF" }}>{formattedTime}</p>
                   <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{tz}</p>
                 </div>
               </div>
@@ -133,12 +133,12 @@ export default async function ConfirmPage({ params }: { params: { token: string 
               {/* Platform */}
               <div className="flex items-start gap-4 p-4 rounded-xl" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
                 <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-lg"
-                     style={{ background: "#27295C" }}>
+                     style={{ background: "#000000" }}>
                   🎥
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: "#9CA3AF" }}>{t.platform}</p>
-                  <p className="font-semibold text-sm" style={{ color: "#27295C" }}>{platformLabel}</p>
+                  <p className="font-semibold text-sm" style={{ color: "#000000" }}>{platformLabel}</p>
                   <p className="text-xs mt-1" style={{ color: "#6B7280" }}>
                     {lang === "es" ? "El link será enviado 15 min antes de la reunión." : lang === "en" ? "The link will be sent 15 min before the meeting." : "O link será enviado 15 min antes da reunião."}
                   </p>
@@ -148,13 +148,13 @@ export default async function ConfirmPage({ params }: { params: { token: string 
               {/* Expert */}
               <div className="flex items-start gap-4 p-4 rounded-xl" style={{ background: "#F8F9FB", border: "1px solid #E5E7EB" }}>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm"
-                     style={{ background: "#27295C" }}>
+                     style={{ background: "#000000" }}>
                   {expertName ? expertName[0] : "FF"}
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-widest mb-0.5" style={{ color: "#9CA3AF" }}>{t.expert}</p>
                   {expertName
-                    ? <p className="font-semibold text-sm" style={{ color: "#27295C" }}>{expertName}</p>
+                    ? <p className="font-semibold text-sm" style={{ color: "#000000" }}>{expertName}</p>
                     : <p className="text-sm" style={{ color: "#6B7280" }}>{t.pending}</p>
                   }
                   <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>FastForward ® | FDA Experts</p>
@@ -165,7 +165,7 @@ export default async function ConfirmPage({ params }: { params: { token: string 
               <div className="flex flex-col gap-2.5 pt-2">
                 <a href={googleCalUrl} target="_blank" rel="noreferrer"
                    className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all hover:-translate-y-0.5"
-                   style={{ background: "#27295C", color: "white" }}>
+                   style={{ background: "#000000", color: "white" }}>
                   📅 {t.addGoogle}
                 </a>
                 <a href={`data:text/calendar;charset=utf8,${encodeURIComponent(icsLines)}`}
@@ -189,7 +189,7 @@ export default async function ConfirmPage({ params }: { params: { token: string 
           {/* Footer */}
           <p className="text-center text-xs mt-6" style={{ color: "#9CA3AF" }}>
             © {new Date().getFullYear()} FastForward ® | FDA Experts · Miami, FL ·{" "}
-            <a href="https://fastfwdus.com" style={{ color: "#C9A84C" }}>fastfwdus.com</a>
+            <a href="https://fastfwdus.com" style={{ color: "#0183FF" }}>fastfwdus.com</a>
             {" "}· {t.footer}
           </p>
         </div>
