@@ -92,6 +92,13 @@ export async function POST(req: NextRequest) {
   const totalFinal = servicios.reduce((a, x) => a + x.price, 0) - descuento;
   if (totalFinal <= 0) return NextResponse.json({ error: "El total debe ser mayor a cero" }, { status: 400 });
 
+  // Se registra el INTENTO antes de tocar Zoho. Si el PUT sale bien pero algo
+  // posterior falla, el cambio no queda invisible: hubo un caso asi.
+  await db.insert(activityLogs).values({
+    userId: session.id, action: "factura_editar_intento", entityType: "proposal", entityId: p.id,
+    details: `invoice ${p.zohoInvoiceId} — total propuesto USD ${totalFinal.toFixed(2)} — motivo: ${razon}`,
+  }).catch(() => {});
+
   try {
     const inv = await updateZohoBooksInvoice({
       invoiceId: p.zohoInvoiceId,
