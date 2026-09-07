@@ -14,8 +14,10 @@ const SERVICE_LABELS: Record<string, string> = {
 };
 
 export async function GET(req: NextRequest) {
+  // ?test=email manda una sesion ficticia solo a esa casilla.
+  const test = new URL(req.url).searchParams.get("test");
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!test && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -37,7 +39,10 @@ export async function GET(req: NextRequest) {
   let sent = 0;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scheduling.fastfwdus.com";
 
-  for (const session of abandoned) {
+  const lista = test
+    ? ([{ ...(abandoned[0] ?? {}), email: test, name: "Cliente de prueba", serviceInterest: "", partnerSlug: null }] as typeof abandoned)
+    : abandoned;
+  for (const session of lista) {
     const serviceLabel = SERVICE_LABELS[session.serviceInterest || ""] || "nuestros servicios";
     const bookUrl = session.partnerSlug
       ? `${appUrl}/book/partner/${session.partnerSlug}`
@@ -50,7 +55,7 @@ export async function GET(req: NextRequest) {
         from: "Carlos Bisio — FastForward <info@fastfwdus.com>",
         replyTo: "info@fastfwdus.com",
         to: session.email,
-        subject: `${firstName}, quedaste a un paso de tu consulta gratuita`,
+        subject: `${firstName}, quedó a un paso de su consulta gratuita`,
         html: `
 <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
   <div style="background:#000000;border-radius:16px 16px 0 0;padding:28px;text-align:center;">
