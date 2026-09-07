@@ -125,6 +125,14 @@ export async function POST(req: NextRequest) {
     });
     await markZohoBooksInvoiceSent(invoice.invoice_id);
 
+    await db.update(proposals).set({
+      zohoInvoiceId: invoice.invoice_id,
+      zohoContactId: contact.contact_id,
+      zohoPaymentLink: invoice.invoice_url || null,
+      invoiceSentAt: new Date(),
+      zohoInvoiceMissingAt: null,
+    }).where(eq(proposals.id, p.id));
+
     // El correo al cliente sale por send-auto (plantilla propia bilingue con
     // el PDF adjunto), no por el mail generico de Zoho: un solo correo.
     let enviada = true;
@@ -142,13 +150,6 @@ export async function POST(req: NextRequest) {
       if (!r.ok) { enviada = false; errorEnvio = (await r.text()).slice(0, 200); }
     } catch (e) { enviada = false; errorEnvio = String(e).slice(0, 200); }
 
-    await db.update(proposals).set({
-      zohoInvoiceId: invoice.invoice_id,
-      zohoContactId: contact.contact_id,
-      zohoPaymentLink: invoice.invoice_url || null,
-      invoiceSentAt: new Date(),
-      zohoInvoiceMissingAt: null,
-    }).where(eq(proposals.id, p.id));
 
     await db.insert(proposalEvents).values({
       proposalId: p.id, kind: "invoice_manual", channel: "dashboard",
