@@ -249,8 +249,11 @@ export async function updateZohoBooksInvoice(params: {
   notes?: string;
   clientAddress?: string;
   clientTaxId?: string;
+  // Zoho exige un motivo para modificar una factura ya enviada (code 110701).
+  reason?: string;
 }): Promise<{ invoice_id: string; invoice_number: string; total: number }> {
   const data = await booksReq("PUT", `/invoices/${params.invoiceId}`, {
+    reason: params.reason || "Correccion administrativa",
     ...(params.contactId ? { customer_id: params.contactId } : {}),
     line_items: params.lineItems.map((item) => ({
       name: item.name,

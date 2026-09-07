@@ -13,6 +13,7 @@ export default function FacturarPage() {
   const [sel, setSel] = useState<Prop | null>(null);
   const [confirmado, setConfirmado] = useState(false);
   const [editando, setEditando] = useState(false);
+  const [motivo, setMotivo] = useState("");
   const [ed, setEd] = useState<{
     clientName: string; clientEmail: string; clientAddress: string; clientTaxId: string;
     discount: number; servicios: { name: string; price: number }[];
@@ -47,7 +48,7 @@ export default function FacturarPage() {
       const r = await fetch(tab === "pendientes" ? "/api/facturar" : "/api/facturar/editar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ proposalId: sel.id, confirmado: true, edits: ed }),
+        body: JSON.stringify({ proposalId: sel.id, confirmado: true, edits: ed, motivo }),
       });
       const d = await r.json();
       if (!r.ok) { setMsg({ tipo: "error", texto: d.error || "Error al emitir" }); }
@@ -60,7 +61,7 @@ export default function FacturarPage() {
               ? `Factura ${d.invoice.invoice_number} corregida y reenviada al cliente.`
               : `Factura ${d.invoice.invoice_number} corregida, pero NO se pudo reenviar: ${d.errorEnvio}`,
         });
-        setSel(null); setConfirmado(false); cargar();
+        setSel(null); setConfirmado(false); setMotivo(""); cargar();
       }
     } catch (e) {
       setMsg({ tipo: "error", texto: String(e) });
@@ -249,6 +250,16 @@ export default function FacturarPage() {
                 ? "Al confirmar, la factura se emite y se envia al cliente de inmediato. No se puede deshacer desde aqui."
                 : "Esta factura ya la recibio el cliente. Al confirmar se corrige en Zoho y se le reenvia la version nueva."}
             </p>
+            {tab === "emitidas" && (
+              <div className="mb-3">
+                <label className="block text-xs uppercase text-amber-900 mb-1">
+                  Motivo del cambio (lo exige Zoho y queda registrado)
+                </label>
+                <input className="border border-amber-300 rounded px-2 py-1 text-sm w-full bg-white"
+                  placeholder="Ej: importe mal cargado, servicio agregado a pedido del cliente"
+                  value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+              </div>
+            )}
             <label className={`flex items-center gap-2 text-sm font-medium ${editando ? "opacity-40" : ""}`}>
               <input type="checkbox" checked={confirmado} disabled={editando}
                 onChange={(e) => setConfirmado(e.target.checked)}
@@ -264,7 +275,7 @@ export default function FacturarPage() {
               className="px-4 py-2 rounded-lg border text-sm font-medium">
               {editando ? "Listo, revisar" : "Editar"}
             </button>
-            <button onClick={emitir} disabled={!confirmado || enviando || editando}
+            <button onClick={emitir} disabled={!confirmado || enviando || editando || (tab === "emitidas" && motivo.trim().length < 5)}
               className="px-6 py-2 rounded-lg bg-black text-white text-sm font-semibold disabled:opacity-40">
               {enviando ? "Guardando..." : tab === "pendientes" ? "Emitir factura" : "Corregir y reenviar"}
             </button>

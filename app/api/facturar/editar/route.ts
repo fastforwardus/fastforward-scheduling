@@ -38,15 +38,19 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { proposalId, confirmado, edits } = await req.json() as {
+  const { proposalId, confirmado, edits, motivo } = await req.json() as {
     proposalId?: string; confirmado?: boolean;
     edits?: {
       clientAddress?: string; clientTaxId?: string;
       discount?: number; servicios?: { name: string; price: number }[];
     };
+    motivo?: string;
   };
   if (!proposalId) return NextResponse.json({ error: "Falta proposalId" }, { status: 400 });
   if (!confirmado) return NextResponse.json({ error: "Falta la confirmacion" }, { status: 400 });
+  const razon = (motivo ?? "").trim();
+  if (razon.length < 5)
+    return NextResponse.json({ error: "Zoho exige un motivo para modificar una factura ya enviada." }, { status: 400 });
 
   const [p] = await db.select().from(proposals).where(eq(proposals.id, proposalId)).limit(1);
   if (!p) return NextResponse.json({ error: "Propuesta inexistente" }, { status: 404 });
@@ -94,8 +98,8 @@ export async function POST(req: NextRequest) {
       lineItems: servicios.map((x) => ({ name: x.name, rate: x.price, quantity: 1 })),
       discount: descuento,
       notes: `Propuesta ${p.proposalNum} — FastForward`,
-      clientAddress: edits?.clientAddress?.trim() || p.clientAddress || undefined,
       clientTaxId: edits?.clientTaxId?.trim() || p.clientTaxId || undefined,
+      reason: razon,
     });
 
     // Zoho no reenvia solo tras un update: el cliente tiene la version vieja.
@@ -113,12 +117,12 @@ export async function POST(req: NextRequest) {
 
     await db.insert(proposalEvents).values({
       proposalId: p.id, kind: "invoice_editada", channel: "dashboard",
-      detail: `Factura ${inv.invoice_number} editada por ${session.fullName} — nuevo total USD ${inv.total}${reenviada ? " — reenviada al cliente" : ` — NO SE REENVIO: ${errorEnvio}`}`,
+      detail: `Factura ${inv.invoice_number} editada por ${session.fullName} — motivo: ${razon} — nuevo total USD ${inv.total}${reenviada ? " — reenviada al cliente" : ` — NO SE REENVIO: ${errorEnvio}`}`,
     }).catch(() => {});
 
     await db.insert(activityLogs).values({
       userId: session.id, action: "factura_editada", entityType: "proposal", entityId: p.id,
-      details: `invoice ${inv.invoice_id} (${inv.invoice_number}) — total USD ${inv.total} — reenviada: ${reenviada}`,
+      details: `invoice ${inv.invoice_id} (${inv.invoice_number}) — total USD ${inv.total} — motivo: ${razon} — reenviada: ${reenviada}`,
     }).catch(() => {});
 
     return NextResponse.json({ ok: true, invoice: inv, reenviada, errorEnvio });
