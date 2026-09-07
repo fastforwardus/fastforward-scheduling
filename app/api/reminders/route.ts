@@ -8,8 +8,11 @@ import { formatInTimeZone } from "date-fns-tz";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function GET(req: NextRequest) {
+  // ?test=email manda una cita ficticia solo a esa casilla, sin tocar
+  // clientes reales ni escribir en reminders_log.
+  const test = new URL(req.url).searchParams.get("test");
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!test && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -45,8 +48,22 @@ export async function GET(req: NextRequest) {
       )
     );
 
-    for (const appt of upcoming) {
-      const already = await db.select().from(remindersLog).where(
+    const lista = test ? [{
+      id: "00000000-0000-0000-0000-000000000000",
+      clientName: "Cliente de prueba",
+      clientEmail: test,
+      clientWhatsapp: "",
+      clientTimezone: "America/New_York",
+      clientLanguage: "es",
+      platform: "meet" as const,
+      meetingLink: "https://meet.google.com/prueba",
+      scheduledAt: new Date(Date.now() + window.minutesBefore * 60 * 1000),
+      confirmToken: "prueba",
+      assignedTo: null,
+    }] as typeof upcoming : upcoming;
+
+    for (const appt of lista) {
+      const already = test ? [] : await db.select().from(remindersLog).where(
         and(
           eq(remindersLog.appointmentId, appt.id),
           eq(remindersLog.type, window.type),
@@ -153,13 +170,13 @@ export async function GET(req: NextRequest) {
           subject: subjects[lang] || subjects.es,
           html,
         });
-        await db.insert(remindersLog).values({
+        if (!test) await db.insert(remindersLog).values({
           appointmentId: appt.id, type: window.type,
           channel: "email", sentAt: new Date(), status: "sent",
         });
         results.sent++;
       } catch (err) {
-        await db.insert(remindersLog).values({
+        if (!test) await db.insert(remindersLog).values({
           appointmentId: appt.id, type: window.type,
           channel: "email", sentAt: new Date(), status: "failed",
           errorMessage: String(err),
