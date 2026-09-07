@@ -161,6 +161,25 @@ export default function ProposalModal({ appointmentId, clientName, clientCompany
       if (data.ok) {
         setSent(true);
         setTimeout(() => { onSuccess(); onClose(); }, 2000);
+      } else if (res.status === 409 && data.error === "posible_duplicado") {
+        // Antes no se mostraba nada: el rep clickeaba de nuevo sin saber.
+        const seguir = confirm((data.mensaje || "Ya existe una propuesta igual para este cliente.") + "\n\n¿Enviar de todos modos?");
+        if (seguir) {
+          const res2 = await fetch(editarId ? "/api/proposals/acciones" : "/api/proposals", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...cuerpo, force: true }),
+          });
+          const data2 = await res2.json();
+          if (data2.ok) {
+            setSent(true);
+            setTimeout(() => { onSuccess(); onClose(); }, 2000);
+          } else {
+            alert(data2.mensaje || data2.error || "No se pudo enviar la propuesta");
+          }
+        }
+      } else {
+        alert(data.mensaje || data.error || "No se pudo enviar la propuesta");
       }
     } catch (err) { console.error("Proposal error:", err); alert("Error: " + String(err)); }
     setSending(false);
