@@ -12,6 +12,11 @@ export default function FacturarPage() {
   const [items, setItems] = useState<Prop[]>([]);
   const [sel, setSel] = useState<Prop | null>(null);
   const [confirmado, setConfirmado] = useState(false);
+  const [editando, setEditando] = useState(false);
+  const [ed, setEd] = useState<{
+    clientName: string; clientEmail: string; clientAddress: string; clientTaxId: string;
+    discount: number; servicios: { name: string; price: number }[];
+  } | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [msg, setMsg] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -40,7 +45,7 @@ export default function FacturarPage() {
       const r = await fetch("/api/facturar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ proposalId: sel.id, confirmado: true }),
+        body: JSON.stringify({ proposalId: sel.id, confirmado: true, edits: ed }),
       });
       const d = await r.json();
       if (!r.ok) { setMsg({ tipo: "error", texto: d.error || "Error al emitir" }); }
@@ -53,7 +58,17 @@ export default function FacturarPage() {
     } finally { setEnviando(false); }
   };
 
-  const sub = sel ? servicios(sel).reduce((a, s) => a + s.price, 0) : 0;
+  const lineas = ed?.servicios ?? [];
+  const sub = lineas.reduce((a, s) => a + (Number(s.price) || 0), 0);
+  const desc = Number(ed?.discount) || 0;
+  const totalCalc = sub - desc;
+  const setLinea = (i: number, campo: "name" | "price", valor: string) => {
+    if (!ed) return;
+    const copia = [...ed.servicios];
+    copia[i] = { ...copia[i], [campo]: campo === "price" ? Number(valor) || 0 : valor };
+    setEd({ ...ed, servicios: copia });
+  };
+  const inp = "border rounded px-2 py-1 text-sm w-full";
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -76,7 +91,14 @@ export default function FacturarPage() {
           )}
           {items.map((p) => (
             <button key={p.id}
-              onClick={() => { setSel(p); setConfirmado(false); setMsg(null); }}
+              onClick={() => {
+                setSel(p); setConfirmado(false); setMsg(null); setEditando(false);
+                setEd({
+                  clientName: p.client_name || "", clientEmail: p.client_email || "",
+                  clientAddress: p.client_address || "", clientTaxId: p.client_tax_id || "",
+                  discount: p.discount || 0, servicios: servicios(p),
+                });
+              }}
               className="w-full text-left border rounded-xl p-4 hover:bg-gray-50 flex justify-between items-center">
               <div>
                 <div className="font-semibold">{p.client_name || "Sin nombre"}</div>
@@ -110,10 +132,25 @@ export default function FacturarPage() {
 
             <div className="mb-6">
               <div className="text-xs uppercase text-gray-400 mb-1">Facturar a</div>
-              <div className="font-semibold">{sel.client_name || "—"}</div>
-              <div className="text-sm text-gray-600">{sel.client_email || "sin email"}</div>
-              {sel.client_address && <div className="text-sm text-gray-600">{sel.client_address}</div>}
-              {sel.client_tax_id && <div className="text-sm text-gray-600">Tax ID: {sel.client_tax_id}</div>}
+              {!editando ? (
+                <>
+                  <div className="font-semibold">{ed?.clientName || "—"}</div>
+                  <div className="text-sm text-gray-600">{ed?.clientEmail || "sin email"}</div>
+                  {ed?.clientAddress && <div className="text-sm text-gray-600">{ed.clientAddress}</div>}
+                  {ed?.clientTaxId && <div className="text-sm text-gray-600">Tax ID: {ed.clientTaxId}</div>}
+                </>
+              ) : (
+                <div className="space-y-2 max-w-md">
+                  <input className={inp} placeholder="Nombre del cliente" value={ed?.clientName ?? ""}
+                    onChange={(e) => ed && setEd({ ...ed, clientName: e.target.value })} />
+                  <input className={inp} placeholder="Email" value={ed?.clientEmail ?? ""}
+                    onChange={(e) => ed && setEd({ ...ed, clientEmail: e.target.value })} />
+                  <input className={inp} placeholder="Direccion" value={ed?.clientAddress ?? ""}
+                    onChange={(e) => ed && setEd({ ...ed, clientAddress: e.target.value })} />
+                  <input className={inp} placeholder="Tax ID" value={ed?.clientTaxId ?? ""}
+                    onChange={(e) => ed && setEd({ ...ed, clientTaxId: e.target.value })} />
+                </div>
+              )}
             </div>
 
             <table className="w-full text-sm mb-6">
@@ -124,24 +161,52 @@ export default function FacturarPage() {
                 </tr>
               </thead>
               <tbody>
-                {servicios(sel).map((s, i) => (
+                {lineas.map((s, i) => (
                   <tr key={i} className="border-b border-gray-100">
-                    <td className="py-2">{s.name}</td>
-                    <td className="py-2 text-right">USD {s.price}</td>
+                    <td className="py-2 pr-2">
+                      {editando
+                        ? <input className={inp} value={s.name} onChange={(e) => setLinea(i, "name", e.target.value)} />
+                        : s.name}
+                    </td>
+                    <td className="py-2 text-right whitespace-nowrap">
+                      {editando ? (
+                        <span className="inline-flex items-center gap-2">
+                          <input type="number" className="border rounded px-2 py-1 text-sm w-28 text-right"
+                            value={s.price} onChange={(e) => setLinea(i, "price", e.target.value)} />
+                          <button onClick={() => ed && setEd({ ...ed, servicios: ed.servicios.filter((_, j) => j !== i) })}
+                            className="text-red-600 text-lg leading-none px-1" title="Borrar">×</button>
+                        </span>
+                      ) : `USD ${s.price}`}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
+            {editando && (
+              <button onClick={() => ed && setEd({ ...ed, servicios: [...ed.servicios, { name: "", price: 0 }] })}
+                className="mb-4 text-sm border rounded-lg px-3 py-1">+ Agregar servicio</button>
+            )}
+
             <div className="flex justify-end">
-              <div className="w-64 text-sm space-y-1">
+              <div className="w-72 text-sm space-y-1">
                 <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>USD {sub}</span></div>
-                {!!sel.discount && (
-                  <div className="flex justify-between"><span className="text-gray-500">Descuento</span><span>- USD {sel.discount}</span></div>
-                )}
-                <div className="flex justify-between border-t pt-2 text-lg font-bold">
-                  <span>Total</span><span>USD {sel.total}</span>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Descuento</span>
+                  {editando
+                    ? <input type="number" className="border rounded px-2 py-1 text-sm w-28 text-right"
+                        value={ed?.discount ?? 0}
+                        onChange={(e) => ed && setEd({ ...ed, discount: Number(e.target.value) || 0 })} />
+                    : <span>{desc ? `- USD ${desc}` : "—"}</span>}
                 </div>
+                <div className="flex justify-between border-t pt-2 text-lg font-bold">
+                  <span>Total</span><span>USD {totalCalc}</span>
+                </div>
+                {totalCalc !== sel.total && (
+                  <div className="text-xs text-amber-700 pt-1">
+                    La propuesta original decia USD {sel.total}.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -150,8 +215,8 @@ export default function FacturarPage() {
             <p className="text-sm text-amber-900 font-medium mb-3">
               Al confirmar, la factura se emite y se envia al cliente de inmediato. No se puede deshacer desde aqui.
             </p>
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input type="checkbox" checked={confirmado}
+            <label className={`flex items-center gap-2 text-sm font-medium ${editando ? "opacity-40" : ""}`}>
+              <input type="checkbox" checked={confirmado} disabled={editando}
                 onChange={(e) => setConfirmado(e.target.checked)}
                 className="w-4 h-4" />
               Revise los datos y confirmo la emision
@@ -159,9 +224,13 @@ export default function FacturarPage() {
           </div>
 
           <div className="mt-4 flex gap-3">
-            <button onClick={() => { setSel(null); setConfirmado(false); }}
+            <button onClick={() => { setSel(null); setConfirmado(false); setEditando(false); }}
               className="px-4 py-2 rounded-lg border text-sm">Volver</button>
-            <button onClick={emitir} disabled={!confirmado || enviando}
+            <button onClick={() => { setEditando(!editando); setConfirmado(false); }}
+              className="px-4 py-2 rounded-lg border text-sm font-medium">
+              {editando ? "Listo, revisar" : "Editar"}
+            </button>
+            <button onClick={emitir} disabled={!confirmado || enviando || editando}
               className="px-6 py-2 rounded-lg bg-black text-white text-sm font-semibold disabled:opacity-40">
               {enviando ? "Emitiendo..." : "Emitir factura"}
             </button>

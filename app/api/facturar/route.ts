@@ -38,7 +38,14 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { proposalId, confirmado } = body as { proposalId?: string; confirmado?: boolean };
+  const { proposalId, confirmado, edits } = body as {
+    proposalId?: string;
+    confirmado?: boolean;
+    edits?: {
+      clientName?: string; clientEmail?: string; clientAddress?: string; clientTaxId?: string;
+      discount?: number; servicios?: { name: string; price: number }[];
+    };
+  };
   if (!proposalId) return NextResponse.json({ error: "Falta proposalId" }, { status: 400 });
   if (!confirmado) return NextResponse.json({ error: "Falta la confirmacion" }, { status: 400 });
 
@@ -71,9 +78,29 @@ export async function POST(req: NextRequest) {
   let servicios: { name: string; price: number }[] = [];
   if (Array.isArray(raw)) servicios = raw as { name: string; price: number }[];
   else if (typeof raw === "string") { try { servicios = JSON.parse(raw); } catch { servicios = []; } }
-  if (!servicios.length) return NextResponse.json({ error: "La propuesta no tiene servicios" }, { status: 400 });
+  // Lo editado en pantalla pisa lo guardado. El total se recalcula aca:
+  // nunca se confia en un total que venga del navegador.
+  if (edits?.servicios?.length) {
+    servicios = edits.servicios
+      .filter((x) => x && String(x.name).trim() !== "")
+      .map((x) => ({ name: String(x.name).trim(), price: Number(x.price) || 0 }));
+  }
+  if (!servicios.length) return NextResponse.json({ error: "La factura no tiene servicios" }, { status: 400 });
 
-  if (!p.clientEmail) {
+  const datos = {
+    clientName: edits?.clientName?.trim() || p.clientName || "Cliente",
+    clientEmail: edits?.clientEmail?.trim() || p.clientEmail || "",
+    clientAddress: edits?.clientAddress?.trim() || p.clientAddress || "",
+    clientTaxId: edits?.clientTaxId?.trim() || p.clientTaxId || "",
+    discount: Number(edits?.discount ?? p.discount ?? 0) || 0,
+  };
+  const subtotal = servicios.reduce((a, x) => a + x.price, 0);
+  const totalFinal = subtotal - datos.discount;
+  if (totalFinal <= 0) {
+    return NextResponse.json({ error: "El total debe ser mayor a cero" }, { status: 400 });
+  }
+
+  if (!datos.clientEmail) {
     return NextResponse.json(
       { error: "La propuesta no tiene email del cliente. Cargalo antes de facturar." },
       { status: 400 }
@@ -82,19 +109,19 @@ export async function POST(req: NextRequest) {
 
   try {
     const contact = await findOrCreateZohoBooksContact({
-      name: p.clientName || "Cliente",
-      email: p.clientEmail,
-      address: p.clientAddress || undefined,
-      taxId: p.clientTaxId || undefined,
+      name: datos.clientName,
+      email: datos.clientEmail,
+      address: datos.clientAddress || undefined,
+      taxId: datos.clientTaxId || undefined,
     });
     const invoice = await createZohoBooksInvoice({
       contactId: contact.contact_id,
       invoiceNumber: p.proposalNum,
       lineItems: servicios.map((s) => ({ name: s.name, rate: s.price, quantity: 1 })),
-      discount: p.discount || 0,
+      discount: datos.discount,
       notes: `Propuesta ${p.proposalNum} — FastForward`,
-      clientAddress: p.clientAddress || undefined,
-      clientTaxId: p.clientTaxId || undefined,
+      clientAddress: datos.clientAddress || undefined,
+      clientTaxId: datos.clientTaxId || undefined,
     });
     await markZohoBooksInvoiceSent(invoice.invoice_id);
 
@@ -113,7 +140,7 @@ export async function POST(req: NextRequest) {
 
     await db.insert(activityLogs).values({
       userId: session.id, action: "factura_manual", entityType: "proposal", entityId: p.id,
-      details: `invoice ${invoice.invoice_id} (${invoice.invoice_number}) — USD ${invoice.total} — cliente ${p.clientName ?? ""}`,
+      details: `invoice ${invoice.invoice_id} (${invoice.invoice_number}) — USD ${invoice.total} — cliente ${datos.clientName}${edits ? " — EDITADA antes de emitir" : ""}`,
     }).catch(() => {});
 
     return NextResponse.json({ ok: true, invoice });
