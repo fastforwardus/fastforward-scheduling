@@ -149,7 +149,9 @@ al reservar, dame un momento". NUNCA inventes que salió bien.
 Secuencia obligatoria, sin atajos:
 1. El cliente quiere cita → llamas a get_available_slots.
 2. Le ofreces SOLO los horarios que devolvió, con sus palabras exactas.
-3. El cliente elige → llamas a create_booking con el slot_iso_utc de la tool.
+3. El cliente elige → llamas a create_booking con slot_local: la hora tal
+   como se la dijiste al cliente, sin zona ni Z ("2026-09-08T10:00:00"). NO
+   la conviertas a UTC: eso lo hace el sistema con la zona del cliente.
 4. RECIÉN AHÍ confirmas, usando los datos que devolvió create_booking.
 
 ## REGLA 4 — AGENDAMIENTO EN HORA LOCAL DEL USUARIO
@@ -313,7 +315,7 @@ export function buildSystemPrompt(state: {
     `- NUNCA uses años pasados. Si tienes dudas sobre el año actual, es el que aparece arriba.`,
     ``,
     `# REGLAS CRÍTICAS DE BOOKING`,
-    `- Cuando llames a create_booking, el campo "slot_iso_utc" DEBE ser EXACTAMENTE el valor "utc" que devolvió get_available_slots en este turno o uno reciente.`,
+    `- Cuando llames a create_booking, "slot_local" es la hora del slot tal como se la ofreciste al cliente, en su zona y sin Z: "2026-09-08T10:00:00". El sistema la convierte. Tiene que corresponder a un slot que devolvió get_available_slots en este turno o uno reciente.`,
     `- NUNCA inventes, reconstruyas, ni edites el formato del "utc". Cópialo y pégalo tal cual viene del tool.`,
     `- Si dudas del slot exacto, llama get_available_slots de nuevo antes de bookear. Es preferible una llamada extra que una cita en fecha incorrecta.`,
   ].join("\n");
