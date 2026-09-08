@@ -2,7 +2,7 @@ import { getBaseUrl } from "@/lib/base-url";
 import { db } from "@/db";
 import { adrianaConversations } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { formatInTimeZone } from "date-fns-tz";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 
 export interface CreateBookingInput {
   name: string;
@@ -11,7 +11,14 @@ export interface CreateBookingInput {
   product_type?: string;
   country?: string;
   timezone: string;       // IANA, "America/Argentina/Buenos_Aires"
-  slot_iso_utc: string;   // viene de get_available_slots, ej: "2026-05-12T14:30:00.000Z"
+  /**
+   * Hora LOCAL del cliente, sin zona: "2026-09-08T10:00:00".
+   * Es la forma preferida. Calcular el UTC a mano se presta a error —un cliente
+   * quedo agendado tres horas tarde por eso— y el horario de verano lo empeora.
+   */
+  slot_local?: string;
+  /** Compatibilidad: UTC ya calculado. Se usa solo si no vino slot_local. */
+  slot_iso_utc?: string;
   notes?: string;
 }
 
@@ -44,6 +51,19 @@ export async function createBooking(
     return { ok: false, message: "Server misconfigured" };
   }
 
+  // La conversion la hace el codigo, que no se equivoca con el horario de verano
+  let scheduledUtc: string;
+  if (input.slot_local) {
+    const limpio = input.slot_local.replace(/[Zz]$/, "").replace(/[+-]\d{2}:?\d{2}$/, "");
+    scheduledUtc = fromZonedTime(limpio, input.timezone).toISOString();
+  } else if (input.slot_iso_utc) {
+    scheduledUtc = input.slot_iso_utc;
+  } else {
+    return { ok: false, message: "Falta el horario: mandá slot_local con la hora del cliente." };
+  }
+  console.log("[create_booking]", input.timezone,
+    "| local:", input.slot_local ?? "(no vino)", "-> utc:", scheduledUtc);
+
   const url = `${getBaseUrl()}/api/book`;
 
   const payload = {
@@ -56,7 +76,7 @@ export async function createBooking(
     serviceInterest: input.product_type || undefined,
     platform:        "meet",
     repSlug:         "general",
-    scheduledAt:     input.slot_iso_utc,
+    scheduledAt:     scheduledUtc,
     clientNotes:     input.notes || `Booking vía WhatsApp Adriana${input.country ? ` — País: ${input.country}` : ""}`,
     bookedVia:       "adriana_whatsapp",
   };
@@ -106,7 +126,7 @@ export async function createBooking(
 
   // Formato amigable en TZ del cliente
   const localTime = formatInTimeZone(
-    new Date(input.slot_iso_utc),
+    new Date(scheduledUtc),
     input.timezone,
     "EEEE d 'de' MMMM, HH:mm 'hs'"
   );

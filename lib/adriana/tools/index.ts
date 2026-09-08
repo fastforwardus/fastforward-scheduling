@@ -55,10 +55,10 @@ export const ADRIANA_TOOLS: Anthropic.Tool[] = [
         product_type: { type: "string", description: "Tipo de producto (opcional)" },
         country:      { type: "string", description: "País (opcional)" },
         timezone:     { type: "string", description: "IANA tz del cliente" },
-        slot_iso_utc: { type: "string", description: "El campo 'utc' del slot que devolvió get_available_slots" },
+        slot_local: { type: "string", description: "Hora LOCAL del cliente, sin zona ni Z: '2026-09-08T10:00:00'. Es la hora que el cliente eligió, tal como se la mostraste. NO conviertas a UTC: el sistema lo hace." },
         notes:        { type: "string", description: "Notas adicionales para los notes del booking (opcional)" },
       },
-      required: ["name", "email", "timezone", "slot_iso_utc"],
+      required: ["name", "email", "timezone", "slot_local"],
     },
   },
   {
