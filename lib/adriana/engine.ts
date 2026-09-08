@@ -210,6 +210,20 @@ export async function processUserMessage(
     tokensOut: totalTokensOut,
   });
 
+  // Y las llamadas a herramientas del turno. Sin esto solo queda el texto:
+  // cuando una cita sale mal no hay forma de saber si consulto los horarios o
+  // se los invento, ni que parametros mando.
+  if (toolCallsLog.length) {
+    await appendMessage({
+      conversationId: conv.id,
+      role: "assistant",
+      content: [{
+        type: "text",
+        text: "tool_calls: " + JSON.stringify(toolCallsLog).slice(0, 4000),
+      }] as never,
+    }).catch((e) => console.error("[adriana] no se pudieron guardar las tools:", e));
+  }
+
   await db
     .update(adrianaConversations)
     .set({ lastAssistantMsgAt: new Date(), updatedAt: new Date() })

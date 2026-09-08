@@ -356,7 +356,11 @@ export default function AdrianaConversationsClient({ user }: { user: SessionUser
 
               {/* Mensajes */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background: "#F8F9FB" }}>
-                {detail.messages.map((m) => {
+                {detail.messages
+                  // El registro de llamadas a herramientas se guarda para
+                  // diagnostico, no para leerlo en el hilo del cliente.
+                  .filter((m) => !extractTextFromContent(m.content).startsWith("tool_calls:"))
+                  .map((m) => {
                   const text = extractTextFromContent(m.content);
                   const isUser = m.role === "user";
                   return (
