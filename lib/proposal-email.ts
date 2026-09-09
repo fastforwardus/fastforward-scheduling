@@ -86,16 +86,34 @@ export function armarHtmlPropuesta(p: EnvioPropuesta): string {
 }
 
 /** Genera el PDF y manda el mail. Usado por el envio original y por el reenvio. */
+/**
+ * Arma el remitente sin desalinear nombre y direccion.
+ *
+ * Si el rep tiene casilla propia en el dominio, firma con ella. Si no, se usa
+ * info@ pero con el nombre de la empresa, no con el del rep.
+ */
+function remitente(repNombre?: string, repEmail?: string): string {
+  const email = (repEmail || "").trim().toLowerCase();
+  const propia = email.endsWith("@fastfwdus.com") && email !== "info@fastfwdus.com";
+  if (propia && repNombre) return `${repNombre} — FastForward <${email}>`;
+  return "FastForward FDA Experts <info@fastfwdus.com>";
+}
+
 export async function enviarPropuestaPorEmail(p: EnvioPropuesta): Promise<void> {
   const pdf = await generateProposalPDF(p.proposalData);
   const firstName = (p.clienteNombre || "").split(" ")[0];
   const L = textos(p.lang, firstName, p.clienteEmpresa, p.total, p.proposalNum, p.validUntilStr);
 
   await resend.emails.send({
-    from: `${p.repNombre} — FastForward <info@fastfwdus.com>`,
+    // El nombre visible tiene que corresponder a la casilla: "Emiliano —
+    // FastForward" saliendo de info@ es la señal que Gmail lee como spoofing
+    // y manda la propuesta a spam.
+    from: remitente(p.repNombre, p.repEmail),
     replyTo: p.repEmail,
     to: p.clienteEmail,
-    cc: p.repEmail !== "info@fastfwdus.com" ? [p.repEmail] : undefined,
+    // Sin cc al rep: la propuesta ya sale desde su casilla, asi que copiarse
+    // a si mismo es redundante y algunos filtros lo leen como auto-envio.
+    cc: undefined,
     subject: p.esReenvio ? L.subjectRe : L.subject,
     html: armarHtmlPropuesta(p),
     attachments: [{
