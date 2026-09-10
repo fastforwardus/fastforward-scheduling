@@ -37,14 +37,6 @@
       "schedule": "0 */2 * * *"
     },
     {
-      "path": "/api/upsell",
-      "schedule": "0 14 1 * *"
-    },
-    {
-      "path": "/api/briefing",
-      "schedule": "*/5 * * * *"
-    },
-    {
       "path": "/api/almost-closed",
       "schedule": "0 15 * * *"
     },
