@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/modelos",
+      "schedule": "0 12 * * 1"
+    },
+    {
       "path": "/api/noshow",
       "schedule": "*/30 * * * *"
     },
