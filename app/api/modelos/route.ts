@@ -16,7 +16,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
  * Cuando se cambia un modelo en el codigo, hay que actualizarlo aca tambien.
  */
 const EN_USO: { modelo: string; donde: string }[] = [
-  { modelo: "claude-opus-4-5",  donde: "Adriana (lib/adriana/engine.ts)" },
+  { modelo: "claude-opus-5",    donde: "Adriana (lib/adriana/engine.ts)" },
   { modelo: "claude-sonnet-5",  donde: "followup, almost-closed" },
 ];
 
@@ -42,7 +42,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: String(e).slice(0, 200) }, { status: 502 });
   }
 
-  const faltan = EN_USO.filter((x) => !disponibles.includes(x.modelo));
+  // Un modelo puede figurar solo con su version fechada: eso todavia funciona,
+  // pero perder el alias suele anteceder al retiro.
+  const faltan = EN_USO.filter((x) =>
+    !disponibles.some((d) => d === x.modelo || d.startsWith(x.modelo + "-")));
   console.log("[modelos] disponibles:", disponibles.length, "| en riesgo:", faltan.length);
 
   if (faltan.length) {

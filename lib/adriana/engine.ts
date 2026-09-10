@@ -11,7 +11,7 @@ import { ADRIANA_TOOLS, dispatchTool, type AdrianaToolContext } from "./tools";
 import { buildSystemPrompt } from "./system-prompt";
 import { getProposalContext } from "./proposal-context";
 
-const MODEL = "claude-opus-4-5";  // ajustar según preferencia / costo
+const MODEL = "claude-opus-5";  // ajustar según preferencia / costo
 const MAX_TOKENS = 1024;
 const MAX_TOOL_LOOPS = 6; // safety: si Claude entra en bucle, cortamos
 const HISTORY_LIMIT = 40; // últimos N mensajes que mandamos a Claude
