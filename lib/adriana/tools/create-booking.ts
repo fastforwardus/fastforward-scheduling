@@ -51,6 +51,19 @@ export async function createBooking(
     return { ok: false, message: "Server misconfigured" };
   }
 
+  // Calificación B2B: sin empresa real y producto no hay cita. FastForward
+  // atiende solo empresas; los envíos personales se derivan a fda.gov.
+  const empresa = (input.company || "").trim();
+  const empresaInvalida = !empresa ||
+    ["sin especificar", "not specified", "n/a", "-", "particular", "personal", "no tengo", "ninguna"]
+      .includes(empresa.toLowerCase());
+  if (empresaInvalida) {
+    return { ok: false, message: "Falta el nombre de la empresa. Pregúntale al cliente el nombre de su empresa y qué producto quiere llevar a EE. UU. antes de agendar. Si es un envío personal (medicamento a un familiar, regalos, encomiendas), NO agendes: oriéntalo amablemente a consultar fda.gov." };
+  }
+  if (!(input.product_type || "").trim()) {
+    return { ok: false, message: "Falta el producto. Pregúntale qué producto quiere llevar la empresa a EE. UU. antes de agendar." };
+  }
+
   // La conversion la hace el codigo, que no se equivoca con el horario de verano
   let scheduledUtc: string;
   if (input.slot_local) {
@@ -69,7 +82,7 @@ export async function createBooking(
   const payload = {
     clientName:      input.name,
     clientEmail:     input.email,
-    clientCompany:   input.company || "Sin especificar",
+    clientCompany:   empresa,
     clientWhatsapp:  ctx.waPhone,
     clientTimezone:  input.timezone,
     clientLanguage:  ctx.language || "es",
