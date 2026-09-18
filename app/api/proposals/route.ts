@@ -66,16 +66,23 @@ export async function POST(req: NextRequest) {
 
   // Get appointment + rep
   let appt: { clientName: string; clientEmail: string; clientCompany: string; clientWhatsapp: string; id: string; assignedTo: string | null; serviceInterest: string | null; scheduledAt?: Date } | null = null;
+  // "Sin especificar" (y variantes) guardado como empresa se trata como vacio,
+  // para que los fallbacks al nombre del cliente funcionen en email y PDF.
+  const limpiarEmpresa = (c: string | null | undefined) => {
+    const v = (c || "").trim();
+    return ["sin especificar", "not specified", "não especificado", "nao especificado", "n/a", "-"]
+      .includes(v.toLowerCase()) ? "" : v;
+  };
   if (appointmentId) {
     const [a] = await db.select().from(appointments).where(eq(appointments.id, appointmentId)).limit(1);
     if (!a) return NextResponse.json({ error: "Cita no encontrada" }, { status: 404 });
-    appt = a;
+    appt = { ...a, clientCompany: limpiarEmpresa(a.clientCompany) || a.clientName };
   } else {
     appt = {
       id: "direct",
       clientName: directClientName,
       clientEmail: directClientEmail,
-      clientCompany: directClientCompany || directClientName,
+      clientCompany: limpiarEmpresa(directClientCompany) || directClientName,
       clientWhatsapp: "",
       assignedTo: session.id,
       serviceInterest: null,
