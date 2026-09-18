@@ -160,19 +160,31 @@ export default function BookWizard({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load slots when reaching step 4
+  // Load slots when reaching step 4. Lead con owner en Zoho: se muestra SOLO
+  // la agenda de ese rep (la cita es suya, aunque implique agendar otro dia).
   useEffect(() => {
     if (w.step !== 4) return;
     setLoadingSlots(true);
-    fetch(`/api/slots?timezone=${encodeURIComponent(timezone)}${repSlug && repSlug !== "general" ? `&rep=${encodeURIComponent(repSlug)}` : ""}`)
-      .then(r => r.json())
-      .then(d => {
+    (async () => {
+      try {
+        let effRep = repSlug && repSlug !== "general" ? repSlug : "";
+        if (!effRep && w.clientEmail) {
+          try {
+            const o = await fetch(`/api/owner-rep?email=${encodeURIComponent(w.clientEmail)}`).then(r => r.json());
+            if (o?.slug) effRep = o.slug;
+          } catch { /* sin owner: pool general */ }
+        }
+        let d = await fetch(`/api/slots?timezone=${encodeURIComponent(timezone)}${effRep ? `&rep=${encodeURIComponent(effRep)}` : ""}`).then(r => r.json());
+        // Owner sin ninguna disponibilidad cargada: pool general antes que un calendario vacio
+        if (effRep && !(repSlug && repSlug !== "general") && !(d.slots || []).length) {
+          d = await fetch(`/api/slots?timezone=${encodeURIComponent(timezone)}`).then(r => r.json());
+        }
         setSlotsData(d);
         const dates = Object.keys(d.grouped || {});
         if (dates.length) setSelectedDate(dates[0]);
-        setLoadingSlots(false);
-      })
-      .catch(() => setLoadingSlots(false));
+      } catch { /* noop */ }
+      setLoadingSlots(false);
+    })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [w.step, timezone, repSlug]);
 

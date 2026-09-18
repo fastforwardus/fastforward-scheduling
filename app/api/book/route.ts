@@ -7,7 +7,7 @@ import { eq, and, gte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
-import { getAvailableRepIds, elegirRepAutomatico, contarSinAsignar } from "@/lib/slots";
+import { getAvailableRepIds, getWorkingRepIds, elegirRepAutomatico, contarSinAsignar } from "@/lib/slots";
 import { createMeetEvent } from "@/lib/google";
 import { normalizeWhatsAppPhone } from "@/lib/phone";
 import { validarTelefono } from "@/lib/phone-lookup";
@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Sin link personal: buscar lead en Zoho CRM y asignar al owner si existe en el sistema
+    let ownerLocked = false;
     if (!assignedTo) {
       const ownerEmail = await findZohoLeadOwnerEmail(clientEmail.toLowerCase().trim());
       if (ownerEmail) {
@@ -83,16 +84,19 @@ export async function POST(req: NextRequest) {
           EXCLUDED_AUTO_ASSIGN_EMAILS.includes(owner.email?.toLowerCase() || "")
         );
         if (owner && !isExcludedOwner) {
-          // El owner de Zoho puede no cubrir ese horario (ej. slot de 5 AM Miami
-          // que solo atiende Emiliano). En ese caso queda para reparto manual.
-          const disponibles = await getAvailableRepIds(new Date(scheduledAt));
-          if (disponibles.has(owner.id)) {
+          // El lead pertenece al owner: la cita es suya. El wizard ya mostro solo
+          // su agenda, asi que el slot cae en sus horarios. Solo si el owner no
+          // trabaja este instante (sin disponibilidad cargada, el wizard cayo al
+          // pool general) sigue al reparto automatico.
+          const trabajan = await getWorkingRepIds(new Date(scheduledAt));
+          if (trabajan.has(owner.id)) {
             assignedTo = owner.id;
             assignedName = owner.fullName;
             assignedEmail = owner.email;
             status = "scheduled";
+            ownerLocked = true;
           } else {
-            console.warn("Owner", owner.fullName, "no disponible en", scheduledAt, "- queda sin asignar");
+            console.warn("Owner", owner.fullName, "sin disponibilidad en", scheduledAt, "- reparto automatico");
           }
         }
       }
@@ -157,8 +161,14 @@ export async function POST(req: NextRequest) {
         return { kind: "full" };
       }
 
-      // Si el rep elegido ya quedo ocupado en este horario, reasignar a uno libre
+      // Si el rep elegido ya quedo ocupado en este horario:
+      // lead con owner -> la cita es del owner, se pide otro horario (nunca otro rep);
+      // resto -> reasignar a un rep libre.
       if (assignedTo && !libres.has(assignedTo)) {
+        if (ownerLocked) {
+          console.warn("Owner ocupado en", slotAt.toISOString(), "- se pide otro horario");
+          return { kind: "full" };
+        }
         const alternativo = await elegirRepAutomatico(slotAt);
         if (!alternativo) {
           console.warn("Rep ocupado y sin alternativa:", slotAt.toISOString());
