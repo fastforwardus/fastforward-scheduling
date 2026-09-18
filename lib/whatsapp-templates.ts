@@ -50,6 +50,11 @@ const TEMPLATES: Record<string, Record<Lang, Tpl>> = {
     en: { body: "Hi {{1}}, this is Adriana from FastForward. We met at the Summer Fancy Food Show, where you spoke with {{2}} from our team about bringing {{3}} products into the United States market. If the project is still on, we can set up a free call with one of our consultants. If you are no longer interested, reply STOP and I will not write again.", btn: "" },
     pt_BR: { body: "Ola {{1}}, sou Adriana da FastForward. Nos conhecemos no Summer Fancy Food Show, onde voce falou com {{2}} da nossa equipe sobre levar os produtos da {{3}} ao mercado dos Estados Unidos. Se o projeto continua de pe, podemos agendar uma ligacao sem custo com um de nossos consultores. Se nao tiver mais interesse, responda BAIXA e nao escrevo mais.", btn: "" },
   },
+  cita_recordatorio_2h: {
+    es: { body: "Hola {{1}}, te recordamos que tu reunion con FastForward es hoy a las {{2}} con {{3}}. Si no puedes asistir, responde por aqui y la reprogramamos.", btn: "Ver detalles" },
+    en: { body: "Hi {{1}}, a reminder that your meeting with FastForward is today at {{2}} with {{3}}. If you cannot make it, reply here and we will reschedule.", btn: "View details" },
+    pt_BR: { body: "Ola {{1}}, lembramos que sua reuniao com a FastForward e hoje as {{2}} com {{3}}. Se nao puder participar, responda por aqui e reagendamos.", btn: "Ver detalhes" },
+  },
   propuesta_vencimiento: {
     es: { body: "Hola {{1}}, ultimo aviso: la propuesta {{2}} vence pronto. Si quieres asegurar las condiciones actuales, es el momento de confirmarla.", btn: "Confirmar ahora" },
     en: { body: "Hi {{1}}, final notice: proposal {{2}} expires soon. To lock in the current terms, now is the time to confirm it.", btn: "Confirm now" },

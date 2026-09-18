@@ -4,6 +4,7 @@ import { appointments, users, remindersLog } from "@/db/schema";
 import { and, eq, gte, lte } from "drizzle-orm";
 import { Resend } from "resend";
 import { formatInTimeZone } from "date-fns-tz";
+import { sendWhatsAppTemplate } from "@/lib/adriana/whatsapp-sender";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -182,6 +183,36 @@ export async function GET(req: NextRequest) {
           errorMessage: String(err),
         });
         results.errors++;
+      }
+
+      // WhatsApp solo en la ventana de 2h: recordatorio con template aprobado
+      // (fuera de la ventana de 24h de Meta no se puede enviar texto libre).
+      if (window.type === "2h" && appt.clientWhatsapp && !test) {
+        const yaWa = await db.select().from(remindersLog).where(
+          and(
+            eq(remindersLog.appointmentId, appt.id),
+            eq(remindersLog.type, "2h"),
+            eq(remindersLog.channel, "whatsapp"),
+            eq(remindersLog.status, "sent"),
+          )
+        ).limit(1);
+        if (!yaWa.length) {
+          const waLang = lang === "pt" ? "pt_BR" : lang;
+          const r = await sendWhatsAppTemplate({
+            toPhone: appt.clientWhatsapp,
+            templateName: "cita_recordatorio_2h",
+            languageCode: waLang,
+            bodyParams: [appt.clientName, `${formattedDate} · ${formattedTime}`, repName],
+            urlParam: appt.confirmToken || appt.id,
+          });
+          await db.insert(remindersLog).values({
+            appointmentId: appt.id, type: "2h",
+            channel: "whatsapp", sentAt: new Date(),
+            status: r.ok ? "sent" : "failed",
+            errorMessage: r.ok ? null : r.error,
+          });
+          if (r.ok) results.sent++; else results.errors++;
+        }
       }
     }
   }
