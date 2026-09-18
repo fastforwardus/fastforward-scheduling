@@ -17,6 +17,17 @@ export const HORA_MAX_CLIENTE = 21;
 
 const MS = 60000;
 
+// UNICOS reps que atienden el pool general. Nadie mas suma capacidad ni
+// recibe citas del reparto, aunque tenga horarios cargados (ej. admin).
+export const REPS_ATENCION = [
+  "tomás marino", "tomas marino",
+  "francisco logarzo",
+  "emiliano caracciolo",
+  "mauricio lobatón", "mauricio lobaton",
+];
+const esRepAtencion = (nombre: string | null) =>
+  REPS_ATENCION.includes((nombre || "").toLowerCase().trim());
+
 export interface AvailableSlot {
   utc: string;
   label: string;
@@ -32,7 +43,7 @@ export interface SlotsResult {
 
 async function cargarRepsYReglas() {
   const reps = await db
-    .select({ id: users.id, slug: users.slug, tz: users.availabilityTimezone, fallbackTz: users.timezone })
+    .select({ id: users.id, slug: users.slug, fullName: users.fullName, tz: users.availabilityTimezone, fallbackTz: users.timezone })
     .from(users)
     .where(eq(users.isActive, true));
 
@@ -56,7 +67,8 @@ async function cargarRepsYReglas() {
 
 // Reps cuya franja permite una cita COMPLETA que arranca en este instante.
 export async function getWorkingRepIds(slot: Date): Promise<Set<string>> {
-  const { reps, rulesByRep } = await cargarRepsYReglas();
+  const { reps: todos, rulesByRep } = await cargarRepsYReglas();
+  const reps = todos.filter((r) => esRepAtencion(r.fullName));
   const out = new Set<string>();
   for (const rep of reps) {
     const repRules = rulesByRep.get(rep.id);
@@ -130,7 +142,7 @@ export async function generateAvailableSlots(
   // Link personal: solo la agenda de ese rep.
   const reps = repSlug && repSlug !== "general"
     ? allReps.filter((r) => r.slug === repSlug)
-    : allReps;
+    : allReps.filter((r) => esRepAtencion(r.fullName));
 
   // Instantes en grilla de 15: base (:00/:30 de cada rep) + desborde (:15/:45)
   const working = new Map<string, Set<string>>();
