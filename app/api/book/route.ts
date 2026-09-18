@@ -3,11 +3,11 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { appointments, users, clientProfiles, systemConfig } from "@/db/schema";
-import { eq, and, gte, sql, notInArray } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { Resend } from "resend";
 import { createOrUpdateZohoLead, findZohoLeadOwnerEmail } from "@/lib/zoho";
-import { getSlotCapacity, getAvailableRepIds, elegirRepAutomatico } from "@/lib/slots";
+import { getAvailableRepIds, elegirRepAutomatico, contarSinAsignar } from "@/lib/slots";
 import { createMeetEvent } from "@/lib/google";
 import { normalizeWhatsAppPhone } from "@/lib/phone";
 import { validarTelefono } from "@/lib/phone-lookup";
@@ -148,18 +148,29 @@ export async function POST(req: NextRequest) {
         .limit(1);
       if (existing) return { kind: "duplicated", appointment: existing };
 
-      // Capacidad real del slot vs citas ya tomadas
-      const capacity = await getSlotCapacity(slotAt);
-      const takenRows = await tx
-        .select({ id: appointments.id })
-        .from(appointments)
-        .where(and(
-          eq(appointments.scheduledAt, slotAt),
-          notInArray(appointments.status, ["cancelled", "rescheduled"]),
-        ));
-      if (takenRows.length >= capacity) {
-        console.warn("Slot lleno:", slotAt.toISOString(), takenRows.length, "/", capacity);
+      // Capacidad por rep: un rep = una cita por horario. Libres = reps en
+      // ventana sin cita solapada; las sin asignar tambien ocupan lugar.
+      const libres = await getAvailableRepIds(slotAt);
+      const pendientes = await contarSinAsignar(slotAt);
+      if (libres.size - pendientes <= 0) {
+        console.warn("Slot lleno:", slotAt.toISOString(), "libres:", libres.size, "sin asignar:", pendientes);
         return { kind: "full" };
+      }
+
+      // Si el rep elegido ya quedo ocupado en este horario, reasignar a uno libre
+      if (assignedTo && !libres.has(assignedTo)) {
+        const alternativo = await elegirRepAutomatico(slotAt);
+        if (!alternativo) {
+          console.warn("Rep ocupado y sin alternativa:", slotAt.toISOString());
+          return { kind: "full" };
+        }
+        const [alt] = await tx.select().from(users).where(eq(users.id, alternativo)).limit(1);
+        if (alt) {
+          console.log("[book] reasignada de", assignedName, "a", alt.fullName, "por solape de horario");
+          assignedTo = alt.id;
+          assignedName = alt.fullName;
+          assignedEmail = alt.email;
+        }
       }
 
       const [created] = await tx

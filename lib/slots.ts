@@ -1,11 +1,12 @@
 import { db } from "@/db";
 import { holidays, appointments, users, availabilityRules } from "@/db/schema";
-import { gte, eq, and, ne, isNotNull, notInArray } from "drizzle-orm";
+import { gte, lte, eq, and, ne, isNotNull, isNull, notInArray } from "drizzle-orm";
 import { addMinutes, isBefore, addDays } from "date-fns";
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 
 export const MIAMI = "America/New_York";
-export const SLOT_DURATION = 30;
+export const SLOT_DURATION = 30;   // duracion de cada cita en minutos
+export const OVERFLOW_STEP = 15;   // grilla de desborde cuando la base esta llena
 export const DAYS_AHEAD = 21;
 export const MIN_LEAD_MINUTES = 120;
 // Franja razonable en hora LOCAL DEL CLIENTE, no de Miami. Con Emiliano
@@ -13,6 +14,8 @@ export const MIN_LEAD_MINUTES = 120;
 // (bien) pero 2 AM en Nueva York (absurdo). Filtramos por donde esta el cliente.
 export const HORA_MIN_CLIENTE = 9;
 export const HORA_MAX_CLIENTE = 21;
+
+const MS = 60000;
 
 export interface AvailableSlot {
   utc: string;
@@ -27,27 +30,11 @@ export interface SlotsResult {
   timezone: string;
 }
 
-export async function generateAvailableSlots(
-  clientTz: string = MIAMI,
-  repSlug?: string,
-): Promise<SlotsResult> {
-  const now = new Date();
-
-  const allReps = await db
-    .select({
-      id: users.id,
-      slug: users.slug,
-      tz: users.availabilityTimezone,
-      fallbackTz: users.timezone,
-    })
+async function cargarRepsYReglas() {
+  const reps = await db
+    .select({ id: users.id, slug: users.slug, tz: users.availabilityTimezone, fallbackTz: users.timezone })
     .from(users)
     .where(eq(users.isActive, true));
-
-  // Link personal: solo la agenda de ese rep. Sin esto el cliente ve horarios
-  // que su rep no cubre y la cita termina asignada a alguien que no trabaja.
-  const reps = repSlug && repSlug !== "general"
-    ? allReps.filter((r) => r.slug === repSlug)
-    : allReps;
 
   const rules = await db
     .select({
@@ -64,9 +51,90 @@ export async function generateAvailableSlots(
     if (!rulesByRep.has(r.userId)) rulesByRep.set(r.userId, new Map());
     rulesByRep.get(r.userId)!.set(r.dayOfWeek, { startTime: r.startTime, endTime: r.endTime });
   }
+  return { reps, rulesByRep };
+}
 
-  // Capacidad bruta: cuantos reps trabajan en cada instante
-  const capacity = new Map<string, number>();
+// Reps cuya franja permite una cita COMPLETA que arranca en este instante.
+export async function getWorkingRepIds(slot: Date): Promise<Set<string>> {
+  const { reps, rulesByRep } = await cargarRepsYReglas();
+  const out = new Set<string>();
+  for (const rep of reps) {
+    const repRules = rulesByRep.get(rep.id);
+    if (!repRules) continue;
+    const tz = rep.tz || rep.fallbackTz || MIAMI;
+    const dateStr = formatInTimeZone(slot, tz, "yyyy-MM-dd");
+    const dow = Number(formatInTimeZone(slot, tz, "i")) % 7;
+    const rule = repRules.get(dow);
+    if (!rule) continue;
+    const startUTC = fromZonedTime(`${dateStr}T${rule.startTime}`, tz);
+    const endUTC = fromZonedTime(`${dateStr}T${rule.endTime}`, tz);
+    if (slot < startUTC) continue;
+    if (addMinutes(slot, SLOT_DURATION) > endUTC) continue;
+    out.add(rep.id);
+  }
+  return out;
+}
+
+// Reps con una cita que se SOLAPA con [slot, slot+30). Una cita a las 15:00
+// ocupa al rep hasta las 15:30: tambien bloquea el desborde de las 15:15.
+export async function getBusyRepIds(slot: Date): Promise<Set<string>> {
+  const desde = new Date(slot.getTime() - (SLOT_DURATION - 1) * MS);
+  const hasta = new Date(slot.getTime() + (SLOT_DURATION - 1) * MS);
+  const rows = await db
+    .select({ assignedTo: appointments.assignedTo })
+    .from(appointments)
+    .where(and(
+      isNotNull(appointments.assignedTo),
+      gte(appointments.scheduledAt, desde),
+      lte(appointments.scheduledAt, hasta),
+      notInArray(appointments.status, ["cancelled", "rescheduled"]),
+    ));
+  const out = new Set<string>();
+  for (const r of rows) if (r.assignedTo) out.add(r.assignedTo);
+  return out;
+}
+
+// Citas sin rep asignado que se solapan con este instante. Tambien ocupan
+// lugar: alguien va a tener que atenderlas.
+export async function contarSinAsignar(slot: Date): Promise<number> {
+  const desde = new Date(slot.getTime() - (SLOT_DURATION - 1) * MS);
+  const hasta = new Date(slot.getTime() + (SLOT_DURATION - 1) * MS);
+  const rows = await db
+    .select({ id: appointments.id })
+    .from(appointments)
+    .where(and(
+      isNull(appointments.assignedTo),
+      gte(appointments.scheduledAt, desde),
+      lte(appointments.scheduledAt, hasta),
+      notInArray(appointments.status, ["cancelled", "rescheduled"]),
+    ));
+  return rows.length;
+}
+
+// REGLA CENTRAL: un rep = una cita por horario. Todo lo que asigna
+// (owner de Zoho o round robin) debe salir de este set.
+export async function getAvailableRepIds(slot: Date): Promise<Set<string>> {
+  const [working, busy] = await Promise.all([getWorkingRepIds(slot), getBusyRepIds(slot)]);
+  const out = new Set<string>();
+  for (const id of working) if (!busy.has(id)) out.add(id);
+  return out;
+}
+
+export async function generateAvailableSlots(
+  clientTz: string = MIAMI,
+  repSlug?: string,
+): Promise<SlotsResult> {
+  const now = new Date();
+  const { reps: allReps, rulesByRep } = await cargarRepsYReglas();
+
+  // Link personal: solo la agenda de ese rep.
+  const reps = repSlug && repSlug !== "general"
+    ? allReps.filter((r) => r.slug === repSlug)
+    : allReps;
+
+  // Instantes en grilla de 15: base (:00/:30 de cada rep) + desborde (:15/:45)
+  const working = new Map<string, Set<string>>();
+  const esBase = new Map<string, boolean>();
 
   for (const rep of reps) {
     const repRules = rulesByRep.get(rep.id);
@@ -82,35 +150,57 @@ export async function generateAvailableSlots(
 
       let slotUTC = fromZonedTime(`${dateStr}T${rule.startTime}`, tz);
       const endUTC = fromZonedTime(`${dateStr}T${rule.endTime}`, tz);
+      let paso = 0;
 
-      while (isBefore(slotUTC, endUTC)) {
+      // La cita completa (30 min) debe caber dentro de la franja
+      while (!isBefore(endUTC, addMinutes(slotUTC, SLOT_DURATION))) {
         const iso = slotUTC.toISOString();
-        capacity.set(iso, (capacity.get(iso) ?? 0) + 1);
-        slotUTC = addMinutes(slotUTC, SLOT_DURATION);
+        if (!working.has(iso)) working.set(iso, new Set());
+        working.get(iso)!.add(rep.id);
+        if (paso % 2 === 0) esBase.set(iso, true);
+        else if (!esBase.has(iso)) esBase.set(iso, false);
+        slotUTC = addMinutes(slotUTC, OVERFLOW_STEP);
+        paso++;
       }
     }
   }
 
-  // Ocupacion: toda cita futura consume una unidad, asignada o no
+  // Ocupacion por solapamiento: una cita en S bloquea S-15, S y S+15
   const booked = await db
     .select({ scheduledAt: appointments.scheduledAt, assignedTo: appointments.assignedTo })
     .from(appointments)
     .where(and(
-      gte(appointments.scheduledAt, now),
-      // Una cita cancelada o reprogramada libera el lugar
+      gte(appointments.scheduledAt, addMinutes(now, -SLOT_DURATION)),
       notInArray(appointments.status, ["cancelled", "rescheduled"]),
     ));
 
-  // Con filtro por rep solo descontamos SUS citas: restar las de todo el equipo
-  // le borraba horarios libres de su propia agenda. La sobreventa global la
-  // sigue frenando el advisory lock de book/route.ts.
   const repIds = new Set(reps.map((r) => r.id));
-  const taken = new Map<string, number>();
+  const busy = new Map<string, Set<string>>();
+  const sinAsignar = new Map<string, number>();
   for (const b of booked) {
+    // Con filtro por rep solo descontamos SUS citas
     if (repSlug && repSlug !== "general" && (!b.assignedTo || !repIds.has(b.assignedTo))) continue;
-    const iso = new Date(b.scheduledAt).toISOString();
-    taken.set(iso, (taken.get(iso) ?? 0) + 1);
+    const t0 = new Date(b.scheduledAt).getTime();
+    for (const t of [t0 - OVERFLOW_STEP * MS, t0, t0 + OVERFLOW_STEP * MS]) {
+      const iso = new Date(t).toISOString();
+      if (!working.has(iso)) continue;
+      if (b.assignedTo) {
+        if (!busy.has(iso)) busy.set(iso, new Set());
+        busy.get(iso)!.add(b.assignedTo);
+      } else {
+        sinAsignar.set(iso, (sinAsignar.get(iso) ?? 0) + 1);
+      }
+    }
   }
+
+  const libresEn = (iso: string): number => {
+    const w = working.get(iso);
+    if (!w) return 0;
+    const b = busy.get(iso);
+    let libres = 0;
+    for (const id of w) if (!b || !b.has(id)) libres++;
+    return libres - (sinAsignar.get(iso) ?? 0);
+  };
 
   const holidayList = await db.select({ date: holidays.date }).from(holidays);
   const holidayDates = new Set(holidayList.map((h) => h.date));
@@ -118,8 +208,8 @@ export async function generateAvailableSlots(
   const minStart = addMinutes(now, MIN_LEAD_MINUTES);
   const slots: AvailableSlot[] = [];
 
-  for (const [iso, cap] of capacity) {
-    const free = cap - (taken.get(iso) ?? 0);
+  for (const iso of working.keys()) {
+    const free = libresEn(iso);
     if (free <= 0) continue;
 
     const when = new Date(iso);
@@ -131,6 +221,15 @@ export async function generateAvailableSlots(
     // Nada de madrugada para el cliente, sin importar quien lo atienda
     const horaLocal = Number(formatInTimeZone(when, clientTz, "H"));
     if (horaLocal < HORA_MIN_CLIENTE || horaLocal >= HORA_MAX_CLIENTE) continue;
+
+    // El desborde :15/:45 solo se ofrece cuando los base vecinos estan llenos
+    if (!esBase.get(iso)) {
+      const prev = new Date(when.getTime() - OVERFLOW_STEP * MS).toISOString();
+      const next = new Date(when.getTime() + OVERFLOW_STEP * MS).toISOString();
+      const prevLibre = working.has(prev) ? libresEn(prev) : 0;
+      const nextLibre = working.has(next) ? libresEn(next) : 0;
+      if (prevLibre > 0 || nextLibre > 0) continue;
+    }
 
     slots.push({
       utc: iso,
@@ -151,109 +250,17 @@ export async function generateAvailableSlots(
   return { slots, grouped, timezone: clientTz };
 }
 
-// Capacidad bruta de un instante puntual (cuantos reps trabajan). No descuenta citas.
-export async function getSlotCapacity(slot: Date): Promise<number> {
-  const holidayList = await db.select({ date: holidays.date }).from(holidays);
-  const miamiDate = formatInTimeZone(slot, MIAMI, "yyyy-MM-dd");
-  if (holidayList.some((h) => h.date === miamiDate)) return 0;
-
-  const reps = await db
-    .select({ id: users.id, tz: users.availabilityTimezone, fallbackTz: users.timezone })
-    .from(users)
-    .where(eq(users.isActive, true));
-
-  const rules = await db
-    .select({
-      userId: availabilityRules.userId,
-      dayOfWeek: availabilityRules.dayOfWeek,
-      startTime: availabilityRules.startTime,
-      endTime: availabilityRules.endTime,
-    })
-    .from(availabilityRules)
-    .where(eq(availabilityRules.isActive, true));
-
-  const byRep = new Map<string, Map<number, { startTime: string; endTime: string }>>();
-  for (const r of rules) {
-    if (!byRep.has(r.userId)) byRep.set(r.userId, new Map());
-    byRep.get(r.userId)!.set(r.dayOfWeek, { startTime: r.startTime, endTime: r.endTime });
-  }
-
-  let capacity = 0;
-  for (const rep of reps) {
-    const repRules = byRep.get(rep.id);
-    if (!repRules) continue;
-    const tz = rep.tz || rep.fallbackTz || MIAMI;
-    const dateStr = formatInTimeZone(slot, tz, "yyyy-MM-dd");
-    const dow = Number(formatInTimeZone(slot, tz, "i")) % 7;
-    const rule = repRules.get(dow);
-    if (!rule) continue;
-
-    const startUTC = fromZonedTime(`${dateStr}T${rule.startTime}`, tz);
-    const endUTC = fromZonedTime(`${dateStr}T${rule.endTime}`, tz);
-    if (slot < startUTC || slot >= endUTC) continue;
-
-    // El slot debe caer en la grilla de este rep
-    const offsetMin = (slot.getTime() - startUTC.getTime()) / 60000;
-    if (offsetMin % SLOT_DURATION !== 0) continue;
-
-    capacity++;
-  }
-  return capacity;
-}
-
-// IDs de reps cuya franja de disponibilidad cubre este instante.
-export async function getAvailableRepIds(slot: Date): Promise<Set<string>> {
-  const reps = await db
-    .select({ id: users.id, tz: users.availabilityTimezone, fallbackTz: users.timezone })
-    .from(users)
-    .where(eq(users.isActive, true));
-
-  const rules = await db
-    .select({
-      userId: availabilityRules.userId,
-      dayOfWeek: availabilityRules.dayOfWeek,
-      startTime: availabilityRules.startTime,
-      endTime: availabilityRules.endTime,
-    })
-    .from(availabilityRules)
-    .where(eq(availabilityRules.isActive, true));
-
-  const byRep = new Map<string, Map<number, { startTime: string; endTime: string }>>();
-  for (const r of rules) {
-    if (!byRep.has(r.userId)) byRep.set(r.userId, new Map());
-    byRep.get(r.userId)!.set(r.dayOfWeek, { startTime: r.startTime, endTime: r.endTime });
-  }
-
-  const available = new Set<string>();
-  for (const rep of reps) {
-    const repRules = byRep.get(rep.id);
-    if (!repRules) continue;
-    const tz = rep.tz || rep.fallbackTz || MIAMI;
-    const dateStr = formatInTimeZone(slot, tz, "yyyy-MM-dd");
-    const dow = Number(formatInTimeZone(slot, tz, "i")) % 7;
-    const rule = repRules.get(dow);
-    if (!rule) continue;
-
-    const startUTC = fromZonedTime(`${dateStr}T${rule.startTime}`, tz);
-    const endUTC = fromZonedTime(`${dateStr}T${rule.endTime}`, tz);
-    if (slot >= startUTC && slot < endUTC) available.add(rep.id);
-  }
-  return available;
-}
-
-
 /**
- * Elige a quién asignar una cita cuando no hay link personal ni owner de Zoho.
- *
- * Prioridad: Tomás y Francisco alternados (round robin por carga), y si ninguno
- * cubre ese horario, Emiliano; después Mauricio. El desempate es por cantidad de
- * citas futuras, así el reparto queda parejo sin guardar estado en ningún lado.
+ * Reparto automatico: Tomas, Francisco, Emiliano y Mauricio en round robin
+ * puro por carga de citas futuras. Solo entra quien trabaja ese horario y
+ * no tiene cita solapada (un rep = una cita por horario).
  */
 export async function elegirRepAutomatico(slot: Date): Promise<string | null> {
-  const PRIORIDAD: string[][] = [
-    ["tomás marino", "tomas marino", "francisco logarzo"],
-    ["emiliano caracciolo"],
-    ["mauricio lobatón", "mauricio lobaton"],
+  const REPS_ROTACION = [
+    "tomás marino", "tomas marino",
+    "francisco logarzo",
+    "emiliano caracciolo",
+    "mauricio lobatón", "mauricio lobaton",
   ];
 
   const disponibles = await getAvailableRepIds(slot);
@@ -264,7 +271,6 @@ export async function elegirRepAutomatico(slot: Date): Promise<string | null> {
     .from(users)
     .where(eq(users.isActive, true));
 
-  // Citas futuras por rep: la carga define quién sigue en el round robin
   const carga = new Map<string, number>();
   const futuras = await db
     .select({ assignedTo: appointments.assignedTo })
@@ -278,13 +284,10 @@ export async function elegirRepAutomatico(slot: Date): Promise<string | null> {
     if (a.assignedTo) carga.set(a.assignedTo, (carga.get(a.assignedTo) ?? 0) + 1);
   }
 
-  for (const nivel of PRIORIDAD) {
-    const candidatos = activos.filter((u) =>
-      disponibles.has(u.id) && nivel.includes((u.fullName || "").toLowerCase().trim()),
-    );
-    if (!candidatos.length) continue;
-    candidatos.sort((a, b) => (carga.get(a.id) ?? 0) - (carga.get(b.id) ?? 0));
-    return candidatos[0].id;
-  }
-  return null;
+  const candidatos = activos.filter((u) =>
+    disponibles.has(u.id) && REPS_ROTACION.includes((u.fullName || "").toLowerCase().trim()),
+  );
+  if (!candidatos.length) return null;
+  candidatos.sort((a, b) => (carga.get(a.id) ?? 0) - (carga.get(b.id) ?? 0));
+  return candidatos[0].id;
 }
