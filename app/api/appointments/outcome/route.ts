@@ -4,6 +4,7 @@ import { appointments } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getSession } from "@/lib/session";
 import { createOrUpdateZohoLead } from "@/lib/zoho";
+import { enviarNoShowCliente } from "@/lib/noshow-cliente";
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
@@ -27,6 +28,21 @@ export async function POST(req: NextRequest) {
   await db.update(appointments)
     .set({ outcome: outcome || null, nextStep: nextStep || null, notes: notes || null, status: status || "completed", leadScore })
     .where(eq(appointments.id, appointmentId));
+
+  // No-show marcado por el rep: recien en este punto se le escribe al cliente
+  // para reagendar. El cron ya no lo asume por falta de outcome. Tope de 72 h
+  // para que marcar citas viejas no dispare mensajes tardios.
+  if (status === "no_show") {
+    if (appt.status !== "no_show") {
+      await db.update(appointments)
+        .set({ noShowCount: (appt.noShowCount ?? 0) + 1 })
+        .where(eq(appointments.id, appointmentId));
+    }
+    const horas = (Date.now() - new Date(appt.scheduledAt).getTime()) / 3600000;
+    if (horas >= 0 && horas <= 72) {
+      await enviarNoShowCliente(appt).catch(err => console.error("[outcome] noshow cliente:", err));
+    }
+  }
 
   // Crear secuencia de follow-up si el outcome lo amerita
   const shouldFollowUp = ["interested", "needs_time", "proposal_sent"].includes(outcome);
