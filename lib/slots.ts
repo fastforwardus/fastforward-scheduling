@@ -20,7 +20,6 @@ const MS = 60000;
 // UNICOS reps que atienden el pool general. Nadie mas suma capacidad ni
 // recibe citas del reparto, aunque tenga horarios cargados (ej. admin).
 export const REPS_ATENCION = [
-  "tomás marino", "tomas marino",
   "francisco logarzo",
   "emiliano caracciolo",
   "mauricio lobatón", "mauricio lobaton",
@@ -263,13 +262,12 @@ export async function generateAvailableSlots(
 }
 
 /**
- * Reparto automatico: Tomas, Francisco, Emiliano y Mauricio en round robin
+ * Reparto automatico: Francisco, Emiliano y Mauricio en round robin
  * puro por carga de citas futuras. Solo entra quien trabaja ese horario y
  * no tiene cita solapada (un rep = una cita por horario).
  */
 export async function elegirRepAutomatico(slot: Date): Promise<string | null> {
   const REPS_ROTACION = [
-    "tomás marino", "tomas marino",
     "francisco logarzo",
     "emiliano caracciolo",
     "mauricio lobatón", "mauricio lobaton",
