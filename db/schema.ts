@@ -28,6 +28,7 @@ export const users = pgTable("users", {
   timezone: text("timezone").default("America/New_York"),
   availabilityTimezone: text("availability_timezone"),
   whatsappPhone: text("whatsapp_phone"),
+  ngtecoId: text("ngteco_id"),
   canRecovery: boolean("can_recovery").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
@@ -431,4 +432,17 @@ export const campanaLeads = pgTable("campana_leads", {
   enviadoAt:   timestamp("enviado_at", { withTimezone: true }),
   respondioAt: timestamp("respondio_at", { withTimezone: true }),
   createdAt:   timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// Asistencia: fichajes remotos desde scheduling + punches de huella importados de NGTeco
+export const timeEntries = pgTable("time_entries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  punchedAt: timestamp("punched_at", { withTimezone: true }).notNull(),
+  source: text("source").notNull(),
+  kind: text("kind").notNull(),
+  externalId: text("external_id").unique(),
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
 });

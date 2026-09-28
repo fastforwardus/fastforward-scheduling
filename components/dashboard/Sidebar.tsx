@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReminderBell } from "@/components/dashboard/ReminderBell";
-import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield, Receipt, History } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield, Receipt, History, Clock } from "lucide-react";
 
 interface SidebarProps {
   user: { fullName: string; email: string; role: string; canRecovery?: boolean };
@@ -25,6 +25,7 @@ export function Sidebar({ user }: SidebarProps) {
     { href: "/dashboard/recovery", icon: PhoneCall, label: "Recupero", roles: ["admin","sales_manager","recovery"] },
     { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
     { href: "/dashboard/admin", icon: Shield, label: "Administracion", roles: ["admin"] },
+    { href: "/dashboard/admin/asistencia", icon: Clock, label: "Asistencia", roles: ["admin","sales_manager"] },
     { href: "/dashboard/admin/adriana", icon: MessageCircle, label: "Conversaciones", roles: ["admin","sales_manager","sales_rep"] },
     { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
   ];
