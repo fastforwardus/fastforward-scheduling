@@ -405,6 +405,7 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
             </table>
           </div>
         </div>
+      )}
 
       {/* Funnel */}
       <div className="rounded-2xl border bg-white p-5" style={{ borderColor: "#E5E7EB" }}>
