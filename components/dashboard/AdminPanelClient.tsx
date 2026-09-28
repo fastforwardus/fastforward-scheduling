@@ -38,6 +38,7 @@ interface Metrics {
   surveysDetail: Array<{ id: string; rating: number; feedback: string | null; clientEmail: string; submittedAt: string; repId: string | null; clientName: string | null; clientCompany: string | null }>;
   proposalsDetail: Array<{ id: string; proposalNum: string; total: number; status: string | null; clientName: string | null; clientEmail: string | null; acceptedAt: string | null; createdAt: string; sentById: string | null; appointmentId: string }>;
   usersDetail: Array<{ id: string; fullName: string; email: string }>;
+  asistencia?: { desde: string; hasta: string; porRep: Array<{ id: string; name: string; dias: number; oficina: number; remoto: number; horas: number; promDia: number; abiertas: number; tarifa: number | null; costo: number | null }> };
 }
 
 const TIMEZONES = [
@@ -340,7 +341,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
 // ─── Metrics View ─────────────────────────────────────────────────────────────
 
 function MetricsView({ metrics }: { metrics: Metrics }) {
-  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction, surveysDetail, proposalsDetail, usersDetail } = metrics;
+  const { summary, byRep, byPlatform, bySource, byScore, daily, last7, satisfaction, surveysDetail, proposalsDetail, usersDetail, asistencia } = metrics;
   const [timelineId, setTimelineId] = useState<string | null>(null);
   const [showSurveys, setShowSurveys] = useState(false);
   const [showProposals, setShowProposals] = useState(false);
@@ -371,6 +372,39 @@ function MetricsView({ metrics }: { metrics: Metrics }) {
           </div>
         ))}
       </div>
+
+      {/* Asistencia: horas y costo del mes en curso */}
+      {asistencia && asistencia.porRep.length > 0 && (
+        <div className="rounded-2xl border bg-white p-5" style={{ borderColor: "#E5E7EB" }}>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-sm font-semibold" style={{ color: "#000000" }}>Horas trabajadas · mes en curso</p>
+              <p className="text-xs" style={{ color: "#9CA3AF" }}>{asistencia.desde} a {asistencia.hasta} · huella NGTeco + clock-in remoto</p>
+            </div>
+            <a href="/dashboard/admin/asistencia" className="text-xs" style={{ color: "#0183FF" }}>Ver detalle diario →</a>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="text-left text-xs uppercase" style={{ color: "#9CA3AF" }}>
+                <tr><th className="py-1 pr-4">Persona</th><th className="py-1 pr-4">Días</th><th className="py-1 pr-4">Oficina</th><th className="py-1 pr-4">Remoto</th><th className="py-1 pr-4">Horas</th><th className="py-1 pr-4">Prom/día</th><th className="py-1 pr-4">Tarifa</th><th className="py-1 pr-4">Acumulado</th></tr>
+              </thead>
+              <tbody>
+                {asistencia.porRep.map(r => (
+                  <tr key={r.id} className="border-t" style={{ borderColor: "#F3F4F6" }}>
+                    <td className="py-1.5 pr-4 whitespace-nowrap font-medium">{r.name}</td>
+                    <td className="py-1.5 pr-4">{r.dias}{r.abiertas > 0 && <span className="text-xs ml-1" style={{ color: "#F59E0B" }}>({r.abiertas} sin salida)</span>}</td>
+                    <td className="py-1.5 pr-4">{r.oficina}</td>
+                    <td className="py-1.5 pr-4">{r.remoto}</td>
+                    <td className="py-1.5 pr-4 font-semibold">{r.horas} h</td>
+                    <td className="py-1.5 pr-4">{r.promDia ? `${r.promDia} h` : "—"}</td>
+                    <td className="py-1.5 pr-4">{r.tarifa != null ? `USD ${r.tarifa}/h` : "—"}</td>
+                    <td className="py-1.5 pr-4 font-semibold" style={{ color: "#0183FF" }}>{r.costo != null ? `USD ${r.costo.toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
       {/* Funnel */}
       <div className="rounded-2xl border bg-white p-5" style={{ borderColor: "#E5E7EB" }}>

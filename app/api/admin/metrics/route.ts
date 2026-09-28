@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
-import { appointments, users, surveys, proposals } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { appointments, users, surveys, proposals, timeEntries } from "@/db/schema";
+import { eq, and, gte, lt, asc } from "drizzle-orm";
+import { agruparPorDia, rangoDiaNY, ymdNY } from "@/lib/asistencia";
 import { getSession } from "@/lib/session";
 
 export async function GET() {
@@ -163,11 +164,42 @@ export async function GET() {
   }).from(surveys)
     .leftJoin(appointments, eq(appointments.id, surveys.appointmentId));
 
+  // Asistencia del mes en curso: huella NGTeco + clock-in remoto, horas y costo por rep
+  const hoyYmd = ymdNY(now);
+  const inicioMesYmd = hoyYmd.slice(0, 8) + "01";
+  const [mesIni] = rangoDiaNY(inicioMesYmd);
+  const [, mesFin] = rangoDiaNY(hoyYmd);
+  const marcas = await db.select({ userId: timeEntries.userId, fullName: users.fullName, punchedAt: timeEntries.punchedAt, source: timeEntries.source, kind: timeEntries.kind })
+    .from(timeEntries).innerJoin(users, eq(timeEntries.userId, users.id))
+    .where(and(gte(timeEntries.punchedAt, mesIni), lt(timeEntries.punchedAt, mesFin)))
+    .orderBy(asc(timeEntries.punchedAt));
+  const tarifas = new Map((await db.select({ id: users.id, hourlyRate: users.hourlyRate }).from(users)).map(u => [u.id, u.hourlyRate ? Number(u.hourlyRate) : null]));
+  const acum = new Map<string, { horas: number; dias: number; oficina: number; remoto: number; abiertas: number }>();
+  for (const f of agruparPorDia(marcas)) {
+    const a = acum.get(f.userId) || { horas: 0, dias: 0, oficina: 0, remoto: 0, abiertas: 0 };
+    a.dias++;
+    if (f.horas != null) a.horas += f.horas; else a.abiertas++;
+    if (f.origenes.includes("ngteco")) a.oficina++; else a.remoto++;
+    acum.set(f.userId, a);
+  }
+  const asistencia = {
+    desde: inicioMesYmd, hasta: hoyYmd,
+    porRep: allUsers.map(u => {
+      const a = acum.get(u.id) || { horas: 0, dias: 0, oficina: 0, remoto: 0, abiertas: 0 };
+      const tarifa = session.role === "admin" ? (tarifas.get(u.id) ?? null) : null;
+      const horas = Math.round(a.horas * 100) / 100;
+      return { id: u.id, name: u.fullName, dias: a.dias, oficina: a.oficina, remoto: a.remoto, horas,
+        promDia: a.dias - a.abiertas > 0 ? Math.round((horas / (a.dias - a.abiertas)) * 100) / 100 : 0,
+        abiertas: a.abiertas, tarifa, costo: tarifa != null ? Math.round(horas * tarifa * 100) / 100 : null };
+    }).filter(r => r.dias > 0 || r.tarifa != null),
+  };
+
   return NextResponse.json({
     summary: { total, assigned, completed, noShow, withOutcome, proposalSent, closed, closedDirect, closedTotal, interested, showRate, conversionRate },
     last30: { total: last30.length },
     last7:  { total: last7.length },
     byPlatform, bySource, byScore, byRep: byRepFinal, daily,
+    asistencia,
     satisfaction: { total: totalSurveys, avg: satisfactionAvg, fiveStars: satisfactionFive, fourStars: satisfactionFour, lowRating: satisfactionLow },
     surveysDetail: surveysWithRep,
     proposalsDetail: allProposals,

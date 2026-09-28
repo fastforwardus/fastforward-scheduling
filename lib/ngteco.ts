@@ -82,16 +82,30 @@ export function punchToDate(p: NgtecoPunch): Date {
   return new Date(`${yyyy}-${mm}-${dd}T${p.attendance_status}${p.timezone || "-04:00"}`);
 }
 
+const norm = (s: string) => (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
 export async function syncNgteco(days = 3) {
   const to = ymdNY(new Date());
   const from = ymdNY(new Date(Date.now() - days * 86400000));
   const punches = await fetchNgtecoPunches(from, to);
-  const reps = await db.select({ id: users.id, ngtecoId: users.ngtecoId }).from(users);
+  const reps = await db.select({ id: users.id, ngtecoId: users.ngtecoId, fullName: users.fullName }).from(users);
   const byCode = new Map(reps.filter((r) => r.ngtecoId).map((r) => [r.ngtecoId!.toUpperCase(), r.id]));
+  const byName = new Map(reps.map((r) => [norm(r.fullName), r]));
   let inserted = 0;
   const sinUsuario = new Set<string>();
+  const autoMapeados: string[] = [];
   for (const p of punches) {
-    const uid = byCode.get((p.employee_code || "").toUpperCase());
+    const code = (p.employee_code || "").toUpperCase();
+    let uid = byCode.get(code);
+    if (!uid) {
+      // Empleado nuevo en NGTeco: mapeo automatico por nombre y se guarda el ID
+      const cand = byName.get(norm(p.employee_name));
+      if (cand && !cand.ngtecoId) {
+        await db.update(users).set({ ngtecoId: code }).where(eq(users.id, cand.id));
+        cand.ngtecoId = code; byCode.set(code, cand.id); uid = cand.id;
+        autoMapeados.push(`${code} → ${cand.fullName}`);
+      }
+    }
     if (!uid) { sinUsuario.add(`${p.employee_code} ${p.employee_name}`); continue; }
     const r = await db.insert(timeEntries).values({
       userId: uid, punchedAt: punchToDate(p), source: "ngteco", kind: "punch",
@@ -99,7 +113,7 @@ export async function syncNgteco(days = 3) {
     }).onConflictDoNothing({ target: timeEntries.externalId }).returning({ id: timeEntries.id });
     inserted += r.length;
   }
-  const resumen = { at: new Date().toISOString(), from, to, punches: punches.length, inserted, sinUsuario: Array.from(sinUsuario) };
+  const resumen = { at: new Date().toISOString(), from, to, punches: punches.length, inserted, sinUsuario: Array.from(sinUsuario), autoMapeados };
   await ngtecoSetCfg("NGTECO_LAST_SYNC", JSON.stringify(resumen));
   return resumen;
 }
