@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const {
       clientName, clientEmail, clientCompany, clientWhatsapp,
       clientTimezone, clientLanguage, serviceInterest, exportVolume,
-      platform, repSlug, utmSource, scheduledAt, partnerSlug, clientNotes,
+      platform, repSlug: repSlugBody, utmSource, scheduledAt, partnerSlug, clientNotes,
     } = body;
 
     if (!clientName || !clientEmail || !clientCompany || !clientWhatsapp || !scheduledAt || !platform) {
@@ -61,6 +61,11 @@ export async function POST(req: NextRequest) {
     let assignedEmail: string | null = null;
     let assignedName = "";
     let status: "scheduled" | "pending_assignment" = "pending_assignment";
+
+    // Links personales redirigidos: las citas del link de Tomas se asignan a Francisco
+    const SLUG_REDIRECTS: Record<string, string> = { tomas: "francisco" };
+    let repSlug: string | undefined = repSlugBody;
+    if (repSlug && SLUG_REDIRECTS[repSlug]) repSlug = SLUG_REDIRECTS[repSlug];
 
     if (repSlug && repSlug !== "general") {
       const [rep] = await db.select().from(users).where(eq(users.slug, repSlug)).limit(1);

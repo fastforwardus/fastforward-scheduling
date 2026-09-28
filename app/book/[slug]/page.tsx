@@ -1,10 +1,16 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+
+// Links personales redirigidos a otro rep (ej. rep que ya no atiende citas)
+const SLUG_REDIRECTS: Record<string, string> = { tomas: "francisco" };
 import BookWizard from "@/components/booking/BookWizard";
 
 export default async function PersonalBookPage({ params }: { params: { slug: string } }) {
+  const destino = SLUG_REDIRECTS[params.slug];
+  if (destino) redirect(`/book/${destino}`);
+
   const [rep] = await db
     .select({
       id: users.id,
