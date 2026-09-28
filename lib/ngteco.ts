@@ -88,6 +88,8 @@ export async function syncNgteco(days = 3) {
   const to = ymdNY(new Date());
   const from = ymdNY(new Date(Date.now() - days * 86400000));
   const punches = await fetchNgtecoPunches(from, to);
+  const desdeIso = await ngtecoCfg("ASISTENCIA_DESDE");
+  const desde = desdeIso ? new Date(desdeIso) : null;
   const reps = await db.select({ id: users.id, ngtecoId: users.ngtecoId, fullName: users.fullName }).from(users);
   const byCode = new Map(reps.filter((r) => r.ngtecoId).map((r) => [r.ngtecoId!.toUpperCase(), r.id]));
   const byName = new Map(reps.map((r) => [norm(r.fullName), r]));
@@ -107,6 +109,7 @@ export async function syncNgteco(days = 3) {
       }
     }
     if (!uid) { sinUsuario.add(`${p.employee_code} ${p.employee_name}`); continue; }
+    if (desde && punchToDate(p) < desde) continue; // anterior al reinicio de contadores
     const r = await db.insert(timeEntries).values({
       userId: uid, punchedAt: punchToDate(p), source: "ngteco", kind: "punch",
       externalId: `ngteco:${p.id}`, userAgent: `${p.verify_type} ${p.punch_from}`,

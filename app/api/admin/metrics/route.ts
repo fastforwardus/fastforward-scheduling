@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { appointments, users, surveys, proposals, timeEntries } from "@/db/schema";
 import { eq, and, gte, lt, asc } from "drizzle-orm";
 import { agruparPorDia, rangoDiaNY, ymdNY } from "@/lib/asistencia";
+import { ngtecoCfg } from "@/lib/ngteco";
 import { getSession } from "@/lib/session";
 
 export async function GET() {
@@ -167,7 +168,9 @@ export async function GET() {
   // Asistencia del mes en curso: huella NGTeco + clock-in remoto, horas y costo por rep
   const hoyYmd = ymdNY(now);
   const inicioMesYmd = hoyYmd.slice(0, 8) + "01";
-  const [mesIni] = rangoDiaNY(inicioMesYmd);
+  const [mesIni0] = rangoDiaNY(inicioMesYmd);
+  const desdeCfg = await ngtecoCfg("ASISTENCIA_DESDE");
+  const mesIni = desdeCfg && new Date(desdeCfg) > mesIni0 ? new Date(desdeCfg) : mesIni0;
   const [, mesFin] = rangoDiaNY(hoyYmd);
   const marcas = await db.select({ userId: timeEntries.userId, fullName: users.fullName, punchedAt: timeEntries.punchedAt, source: timeEntries.source, kind: timeEntries.kind })
     .from(timeEntries).innerJoin(users, eq(timeEntries.userId, users.id))
@@ -183,7 +186,7 @@ export async function GET() {
     acum.set(f.userId, a);
   }
   const asistencia = {
-    desde: inicioMesYmd, hasta: hoyYmd,
+    desde: ymdNY(mesIni), hasta: hoyYmd,
     porRep: allUsers.map(u => {
       const a = acum.get(u.id) || { horas: 0, dias: 0, oficina: 0, remoto: 0, abiertas: 0 };
       const tarifa = session.role === "admin" ? (tarifas.get(u.id) ?? null) : null;
