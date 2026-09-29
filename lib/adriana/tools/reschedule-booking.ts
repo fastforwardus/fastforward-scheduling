@@ -109,7 +109,7 @@ export async function rescheduleBooking(input: RescheduleBookingInput, ctx: Resc
     return { ok: false, message: `Ese horario no está disponible para ${info.repName ?? "el consultor asignado"}. Llama a get_reschedule_slots y ofrece al cliente otro de los horarios libres.` };
   }
 
-  const r = await rescheduleAppointment(info.appt.id, nuevoUtc);
+  const r = await rescheduleAppointment(info.appt.id, nuevoUtc, "adriana_whatsapp");
   if (!r.ok) return { ok: false, message: r.error };
 
   await db.update(adrianaConversations)
