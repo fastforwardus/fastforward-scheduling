@@ -3,10 +3,10 @@ import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
-const NAME = "caso_actualizacion";
+const NAME = "caso_estado";
 const TPLS = [
-  { language: "es", text: "Hola {{1}}, novedades de FastForward sobre su trámite {{2}}: {{3}}. Puede ver el detalle completo en su portal de clientes. Si tiene dudas, responda por aquí.", ex: ["Juan", "Registro FDA — Alimentos", "ahora en etapa 3 de 5 (Preparación del registro)"] },
-  { language: "en", text: "Hi {{1}}, an update from FastForward on your filing {{2}}: {{3}}. You can see the full details in your client portal. If you have any questions, just reply here.", ex: ["John", "FDA Registration — Food", "now at stage 3 of 5 (Registration preparation)"] },
+  { language: "es", text: "Hola {{1}}, estado de su trámite {{2}} en FastForward: {{3}}. Puede consultar el detalle en su portal de clientes.", ex: ["Juan", "Registro FDA — Alimentos", "ahora en etapa 3 de 5 (Preparación del registro)"] },
+  { language: "en", text: "Hi {{1}}, status of your filing {{2}} at FastForward: {{3}}. You can check the details in your client portal.", ex: ["John", "FDA Registration — Food", "now at stage 3 of 5 (Registration preparation)"] },
 ];
 
 async function auth(req: Request) {
