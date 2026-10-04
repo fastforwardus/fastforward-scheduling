@@ -1,6 +1,8 @@
 import { portal } from "./portal-db";
 import { logEvent, touch } from "./queries";
 import { sendStatusUpdate } from "./notify";
+import { createNextMilestone } from "./milestones";
+import { sendCloseSurvey } from "./survey";
 
 export type StageResult =
   | { ok: true; filingCompleted: boolean; completedStage: string; nextStage: string | null }
@@ -42,6 +44,10 @@ export async function completeActiveStage(filingId: string, actor: { email: stri
 
   await touch(filingId);
   try { await sendStatusUpdate(filingId, actor, result.filingCompleted ? "completed" : "stage_change"); } catch (e) { console.error("[status] aviso al cliente falló:", e); }
+  if (result.filingCompleted) {
+    try { await createNextMilestone(filingId, actor.name); } catch (e) { console.error("[status] hito falló:", e); }
+    try { await sendCloseSurvey(filingId); } catch (e) { console.error("[status] encuesta falló:", e); }
+  }
   await logEvent(filingId, actor, "stage_complete", { stage: current.name_es }, { next: next?.name_es ?? null, filingCompleted: result.filingCompleted });
   return { ok: true, filingCompleted: result.filingCompleted, completedStage: current.name_es, nextStage: next?.name_es ?? null };
 }

@@ -4,6 +4,8 @@ import { portal } from "@/lib/status/portal-db";
 import { getCase, ensureMeta, touch, logEvent } from "@/lib/status/queries";
 import { completeActiveStage } from "@/lib/status/stages";
 import { sendStatusUpdate } from "@/lib/status/notify";
+import { createNextMilestone } from "@/lib/status/milestones";
+import { sendCloseSurvey } from "@/lib/status/survey";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +67,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     await portal`INSERT INTO case_comments (filing_id, author_email, author_name, kind, body)
                  VALUES (${id}, ${session.email}, ${session.fullName}, 'system', ${`Caso cerrado: ${reason === "completed" ? "completado" : reason === "cancelled" ? "cancelado" : "sin respuesta"}${b.note ? ` — ${String(b.note).trim()}` : ""}`})`;
     await logEvent(id, actor, "close", before, { closed_reason: reason });
-    return NextResponse.json({ ok: true });
+    let milestone = null, survey = null;
+    if (reason === "completed") {
+      try { milestone = await createNextMilestone(id, session.fullName); } catch (e) { console.error(e); }
+      try { survey = await sendCloseSurvey(id); } catch (e) { console.error(e); }
+    }
+    return NextResponse.json({ ok: true, milestone, survey });
   }
 
   if (b.action === "reopen") {
