@@ -2,6 +2,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MessageCircle, Phone, Mail, X, Copy, Building2, RotateCcw, CheckCircle2 } from "lucide-react";
 import type { CaseRow } from "@/lib/status/queries";
+import { Sidebar } from "@/components/dashboard/Sidebar";
+
+type User = { id?: string; fullName: string; email: string; role: string; slug?: string; canRecovery?: boolean };
 
 type Scope = "open" | "closed";
 type Detail = {
@@ -48,7 +51,8 @@ function ContactButtons({ c, compact }: { c: CaseRow; compact?: boolean }) {
   );
 }
 
-export default function StatusClient({ isAdmin }: { isAdmin: boolean }) {
+export default function StatusClient({ user }: { user: User }) {
+  const isAdmin = user.role === "admin";
   const [scope, setScope] = useState<Scope>("open");
   const [rows, setRows] = useState<CaseRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,6 +104,9 @@ export default function StatusClient({ isAdmin }: { isAdmin: boolean }) {
   async function refreshAll(id: string) { await Promise.all([load(), openDetail(id)]); }
 
   return (
+    <div className="flex min-h-screen" style={{ background: "#F8F9FB" }}>
+    <Sidebar user={user} />
+    <main className="flex-1 lg:ml-0 pt-14 lg:pt-0 overflow-auto">
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -118,7 +125,7 @@ export default function StatusClient({ isAdmin }: { isAdmin: boolean }) {
           {byAgent.map(([name, v]) => (
             <button key={name} onClick={() => setFAgent(fAgent === name ? "" : name)} className={`rounded-md border px-3 py-2 text-left text-xs ${fAgent === name ? "border-black bg-gray-50" : "hover:bg-gray-50"}`}>
               <div className="font-medium text-gray-900">{name}</div>
-              <div className="text-gray-500">{v.total} activos · <span className={v.red ? "text-red-600" : ""}>{v.red} sin movimiento</span> · <span className={v.late ? "text-amber-600" : ""}>{v.late} fuera de SLA</span></div>
+              <div className="text-gray-500">{v.total} activos · <span className={v.red ? "text-red-600" : ""}>{v.red} sin movimiento +14 d</span> · <span className={v.late ? "text-amber-600" : ""}>{v.late} con etapa demorada</span></div>
             </button>
           ))}
         </div>
@@ -134,7 +141,7 @@ export default function StatusClient({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-md border">
+      <div className="overflow-x-auto rounded-md border bg-white">
         <table className="w-full text-sm">
           <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
             <tr>
@@ -154,14 +161,15 @@ export default function StatusClient({ isAdmin }: { isAdmin: boolean }) {
               <tr key={r.id} onClick={() => openDetail(r.id)} className="cursor-pointer border-t hover:bg-gray-50">
                 <td className="px-3 py-2"><span className={`inline-block h-2.5 w-2.5 rounded-full ${LIGHT[r.light]}`} title={`${r.daysInactive} días sin movimiento`} /></td>
                 <td className="px-3 py-2">
-                  <div className="font-medium text-gray-900">{r.company}{r.country ? <span className="ml-1 text-xs font-normal text-gray-400">· {r.country}</span> : null}</div>
-                  <div className="text-xs text-gray-600">{r.filingName}</div>
+                  <div className="font-semibold text-gray-900">{r.company}</div>
+                  <div className="text-xs text-gray-500">{r.contactName}{r.country ? ` · ${r.country}` : ""}</div>
+                  <div className="mt-0.5 text-xs text-gray-700">{r.filingName}</div>
                   {r.lastComment && <div className="mt-0.5 line-clamp-1 text-xs text-gray-400">{r.lastCommentBy}: {r.lastComment}</div>}
                 </td>
                 <td className="px-3 py-2 text-gray-700">{r.agentName || <span className="text-gray-400">Sin asignar</span>}</td>
                 <td className="px-3 py-2">
                   {r.stageName ? <><div className="text-gray-900">{r.stagePos}/{r.stageTotal}</div><div className="line-clamp-1 text-xs text-gray-500">{r.stageName}</div></> : <span className="text-gray-400">—</span>}
-                  {scope === "open" && r.sla === "late" && <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 text-[10px] font-medium text-amber-800">Fuera de SLA</span>}
+                  {scope === "open" && r.sla === "late" && <span className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 text-[10px] font-medium text-amber-800">Demorada {r.slaOverDays} d</span>}
                 </td>
                 <td className="px-3 py-2">
                   <span className={`rounded px-1.5 py-0.5 text-xs ${r.waitingOn === "client" ? "bg-blue-50 text-blue-700" : r.waitingOn === "authority" ? "bg-purple-50 text-purple-700" : r.waitingOn === "us" ? "bg-red-50 text-red-700" : "bg-gray-100 text-gray-500"}`}>{r.waitingOn ? WAITING[r.waitingOn] : "Sin definir"}</span>
@@ -181,6 +189,8 @@ export default function StatusClient({ isAdmin }: { isAdmin: boolean }) {
       {sel && <DetailPanel id={sel} detail={detail} isAdmin={isAdmin} onClose={() => { setSel(null); setDetail(null); }} onChanged={() => refreshAll(sel)} onAccount={async (cid) => { const r = await fetch(`/api/status/account/${cid}`, { cache: "no-store" }); if (r.ok) setAccount(await r.json()); }} setMsg={setMsg} />}
       {account && <AccountPanel a={account} onClose={() => setAccount(null)} onOpen={(id) => { setAccount(null); openDetail(id); }} />}
       {msg && <div className="fixed bottom-4 right-4 rounded-md bg-black px-4 py-2 text-sm text-white shadow" onAnimationEnd={() => setMsg("")}>{msg}</div>}
+    </div>
+    </main>
     </div>
   );
 }
@@ -215,6 +225,15 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
     const r = await fetch(`/api/status/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "close", reason: closeReason, note: closeNote }) });
     setBusy(false); flash(r.ok ? "Caso cerrado" : "Error"); if (r.ok) onChanged();
   }
+  async function completeStage() {
+    const cur = detail?.stages.find((s) => s.status === "active");
+    if (!cur) return flash("No hay etapa activa");
+    if (!confirm(`¿Marcar como completada la etapa "${cur.name}"? Impacta en el portal del cliente.`)) return;
+    setBusy(true);
+    const r = await fetch(`/api/status/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "complete_stage" }) });
+    const j = await r.json();
+    setBusy(false); flash(r.ok ? (j.filingCompleted ? "Trámite completado" : `Ahora en: ${j.nextStage}`) : j.error || "Error"); if (r.ok) onChanged();
+  }
   async function reopen() {
     setBusy(true);
     const r = await fetch(`/api/status/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "reopen" }) });
@@ -244,7 +263,8 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
               <div className="mb-1 flex items-center justify-between text-xs font-medium uppercase text-gray-500">Resumen para el teléfono
                 <button onClick={() => { navigator.clipboard.writeText(c.summary); flash("Copiado"); }} className="inline-flex items-center gap-1 text-gray-600 hover:text-black"><Copy className="h-3.5 w-3.5" />Copiar</button></div>
               <p className="text-sm text-gray-900">{c.summary}</p>
-              {c.sla === "late" && <p className="mt-1 text-xs text-amber-700">Etapa fuera de SLA: vencía el {fmtD(c.slaDueAt)}.</p>}
+              {c.sla === "late" && <p className="mt-1 text-xs text-amber-700">Esta etapa tenía {c.slaPlannedDays} días previstos y ya lleva {c.slaElapsedDays} ({c.slaOverDays} de más).</p>}
+              {c.sla === "ok" && <p className="mt-1 text-xs text-gray-500">Esta etapa tiene {c.slaPlannedDays} días previstos; lleva {c.slaElapsedDays}.</p>}
             </div>
 
             {!c.closedAt && (
@@ -262,13 +282,14 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
             )}
 
             <div>
-              <div className="mb-2 text-xs font-medium uppercase text-gray-500">Etapas</div>
+              <div className="mb-2 flex items-center justify-between text-xs font-medium uppercase text-gray-500">Etapas
+                {!c.closedAt && detail!.stages.some((s) => s.status === "active") && <button disabled={busy} onClick={completeStage} className="rounded-md bg-black px-3 py-1 text-xs font-normal normal-case text-white disabled:opacity-50">Completar etapa actual →</button>}</div>
               <ol className="space-y-1">
                 {detail!.stages.map((s) => (
                   <li key={s.id} className="flex items-center gap-2 text-sm">
                     <span className={`h-2 w-2 rounded-full ${s.status === "completed" ? "bg-emerald-500" : s.status === "active" ? "bg-black" : s.status === "skipped" ? "bg-gray-300" : "bg-gray-200"}`} />
                     <span className={s.status === "active" ? "font-medium text-gray-900" : "text-gray-700"}>{s.position}. {s.name}</span>
-                    <span className="ml-auto text-xs text-gray-400">{s.status === "completed" ? `✓ ${fmtD(s.completed_at)}` : s.status === "active" ? `desde ${fmtD(s.started_at)}${s.duration_days ? ` · SLA ${s.duration_days} d` : ""}` : s.status === "skipped" ? "omitida" : "pendiente"}</span>
+                    <span className="ml-auto text-xs text-gray-400">{s.status === "completed" ? `✓ ${fmtD(s.completed_at)}` : s.status === "active" ? `desde ${fmtD(s.started_at)}${s.duration_days ? ` · previsto ${s.duration_days} d` : ""}` : s.status === "skipped" ? "omitida" : "pendiente"}</span>
                   </li>
                 ))}
               </ol>

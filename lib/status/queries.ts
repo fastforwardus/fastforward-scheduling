@@ -47,6 +47,9 @@ export type CaseRow = {
   light: Light;
   sla: SlaState;
   slaDueAt: string | null;
+  slaPlannedDays: number | null;
+  slaElapsedDays: number | null;
+  slaOverDays: number | null;
   summary: string;
 };
 
@@ -69,8 +72,14 @@ function derive(r: any): CaseRow {
   const light: Light = daysInactive < 7 ? "green" : daysInactive < 14 ? "yellow" : "red";
   let sla: SlaState = "none";
   let slaDueAt: string | null = null;
+  let slaPlannedDays: number | null = null;
+  let slaElapsedDays: number | null = null;
+  let slaOverDays: number | null = null;
   if (r.stage_started_at && r.stage_duration_days != null) {
-    const due = new Date(new Date(r.stage_started_at).getTime() + Number(r.stage_duration_days) * DAY);
+    slaPlannedDays = Number(r.stage_duration_days);
+    slaElapsedDays = Math.floor((now - new Date(r.stage_started_at).getTime()) / DAY);
+    slaOverDays = Math.max(0, slaElapsedDays - slaPlannedDays);
+    const due = new Date(new Date(r.stage_started_at).getTime() + slaPlannedDays * DAY);
     slaDueAt = due.toISOString();
     sla = due.getTime() >= now ? "ok" : "late";
   }
@@ -90,9 +99,9 @@ function derive(r: any): CaseRow {
     startDate: r.start_date ? new Date(r.start_date).toISOString() : null,
     estimatedEndDate: r.estimated_end_date ? new Date(r.estimated_end_date).toISOString() : null,
     clientId: r.client_id,
-    company: r.company,
+    company: r.legal_name || r.company,
     legalName: r.legal_name ?? null,
-    contactName: r.contact_name ?? null,
+    contactName: r.contact_name || r.company || null,
     email: r.email ?? null,
     whatsapp: r.whatsapp ?? null,
     phone: r.phone ?? null,
@@ -123,6 +132,9 @@ function derive(r: any): CaseRow {
     light,
     sla,
     slaDueAt,
+    slaPlannedDays,
+    slaElapsedDays,
+    slaOverDays,
     summary,
   };
 }

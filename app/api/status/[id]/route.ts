@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/session";
 import { portal } from "@/lib/status/portal-db";
 import { getCase, ensureMeta, touch, logEvent } from "@/lib/status/queries";
+import { completeActiveStage } from "@/lib/status/stages";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                  VALUES (${id}, ${session.email}, ${session.fullName}, 'system', 'Caso reabierto')`;
     await logEvent(id, actor, "reopen", before, null);
     return NextResponse.json({ ok: true });
+  }
+
+  if (b.action === "complete_stage") {
+    const r = await completeActiveStage(id, { email: session.email, name: session.fullName });
+    return NextResponse.json(r, { status: r.ok ? 200 : 400 });
   }
 
   return NextResponse.json({ error: "acción inválida" }, { status: 400 });
