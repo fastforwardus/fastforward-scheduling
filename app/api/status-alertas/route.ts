@@ -48,18 +48,26 @@ export async function GET(req: NextRequest) {
   for (const [email, grp] of grupos) {
     if (!grp.inactivos.length && !grp.esperando.length && !grp.hitos.length) continue;
     resumen[email] = { inactivos: grp.inactivos.length, esperando: grp.esperando.length, hitos: grp.hitos.length };
-    const fila = (c: (typeof open)[number], extra: string) => `<tr><td style="padding:8px;border-bottom:1px solid #F0F0F0;"><strong>${c.company}</strong><br><span style="color:#6B7280;font-size:12px;">${c.filingName}</span></td><td style="padding:8px;border-bottom:1px solid #F0F0F0;font-size:12px;color:#374151;">${extra}</td><td style="padding:8px;border-bottom:1px solid #F0F0F0;white-space:nowrap;"><a href="${APP_URL}/dashboard/status" style="color:#0183FF;font-size:12px;">Abrir</a></td></tr>`;
-    const secc = (titulo: string, filas: string[]) => filas.length ? `<h3 style="font-size:14px;color:#000;margin:22px 0 8px;">${titulo} (${filas.length})</h3><table style="width:100%;border-collapse:collapse;font-size:13px;">${filas.join("")}</table>` : "";
+    const card = (titulo: string, sub: string, detalle: string, botones: string) => `
+      <div style="border:1px solid #E5E7EB;border-left:4px solid #0183FF;border-radius:10px;padding:14px 16px;margin:10px 0;">
+        <div style="font-size:15px;font-weight:700;color:#000;">${titulo}</div>
+        <div style="font-size:13px;color:#4B5563;margin:2px 0 8px;">${sub}</div>
+        <div style="font-size:13px;color:#111;background:#F8F9FB;border-radius:8px;padding:8px 10px;">${detalle}</div>
+        <div style="margin-top:10px;">${botones}</div>
+      </div>`;
+    const btn = (href: string, label: string, color = "#0183FF") => `<a href="${href}" style="display:inline-block;background:${color};color:#fff;text-decoration:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-right:8px;">${label}</a>`;
+    const secc = (titulo: string, items: string[]) => items.length ? `<h3 style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:#6B7280;margin:28px 0 6px;">${titulo} <span style="background:#0183FF;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;">${items.length}</span></h3>${items.join("")}` : "";
+    const verCaso = (id: string) => btn(`${APP_URL}/dashboard/status?case=${id}`, "Ver caso");
     const html = `
-<div style="font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:24px;">
+<div style="font-family:system-ui,-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#F8F9FB;">
   <div style="background:#0183FF;border-radius:16px 16px 0 0;padding:22px;text-align:center;"><img src="${LOGO_WHITE}" height="30" alt="FastForward"></div>
   <div style="background:#fff;border:1px solid #E5E7EB;border-top:none;border-radius:0 0 16px 16px;padding:28px;">
-    <p style="font-size:16px;font-weight:700;color:#000;margin:0 0 4px;">Hola ${grp.name.split(" ")[0]}, tus casos que necesitan acción</p>
-    <p style="font-size:12px;color:#6B7280;margin:0;">Resumen diario de Status · ${fmt(new Date())}</p>
-    ${secc("Sin movimiento hace más de 14 días", grp.inactivos.map((c) => fila(c, `${c.daysInactive} días sin actividad · etapa ${c.stagePos ?? "-"}/${c.stageTotal}${c.stageName ? ` (${c.stageName})` : ""}`)))}
-    ${secc("Esperando respuesta hace más de 10 días", grp.esperando.map((c) => fila(c, `Esperando a ${c.waitingOn === "client" ? "cliente" : "autoridad"} · ${c.daysInactive} días${c.nextStep ? ` · ${c.nextStep}` : ""}${c.waitingOn === "client" && waLink(c.whatsapp || c.phone, `Hola ${c.contactName || ""}, le escribo de FastForward sobre su trámite "${c.filingName}". Para continuar necesitamos: ${c.nextStep || "su respuesta"}. ¿Me confirma cuándo podría enviarlo?`) ? ` · <a href="${waLink(c.whatsapp || c.phone, `Hola ${c.contactName || ""}, le escribo de FastForward sobre su trámite "${c.filingName}". Para continuar necesitamos: ${c.nextStep || "su respuesta"}. ¿Me confirma cuándo podría enviarlo?`)}" style="color:#059669;">Reclamar por WhatsApp</a>` : ""}`)))}
-    ${secc("Vencimientos en los próximos 60 días", grp.hitos.map((h) => { const emp = h.legal_name || h.company; const wa = waLink(h.whatsapp || h.phone, `Hola ${h.contact || ""}, le escribo de FastForward. Le recordamos que el ${fmt(h.due_date)} vence: ${h.label} (${emp}). Podemos gestionarlo por usted; ¿quiere que le enviemos la propuesta?`); return `<tr><td style="padding:8px;border-bottom:1px solid #F0F0F0;"><strong>${emp}</strong><br><span style="color:#6B7280;font-size:12px;">${h.filing_name || ""}</span></td><td style="padding:8px;border-bottom:1px solid #F0F0F0;font-size:12px;color:#374151;">${h.label}<br><strong>vence ${fmt(h.due_date)}</strong></td><td style="padding:8px;border-bottom:1px solid #F0F0F0;white-space:nowrap;font-size:12px;">${wa ? `<a href="${wa}" style="color:#059669;">WhatsApp</a>` : "sin tel."}</td></tr>`; }))}
-    <p style="font-size:12px;color:#9CA3AF;margin:24px 0 0;">Este aviso se repite semanalmente mientras el caso siga igual. Registra el contacto en Status para que deje de aparecer.</p>
+    <p style="font-size:18px;font-weight:700;color:#000;margin:0 0 4px;">Hola ${grp.name.split(" ")[0]}, estos casos necesitan acción</p>
+    <p style="font-size:12px;color:#6B7280;margin:0;">Resumen diario · ${fmt(new Date())}</p>
+    ${secc("Sin movimiento hace más de 14 días", grp.inactivos.map((c) => card(c.company, c.filingName, `<strong>${c.daysInactive} días</strong> sin actividad · etapa ${c.stagePos ?? "-"} de ${c.stageTotal}${c.stageName ? ` · ${c.stageName}` : ""}`, verCaso(c.id))))}
+    ${secc("Esperando respuesta hace más de 10 días", grp.esperando.map((c) => { const msg = `Hola ${c.contactName || ""}, le escribo de FastForward sobre su trámite "${c.filingName}". Para continuar necesitamos: ${c.nextStep || "su respuesta"}. ¿Me confirma cuándo podría enviarlo?`; const wa = c.waitingOn === "client" ? waLink(c.whatsapp || c.phone, msg) : null; return card(c.company, c.filingName, `Esperando a <strong>${c.waitingOn === "client" ? "cliente" : "autoridad"}</strong> hace ${c.daysInactive} días${c.nextStep ? ` · ${c.nextStep}` : ""}`, verCaso(c.id) + (wa ? btn(wa, "Reclamar por WhatsApp", "#059669") : "")); }))}
+    ${secc("Vencimientos en los próximos 60 días", grp.hitos.map((h) => { const emp = h.legal_name || h.company; const wa = waLink(h.whatsapp || h.phone, `Hola ${h.contact || ""}, le escribo de FastForward. Le recordamos que el ${fmt(h.due_date)} vence: ${h.label} (${emp}). Podemos gestionarlo por usted; ¿quiere que le enviemos la propuesta?`); return card(emp, h.filing_name || "", `${h.label} · <strong>vence ${fmt(h.due_date)}</strong>`, (h.filing_id ? verCaso(h.filing_id) : "") + (wa ? btn(wa, "Avisar por WhatsApp", "#059669") : "")); }))}
+    <p style="font-size:12px;color:#9CA3AF;margin:28px 0 0;line-height:1.5;">Este aviso se repite cada semana mientras el caso siga igual. Registra el contacto en Status y deja de aparecer.</p>
   </div>
 </div>`;
     if (apply) {

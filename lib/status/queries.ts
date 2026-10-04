@@ -67,6 +67,12 @@ function fmt(d: string | Date | null): string {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function derive(r: any): CaseRow {
   const now = Date.now();
+  for (const suf of [r.legal_name, r.company]) {
+    if (suf && typeof r.filing_name === "string" && r.filing_name.toLowerCase().endsWith(` — ${String(suf).toLowerCase()}`)) {
+      r.filing_name = r.filing_name.slice(0, r.filing_name.length - String(suf).length - 3).trim();
+      break;
+    }
+  }
   const last = new Date(r.last_activity_at ?? r.created_at);
   const daysInactive = Math.floor((now - last.getTime()) / DAY);
   const light: Light = daysInactive < 7 ? "green" : daysInactive < 14 ? "yellow" : "red";
@@ -89,7 +95,7 @@ function derive(r: any): CaseRow {
   const closed = !!r.closed_at;
   const summary = closed
     ? `${r.filing_name}: cerrado el ${fmt(r.closed_at)} (${r.closed_reason === "completed" ? "completado" : r.closed_reason === "cancelled" ? "cancelado" : "sin respuesta"}).`
-    : `${r.filing_name}: ${r.stage_name ? `etapa ${stagePos} de ${stageTotal} (${r.stage_name})` : "sin etapa activa"}, esperando a ${waitingLabel(r.waiting_on).toLowerCase()}${r.next_step ? ` — próximo paso: ${r.next_step}` : ""}. Última acción ${fmt(r.last_activity_at)} por ${who}.`;
+    : `${r.filing_name}: ${r.stage_name ? `etapa ${stagePos} de ${stageTotal} (${r.stage_name})` : "sin etapa activa"}${r.waiting_on ? `, esperando a ${waitingLabel(r.waiting_on).toLowerCase()}` : ""}${r.next_step ? ` — próximo paso: ${r.next_step}` : ""}. Última acción ${fmt(r.last_activity_at)} por ${who}.`;
   return {
     id: r.id,
     filingName: r.filing_name,
