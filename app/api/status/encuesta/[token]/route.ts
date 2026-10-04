@@ -18,11 +18,11 @@ export async function GET(req: Request, { params }: { params: { token: string } 
   if (!m) return page("FastForward", `<p style="font-size:16px;color:#374151;">Este enlace no es válido o ya expiró.</p>`);
   const en = m.lang === "en";
   if (![1, 2, 3].includes(s)) return page("FastForward", `<p style="font-size:16px;color:#374151;">${en ? "Invalid option." : "Opción no válida."}</p>`);
-  if (m.survey_score == null) {
+  if (m.survey_score !== s) {
     await portal`UPDATE case_meta SET survey_score = ${s}, survey_at = now(), updated_at = now() WHERE filing_id = ${m.filing_id}`;
-    await portal`INSERT INTO case_comments (filing_id, author_email, author_name, kind, body) VALUES (${m.filing_id}, 'system', 'Sistema', 'system', ${`Encuesta de cierre: ${["", "☹️ Mala", "😐 Regular", "😊 Excelente"][s]}`})`;
+    await portal`INSERT INTO case_comments (filing_id, author_email, author_name, kind, body) VALUES (${m.filing_id}, 'system', 'Sistema', 'system', ${`Encuesta de cierre: ${["", "☹️ Mala", "😐 Regular", "😊 Excelente"][s]}${m.survey_score != null ? " (cambió su respuesta)" : ""}`})`;
   }
-  const score = m.survey_score ?? s;
+  const score = s;
   if (score === 3) {
     return page("¡Gracias!", `<div style="font-size:48px;">😊</div><p style="font-size:18px;font-weight:700;color:#000;margin:12px 0 8px;">${en ? "Thank you!" : "¡Muchas gracias!"}</p>
 <p style="font-size:14px;color:#374151;line-height:1.6;">${en ? "It would mean a lot to us if you could leave a short public review. It takes one minute:" : "Nos ayudaría muchísimo que deje una breve reseña pública. Toma un minuto:"}</p>
