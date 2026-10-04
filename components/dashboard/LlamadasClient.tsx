@@ -13,6 +13,30 @@ type Slot = { utc: string; label: string; date: string };
 const BLUE = "#0183FF";
 const fmtTz = (iso: string, tz: string) => new Date(iso).toLocaleString("es-US", { timeZone: tz, weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 const digits = (s: string) => s.replace(/\D/g, "");
+const COUNTRIES: { code: string; name: string; prefix: string; mobile?: string }[] = [
+  { code: "AR", name: "Argentina", prefix: "54", mobile: "9" },
+  { code: "MX", name: "México", prefix: "52" },
+  { code: "CO", name: "Colombia", prefix: "57" },
+  { code: "CL", name: "Chile", prefix: "56" },
+  { code: "PE", name: "Perú", prefix: "51" },
+  { code: "UY", name: "Uruguay", prefix: "598" },
+  { code: "PY", name: "Paraguay", prefix: "595" },
+  { code: "BO", name: "Bolivia", prefix: "591" },
+  { code: "EC", name: "Ecuador", prefix: "593" },
+  { code: "BR", name: "Brasil", prefix: "55" },
+  { code: "ES", name: "España", prefix: "34" },
+  { code: "US", name: "EE. UU. / Canadá", prefix: "1" },
+];
+/** Si el número viene sin prefijo internacional, lo completa con el país elegido (AR celulares: 54 9 + área + número). */
+function toE164(raw: string, country: string): string {
+  const d = digits(raw);
+  if (raw.trim().startsWith("+") || raw.trim().startsWith("00")) return d.replace(/^00/, "");
+  const c = COUNTRIES.find((x) => x.code === country) || COUNTRIES[0];
+  if (d.startsWith(c.prefix) && d.length >= c.prefix.length + 9) return d;
+  let local = d.replace(/^0/, "");
+  if (c.code === "AR") { local = local.replace(/^15/, ""); if (!local.startsWith("9")) local = "9" + local; }
+  return c.prefix + local;
+}
 
 export default function LlamadasClient({ user }: { user: User }) {
   const tz = user.timezone || "America/New_York";
@@ -26,6 +50,7 @@ export default function LlamadasClient({ user }: { user: User }) {
   const [loadingContact, setLoadingContact] = useState(false);
   const [script, setScript] = useState<string | null>(null);
   const [manual, setManual] = useState("");
+  const [country, setCountry] = useState<string>(() => (tz.startsWith("America/Argentina") ? "AR" : tz === "America/New_York" ? "US" : "AR"));
   const [showPad, setShowPad] = useState(true);
   const [newList, setNewList] = useState(false);
   const [editScript, setEditScript] = useState(false);
@@ -140,13 +165,15 @@ export default function LlamadasClient({ user }: { user: User }) {
                 <div className="bg-white rounded-2xl border p-5" style={{ borderColor: "#E5E7EB" }}>
                   <div className="text-xs uppercase tracking-widest mb-2" style={{ color: "#9CA3AF" }}>Marcar un número</div>
                   <div className="flex items-center gap-2 mb-3">
-                    <input value={manual} onChange={(e) => setManual(e.target.value)} placeholder="+54 9 11 1234 5678" className="flex-1 text-xl px-3 py-2 rounded-lg border font-mono" style={{ borderColor: "#E5E7EB" }} />
+                    <select value={country} onChange={(e) => setCountry(e.target.value)} className="text-sm px-2 py-2 rounded-lg border bg-white" style={{ borderColor: "#E5E7EB" }}>{COUNTRIES.map((c) => <option key={c.code} value={c.code}>{c.name} +{c.prefix}</option>)}</select>
+                    <input value={manual} onChange={(e) => setManual(e.target.value)} placeholder={country === "AR" ? "11 1234 5678 (sin 0 ni 15)" : "número local o con +"} className="flex-1 text-xl px-3 py-2 rounded-lg border font-mono" style={{ borderColor: "#E5E7EB" }} />
                     <button onClick={() => setManual((v) => v.slice(0, -1))} className="p-2 rounded-lg border" style={{ borderColor: "#E5E7EB" }}><Delete className="w-5 h-5" /></button>
                   </div>
                   <div className="grid grid-cols-3 gap-2 max-w-xs">
                     {["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"].map((k) => <button key={k} onClick={() => setManual((v) => v + k)} className="py-3 rounded-full text-lg font-medium" style={{ background: "#F3F4F6", color: "#000" }}>{k}</button>)}
                   </div>
-                  <button disabled={!voiceReady || digits(manual).length < 8} onClick={() => call(manual, "manual", "")} className="mt-3 inline-flex items-center gap-2 px-6 py-3 rounded-full text-white font-semibold disabled:opacity-40" style={{ background: calling ? "#DC2626" : "#22C55E" }}>{calling ? <><PhoneOff className="w-5 h-5" />Cortar · {mm}:{ss}</> : <><Phone className="w-5 h-5" />Llamar</>}</button>
+                  <p className="text-xs mt-2 mb-1" style={{ color: "#9CA3AF" }}>Se marcará: +{digits(manual).length >= 6 ? toE164(manual, country) : "…"}</p>
+                  <button disabled={!voiceReady || digits(manual).length < 8} onClick={() => call(toE164(manual, country), "manual", "")} className="mt-3 inline-flex items-center gap-2 px-6 py-3 rounded-full text-white font-semibold disabled:opacity-40" style={{ background: calling ? "#DC2626" : "#22C55E" }}>{calling ? <><PhoneOff className="w-5 h-5" />Cortar · {mm}:{ss}</> : <><Phone className="w-5 h-5" />Llamar</>}</button>
                 </div>
               )}
 
