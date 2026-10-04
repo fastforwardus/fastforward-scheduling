@@ -71,6 +71,10 @@
     {
       "path": "/api/ngteco-sync",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/status-alertas?apply=1",
+      "schedule": "0 12 * * 1-5"
     }
   ]
 }
