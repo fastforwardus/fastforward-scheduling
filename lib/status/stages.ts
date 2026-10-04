@@ -1,5 +1,6 @@
 import { portal } from "./portal-db";
 import { logEvent, touch } from "./queries";
+import { sendStatusUpdate } from "./notify";
 
 export type StageResult =
   | { ok: true; filingCompleted: boolean; completedStage: string; nextStage: string | null }
@@ -40,6 +41,7 @@ export async function completeActiveStage(filingId: string, actor: { email: stri
   });
 
   await touch(filingId);
+  try { await sendStatusUpdate(filingId, actor, result.filingCompleted ? "completed" : "stage_change"); } catch (e) { console.error("[status] aviso al cliente falló:", e); }
   await logEvent(filingId, actor, "stage_complete", { stage: current.name_es }, { next: next?.name_es ?? null, filingCompleted: result.filingCompleted });
   return { ok: true, filingCompleted: result.filingCompleted, completedStage: current.name_es, nextStage: next?.name_es ?? null };
 }

@@ -3,6 +3,7 @@ import { getSession } from "@/lib/session";
 import { portal } from "@/lib/status/portal-db";
 import { getCase, ensureMeta, touch, logEvent } from "@/lib/status/queries";
 import { completeActiveStage } from "@/lib/status/stages";
+import { sendStatusUpdate } from "@/lib/status/notify";
 
 export const dynamic = "force-dynamic";
 
@@ -77,6 +78,11 @@ export async function POST(req: Request, { params }: { params: { id: string } })
                  VALUES (${id}, ${session.email}, ${session.fullName}, 'system', 'Caso reabierto')`;
     await logEvent(id, actor, "reopen", before, null);
     return NextResponse.json({ ok: true });
+  }
+
+  if (b.action === "send_update") {
+    const r = await sendStatusUpdate(id, { email: session.email, name: session.fullName }, "manual");
+    return NextResponse.json(r, { status: r.ok ? 200 : 400 });
   }
 
   if (b.action === "complete_stage") {

@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MessageCircle, Phone, Mail, X, Copy, Building2, RotateCcw, CheckCircle2 } from "lucide-react";
+import { MessageCircle, Phone, Mail, X, Copy, Building2, RotateCcw, CheckCircle2, Send } from "lucide-react";
 import type { CaseRow } from "@/lib/status/queries";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 
@@ -12,6 +12,7 @@ type Detail = {
   stages: { id: string; position: number; name: string; status: string; started_at: string | null; completed_at: string | null; duration_days: number | null }[];
   comments: { id: string; author_name: string; kind: string; body: string; created_at: string }[];
   events: { id: string; actor_name: string | null; action: string; created_at: string }[];
+  notifications: { id: string; channel: string; kind: string; recipient: string; status: string; sent_by: string | null; created_at: string }[];
   deliverables: { id: string; name: string; filename: string; blob_url: string; created_at: string }[];
   siblings: { id: string; name: string; status: string; closed_at: string | null; key_date: string | null; key_date_label: string | null }[];
 };
@@ -115,7 +116,7 @@ export default function StatusClient({ user }: { user: User }) {
         </div>
         <div className="flex gap-1 rounded-md border p-0.5">
           {(["open", "closed"] as Scope[]).map((s) => (
-            <button key={s} onClick={() => setScope(s)} className={`px-3 py-1.5 text-sm rounded ${scope === s ? "bg-black text-white" : "text-gray-700 hover:bg-gray-100"}`}>{s === "open" ? "Abiertos" : "Cerrados"}</button>
+            <button key={s} onClick={() => setScope(s)} className={`px-3 py-1.5 text-sm rounded ${scope === s ? "bg-[#0183FF] text-white" : "text-gray-700 hover:bg-gray-100"}`}>{s === "open" ? "Abiertos" : "Cerrados"}</button>
           ))}
         </div>
       </div>
@@ -225,6 +226,13 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
     const r = await fetch(`/api/status/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "close", reason: closeReason, note: closeNote }) });
     setBusy(false); flash(r.ok ? "Caso cerrado" : "Error"); if (r.ok) onChanged();
   }
+  async function sendUpdate() {
+    if (!confirm("¿Enviar al cliente la actualización de este trámite por email (y WhatsApp si está habilitado)?")) return;
+    setBusy(true);
+    const r = await fetch(`/api/status/${id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "send_update" }) });
+    const j = await r.json();
+    setBusy(false); flash(r.ok ? `Email: ${j.email} · WhatsApp: ${j.whatsapp}` : j.error || "Error"); if (r.ok) onChanged();
+  }
   async function completeStage() {
     const cur = detail?.stages.find((s) => s.status === "active");
     if (!cur) return flash("No hay etapa activa");
@@ -257,9 +265,10 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
             <div className="flex flex-wrap items-center gap-2">
               <ContactButtons c={c} />
               <button onClick={() => onAccount(c.clientId)} className="inline-flex h-9 items-center gap-2 rounded-md border border-gray-700 px-3 text-sm text-gray-800 hover:bg-gray-100"><Building2 className="h-4 w-4" />Perfil de cuenta</button>
+              <button disabled={busy} onClick={sendUpdate} className="inline-flex h-9 items-center gap-2 rounded-md bg-[#0183FF] px-3 text-sm text-white hover:bg-[#0025FF] disabled:opacity-50"><Send className="h-4 w-4" />Enviar actualización al cliente</button>
             </div>
 
-            <div className="rounded-md border border-gray-900 bg-gray-50 p-3">
+            <div className="rounded-md border border-[#0183FF] bg-[#F0F7FF] p-3">
               <div className="mb-1 flex items-center justify-between text-xs font-medium uppercase text-gray-500">Resumen para el teléfono
                 <button onClick={() => { navigator.clipboard.writeText(c.summary); flash("Copiado"); }} className="inline-flex items-center gap-1 text-gray-600 hover:text-black"><Copy className="h-3.5 w-3.5" />Copiar</button></div>
               <p className="text-sm text-gray-900">{c.summary}</p>
@@ -277,13 +286,13 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
                   <input type="date" value={keyDate} onChange={(e) => setKeyDate(e.target.value)} className="mt-1 w-full rounded-md border px-2 py-1.5 text-sm" /></label>
                 <label className="text-xs text-gray-600">Qué vence
                   <input value={keyLabel} onChange={(e) => setKeyLabel(e.target.value)} placeholder="Ej.: Renovación FDA, Office Action" className="mt-1 w-full rounded-md border px-2 py-1.5 text-sm" /></label>
-                <div className="md:col-span-2 text-right"><button disabled={busy} onClick={saveMeta} className="rounded-md bg-black px-4 py-1.5 text-sm text-white disabled:opacity-50">Guardar</button></div>
+                <div className="md:col-span-2 text-right"><button disabled={busy} onClick={saveMeta} className="rounded-md bg-[#0183FF] px-4 py-1.5 text-sm text-white hover:bg-[#0025FF] disabled:opacity-50">Guardar</button></div>
               </div>
             )}
 
             <div>
               <div className="mb-2 flex items-center justify-between text-xs font-medium uppercase text-gray-500">Etapas
-                {!c.closedAt && detail!.stages.some((s) => s.status === "active") && <button disabled={busy} onClick={completeStage} className="rounded-md bg-black px-3 py-1 text-xs font-normal normal-case text-white disabled:opacity-50">Completar etapa actual →</button>}</div>
+                {!c.closedAt && detail!.stages.some((s) => s.status === "active") && <button disabled={busy} onClick={completeStage} className="rounded-md bg-[#0183FF] px-3 py-1 text-xs font-normal normal-case text-white hover:bg-[#0025FF] disabled:opacity-50">Completar etapa actual →</button>}</div>
               <ol className="space-y-1">
                 {detail!.stages.map((s) => (
                   <li key={s.id} className="flex items-center gap-2 text-sm">
@@ -299,11 +308,11 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
               <div className="mb-2 text-xs font-medium uppercase text-gray-500">Registrar contacto / nota</div>
               <div className="flex flex-wrap gap-1.5">
                 {Object.entries(KIND).filter(([k]) => k !== "system").map(([k, v]) => (
-                  <button key={k} onClick={() => setKind(k)} className={`rounded-full border px-3 py-1 text-xs ${kind === k ? "border-black bg-black text-white" : "text-gray-700 hover:bg-gray-100"}`}>{v}</button>
+                  <button key={k} onClick={() => setKind(k)} className={`rounded-full border px-3 py-1 text-xs ${kind === k ? "border-black bg-[#0183FF] text-white" : "text-gray-700 hover:bg-gray-100"}`}>{v}</button>
                 ))}
               </div>
               <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder={kind === "call" ? "Quién llamó, qué preguntó, qué se respondió…" : "Qué se habló, qué quedó pendiente…"} className="mt-2 w-full rounded-md border px-3 py-2 text-sm" />
-              <div className="mt-2 text-right"><button disabled={busy || !text.trim()} onClick={addComment} className="rounded-md bg-black px-4 py-1.5 text-sm text-white disabled:opacity-50">Registrar</button></div>
+              <div className="mt-2 text-right"><button disabled={busy || !text.trim()} onClick={addComment} className="rounded-md bg-[#0183FF] px-4 py-1.5 text-sm text-white hover:bg-[#0025FF] disabled:opacity-50">Registrar</button></div>
             </div>
 
             <div>
@@ -318,6 +327,13 @@ function DetailPanel({ id, detail, isAdmin, onClose, onChanged, onAccount, setMs
                 ))}
               </ul>
             </div>
+
+            {detail!.notifications.length > 0 && (
+              <div>
+                <div className="mb-2 text-xs font-medium uppercase text-gray-500">Avisos enviados al cliente</div>
+                <ul className="space-y-1 text-xs text-gray-600">{detail!.notifications.map((n) => <li key={n.id}>{fmtDT(n.created_at)} · {n.channel} · {n.kind === "manual" ? "manual" : n.kind === "completed" ? "completado" : "cambio de etapa"} · {n.recipient} · <span className={n.status === "sent" ? "text-emerald-700" : "text-red-600"}>{n.status === "sent" ? "enviado" : "error"}</span> · por {n.sent_by}</li>)}</ul>
+              </div>
+            )}
 
             {detail!.deliverables.length > 0 && (
               <div>
