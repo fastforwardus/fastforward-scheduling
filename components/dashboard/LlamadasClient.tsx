@@ -26,7 +26,7 @@ export default function LlamadasClient({ user }: { user: User }) {
   const [loadingContact, setLoadingContact] = useState(false);
   const [script, setScript] = useState<string | null>(null);
   const [manual, setManual] = useState("");
-  const [showPad, setShowPad] = useState(false);
+  const [showPad, setShowPad] = useState(true);
   const [newList, setNewList] = useState(false);
   const [editScript, setEditScript] = useState(false);
   const [note, setNote] = useState("");
@@ -123,6 +123,7 @@ export default function LlamadasClient({ user }: { user: User }) {
           </div>
 
           {voiceError && <div className="mb-4 rounded-xl border px-4 py-3 text-sm" style={{ background: "#FEF2F2", borderColor: "#FECACA", color: "#991B1B" }}>{voiceError}</div>}
+          {!voiceError && !voiceReady && <div className="mb-4 rounded-xl border px-4 py-3 text-sm" style={{ background: "#FEF9C3", borderColor: "#FDE68A", color: "#854D0E" }}>Conectando el teléfono… si tarda más de unos segundos, permite el micrófono en el navegador.</div>}
 
           {stats && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
