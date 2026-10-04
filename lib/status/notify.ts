@@ -83,6 +83,23 @@ export function buildStatusEmail(c: CaseRow) {
   return { lang, subject: L.subject(c.filingName), html, waParams: [name, c.filingName, waStatus] };
 }
 
+let tplCache: { at: number; langs: Set<string> } | null = null;
+async function templateApproved(lang: Lang): Promise<boolean> {
+  if (process.env.WA_STATUS_TEMPLATE_ENABLED === "0") return false;
+  if (tplCache && Date.now() - tplCache.at < 3600_000) return tplCache.langs.has(lang);
+  try {
+    const waba = process.env.META_WHATSAPP_BUSINESS_ACCOUNT_ID;
+    const token = process.env.META_WHATSAPP_ACCESS_TOKEN;
+    const r = await fetch(`https://graph.facebook.com/v22.0/${waba}/message_templates?name=${WA_TEMPLATE}&fields=language,status`, { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+    const j = (await r.json()) as { data?: { language: string; status: string }[] };
+    const langs = new Set((j.data || []).filter((d) => d.status === "APPROVED").map((d) => d.language));
+    tplCache = { at: Date.now(), langs };
+    return langs.has(lang);
+  } catch {
+    return false;
+  }
+}
+
 /** Envía la actualización al cliente por email (+ WhatsApp si la plantilla está habilitada) y deja registro. */
 export async function sendStatusUpdate(filingId: string, actor: { email: string; name: string }, kind: UpdateKind) {
   const data = await getCase(filingId);
@@ -107,14 +124,14 @@ export async function sendStatusUpdate(filingId: string, actor: { email: string;
     }
   } else out.email = "sin email";
 
-  // WhatsApp (solo con plantilla aprobada en Meta)
+  // WhatsApp (solo con plantilla aprobada en Meta; se verifica el estado con caché de 1 h)
   const phone = (c.whatsapp || c.phone || "").replace(/\D/g, "");
-  if (phone.length >= 8 && process.env.WA_STATUS_TEMPLATE_ENABLED === "1") {
+  if (phone.length >= 8 && (await templateApproved(lang))) {
     const r = await sendWhatsAppTemplate({ toPhone: phone, templateName: WA_TEMPLATE, languageCode: lang === "en" ? "en" : "es", bodyParams: waParams });
     await portal`INSERT INTO case_notifications (filing_id, channel, kind, recipient, payload, status, error, sent_by)
                  VALUES (${filingId}, 'whatsapp', ${kind}, ${phone}, ${portal.json({ template: WA_TEMPLATE, params: waParams })}, ${r.ok ? "sent" : "error"}, ${r.error ?? null}, ${actor.name})`;
     out.whatsapp = r.ok ? "enviado" : `error: ${r.error}`;
-  } else out.whatsapp = phone.length >= 8 ? "pendiente plantilla Meta" : "sin teléfono";
+  } else out.whatsapp = phone.length >= 8 ? "plantilla Meta aún no aprobada" : "sin teléfono";
 
   // Notificación in-app en el portal del cliente
   const bodyEs = c.closedAt ? `Su trámite "${c.filingName}" fue completado.` : `Su trámite "${c.filingName}" está en la etapa ${c.stagePos ?? "-"} de ${c.stageTotal}${c.stageName ? ` (${c.stageName})` : ""}.`;
