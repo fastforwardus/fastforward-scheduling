@@ -5,37 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReminderBell } from "@/components/dashboard/ReminderBell";
+import { MODULES, effectiveModules } from "@/lib/modules";
 import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield, Receipt, History, Clock, ListChecks } from "lucide-react";
 
 interface SidebarProps {
-  user: { fullName: string; email: string; role: string; canRecovery?: boolean };
+  user: { fullName: string; email: string; role: string; canRecovery?: boolean; modules?: string[] | null };
 }
 
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const allLinks = [
-    { href: "/dashboard", icon: LayoutDashboard, label: "Inicio", roles: ["admin","sales_manager","sales_rep"] },
-    { href: "/dashboard/appointments", icon: Calendar, label: "Todas las citas", roles: ["admin","sales_manager","sales_rep"] },
-    { href: "/dashboard/propuestas", icon: FileText, label: "Propuestas", roles: ["admin","sales_manager","sales_rep"] },
-    { href: "/dashboard/propuesta", icon: FileText, label: "Enviar propuesta", roles: ["admin","sales_manager","sales_rep"] },
-    { href: "/dashboard/facturar", icon: Receipt, label: "Facturar", roles: ["admin","sales_manager","sales_rep"] },
-    { href: "/dashboard/actividad", icon: History, label: "Actividad", roles: ["admin","sales_manager","sales_rep"] },
-    { href: "/dashboard/status", icon: ListChecks, label: "Status", roles: ["admin","sales_manager","sales_rep","recovery"] },
-    { href: "/dashboard/recovery", icon: PhoneCall, label: "Recupero", roles: ["admin","sales_manager","recovery"] },
-    { href: "/dashboard/team", icon: Users, label: "Equipo", roles: ["admin","sales_manager"] },
-    { href: "/dashboard/admin", icon: Shield, label: "Administracion", roles: ["admin"] },
-    { href: "/dashboard/admin/asistencia", icon: Clock, label: "Asistencia", roles: ["admin","sales_manager"] },
-    { href: "/dashboard/admin/adriana", icon: MessageCircle, label: "Conversaciones", roles: ["admin","sales_manager","sales_rep"] },
-    { href: "/dashboard/settings", icon: Settings, label: "Configuracion", roles: ["admin","sales_manager","sales_rep"] },
-  ];
-
-  // Recupero tambien se habilita por usuario, no solo por rol
-  const links = allLinks.filter(l =>
-    l.roles.includes(user.role) ||
-    (l.href === "/dashboard/recovery" && !!user.canRecovery)
-  );
+  const ICONS: Record<string, React.ComponentType<{ className?: string }>> = { inicio: LayoutDashboard, citas: Calendar, propuestas: FileText, enviar_propuesta: FileText, facturar: Receipt, actividad: History, status: ListChecks, recovery: PhoneCall, equipo: Users, admin: Shield, asistencia: Clock, conversaciones: MessageCircle, settings: Settings };
+  const enabled = new Set(effectiveModules(user));
+  const links = MODULES.filter((m) => enabled.has(m.key)).map((m) => ({ href: m.href, icon: ICONS[m.key] ?? FileText, label: m.label }));
 
   const NavLinks = () => (
     <nav className="flex-1 px-3 py-4 space-y-1 flex flex-col">
