@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReminderBell } from "@/components/dashboard/ReminderBell";
 import { MODULES, effectiveModules } from "@/lib/modules";
-import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield, Receipt, History, Clock, ListChecks } from "lucide-react";
+import { Calendar, Users, LayoutDashboard, LogOut, Menu, X, Settings , FileText, MessageCircle, PhoneCall, Shield, Receipt, History, Clock, ListChecks, PhoneOutgoing } from "lucide-react";
 
 interface SidebarProps {
   user: { fullName: string; email: string; role: string; canRecovery?: boolean; modules?: string[] | null };
@@ -16,7 +16,7 @@ export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const ICONS: Record<string, React.ComponentType<{ className?: string }>> = { inicio: LayoutDashboard, citas: Calendar, propuestas: FileText, enviar_propuesta: FileText, facturar: Receipt, actividad: History, status: ListChecks, recovery: PhoneCall, equipo: Users, admin: Shield, asistencia: Clock, conversaciones: MessageCircle, settings: Settings };
+  const ICONS: Record<string, React.ComponentType<{ className?: string }>> = { inicio: LayoutDashboard, citas: Calendar, propuestas: FileText, enviar_propuesta: FileText, facturar: Receipt, actividad: History, status: ListChecks, llamadas: PhoneOutgoing, recovery: PhoneCall, equipo: Users, admin: Shield, asistencia: Clock, conversaciones: MessageCircle, settings: Settings };
   const enabled = new Set(effectiveModules(user));
   const links = MODULES.filter((m) => enabled.has(m.key)).map((m) => ({ href: m.href, icon: ICONS[m.key] ?? FileText, label: m.label }));
 

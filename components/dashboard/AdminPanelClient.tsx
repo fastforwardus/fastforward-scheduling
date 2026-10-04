@@ -58,8 +58,8 @@ const TIMEZONES = [
 ];
 
 const DAYS = ["", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
-const ROLES: Record<string, string> = { admin: "Admin", sales_manager: "Manager", sales_rep: "Sales Rep" };
-const ROLE_COLORS: Record<string, string> = { admin: "#6366F1", sales_manager: "#F97316", sales_rep: "#22C55E" };
+const ROLES: Record<string, string> = { admin: "Admin", sales_manager: "Manager", sales_rep: "Sales Rep", caller: "Llamadas (SDR)" };
+const ROLE_COLORS: Record<string, string> = { admin: "#6366F1", sales_manager: "#F97316", sales_rep: "#22C55E", caller: "#0183FF" };
 
 // ─── Availability Editor ──────────────────────────────────────────────────────
 
@@ -244,6 +244,7 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                     className="w-full px-3 py-2 rounded-lg border text-sm outline-none bg-white"
                     style={{ borderColor: "#E5E7EB", color: "#000000" }}>
                     <option value="sales_rep">Sales Rep</option>
+                    <option value="caller">Llamadas (SDR)</option>
                     <option value="sales_manager">Sales Manager</option>
                     <option value="admin">Admin</option>
                   </select>
@@ -337,6 +338,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
               className="w-full px-4 py-3 rounded-xl border text-sm outline-none bg-white"
               style={{ borderColor: "#E5E7EB", color: "#000000" }}>
               <option value="sales_rep">Sales Rep</option>
+                    <option value="caller">Llamadas (SDR)</option>
               <option value="sales_manager">Sales Manager</option>
               <option value="admin">Admin</option>
             </select>
