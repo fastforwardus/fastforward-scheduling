@@ -14,7 +14,7 @@ const s = postgres(process.env.SCHED_URL!, { max: 1 }); const pt = postgres(proc
     pt`SELECT lower(email) e, coalesce(whatsapp, responsible_phone) ph, responsible_name n FROM clients WHERE lower(email) = ANY(${emails})`,
   ]);
   const found = new Map<string, { ph: string; n: string | null; src: string }>();
-  for (const [src, list] of [["portal", c], ["cita", a], ["propuesta", p], ["web", w]] as const) for (const r of list as { e: string; ph: string; n: string | null }[]) if (r.ph && !found.has(r.e)) found.set(r.e, { ph: r.ph, n: r.n, src });
+  for (const [src, list] of [["portal", c], ["cita", a], ["propuesta", p], ["web", w]] as const) for (const r of list as unknown as { e: string; ph: string; n: string | null }[]) if (r.ph && !found.has(r.e)) found.set(r.e, { ph: r.ph, n: r.n, src });
   const out = rows.map((r) => ({ r, f: found.get(r.email.toLowerCase()) })).filter((x) => x.f && isPlausiblePhone(normalizeWhatsAppPhone(x.f.ph)));
   const por: Record<string, number> = {}; out.forEach((x) => { por[x.f!.src] = (por[x.f!.src] || 0) + 1; });
   console.log(`${rows.length} sin teléfono → ${out.length} recuperados ${JSON.stringify(por)}${apply ? "" : " (simulación)"}`);
