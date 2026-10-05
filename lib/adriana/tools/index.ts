@@ -5,6 +5,7 @@ import { createBooking, type CreateBookingInput, type CreateBookingContext } fro
 import { saveSatisfactionScore, type SaveSatisfactionInput, type SaveSatisfactionContext } from "./save-satisfaction-score";
 import { saveFeedbackComment, type SaveFeedbackInput, type SaveFeedbackContext } from "./save-feedback-comment";
 import { notifyTeam, type NotifyTeamInput, type NotifyTeamContext } from "./notify-team";
+import { getRescheduleSlots, rescheduleBooking, type RescheduleSlotsInput, type RescheduleBookingInput, type RescheduleContext } from "./reschedule-booking";
 
 /** Schemas que se le mandan a Claude. */
 export const ADRIANA_TOOLS: Anthropic.Tool[] = [
@@ -62,6 +63,34 @@ export const ADRIANA_TOOLS: Anthropic.Tool[] = [
     },
   },
   {
+    name: "get_reschedule_slots",
+    description:
+      "Devuelve los horarios libres para REAGENDAR la cita que el cliente YA tiene, filtrados al mismo consultor asignado (el consultor nunca cambia al reagendar). Úsala cuando el cliente pide cambiar la fecha u hora de su cita. Devuelve rep_name, current_time_local y slots. Ofrece máximo 3 slots. Si el cliente pide un horario puntual, pásalo como date_from/date_to para verificarlo.",
+    input_schema: {
+      type: "object",
+      properties: {
+        timezone:       { type: "string", description: "Zona horaria IANA del cliente" },
+        date_from:      { type: "string", description: "Fecha desde (YYYY-MM-DD). Opcional." },
+        date_to:        { type: "string", description: "Fecha hasta (YYYY-MM-DD). Opcional." },
+        preferred_time: { type: "string", enum: ["morning", "afternoon", "any"], description: "Mañana o tarde si el cliente lo pidió" },
+      },
+      required: ["timezone"],
+    },
+  },
+  {
+    name: "reschedule_booking",
+    description:
+      "Mueve la cita existente del cliente al nuevo horario, manteniendo el mismo consultor. Solo llámala con un slot que get_reschedule_slots haya devuelto como libre y que el cliente haya confirmado. Si el horario pedido por el cliente no está en los slots libres, NO la llames: ofrécele los horarios disponibles. Devuelve formatted_time_local y rep_name.",
+    input_schema: {
+      type: "object",
+      properties: {
+        timezone:   { type: "string", description: "IANA tz del cliente" },
+        slot_local: { type: "string", description: "Hora LOCAL del cliente, sin zona ni Z: '2026-09-29T16:00:00'. NO conviertas a UTC." },
+      },
+      required: ["timezone", "slot_local"],
+    },
+  },
+  {
     name: "save_satisfaction_score",
     description:
       "Guarda el puntaje de satisfacción 1-5 que dio el cliente al final de la conversación, después del booking. Solo llamala con un número entero entre 1 y 5.",
@@ -95,7 +124,7 @@ export const ADRIANA_TOOLS: Anthropic.Tool[] = [
         reason: {
           type: "string",
           enum: ["payment", "complex_question", "other"],
-          description: "Motivo del handoff: payment (pago/factura), complex_question (tecnica/regulatoria), other. Si el cliente quiere OTRA cita NO uses esta tool: agendala vos con get_available_slots y create_booking.",
+          description: "Motivo del handoff: payment (pago/factura), complex_question (tecnica/regulatoria), other. Si el cliente quiere OTRA cita NO uses esta tool: agendala vos con get_available_slots y create_booking. Si quiere CAMBIAR la fecha de su cita existente tampoco: usa get_reschedule_slots y reschedule_booking.",
         },
         urgency: {
           type: "string",
@@ -146,6 +175,12 @@ export async function dispatchTool(
 
     case "notify_team":
       return notifyTeam(input as NotifyTeamInput, { conversationId: ctx.conversationId } as NotifyTeamContext);
+
+    case "get_reschedule_slots":
+      return getRescheduleSlots(input as RescheduleSlotsInput, { conversationId: ctx.conversationId } as RescheduleContext);
+
+    case "reschedule_booking":
+      return rescheduleBooking(input as RescheduleBookingInput, { conversationId: ctx.conversationId } as RescheduleContext);
 
     default:
       return { ok: false, message: `Unknown tool: ${name}` };

@@ -31,6 +31,7 @@ export const users = pgTable("users", {
   ngtecoId: text("ngteco_id"),
   hourlyRate: numeric("hourly_rate", { precision: 8, scale: 2 }),
   canRecovery: boolean("can_recovery").default(false).notNull(),
+  modules: text("modules").array(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).default(sql`now()`).notNull(),
 });

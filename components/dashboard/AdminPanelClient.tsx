@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { MODULES, defaultModulesFor } from "@/lib/modules";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import ProposalTimelineModal from "@/components/dashboard/ProposalTimelineModal";
 import { Users, BarChart2, Plus, Edit2, Check, X, Loader2, ChevronDown, ChevronUp, Clock, Trash2 } from "lucide-react";
@@ -11,7 +12,7 @@ import SaludClient from "@/components/dashboard/SaludClient";
 
 interface User {
   id: string; fullName: string; email: string; role: string;
-  slug: string | null; isActive: boolean; whatsappPhone: string | null; canRecovery?: boolean;
+  slug: string | null; isActive: boolean; whatsappPhone: string | null; canRecovery?: boolean; modules?: string[] | null;
   googleRefreshToken: string | null;
 }
 
@@ -57,8 +58,8 @@ const TIMEZONES = [
 ];
 
 const DAYS = ["", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab", "Dom"];
-const ROLES: Record<string, string> = { admin: "Admin", sales_manager: "Manager", sales_rep: "Sales Rep" };
-const ROLE_COLORS: Record<string, string> = { admin: "#6366F1", sales_manager: "#F97316", sales_rep: "#22C55E" };
+const ROLES: Record<string, string> = { admin: "Admin", sales_manager: "Manager", sales_rep: "Sales Rep", caller: "Llamadas (SDR)" };
+const ROLE_COLORS: Record<string, string> = { admin: "#6366F1", sales_manager: "#F97316", sales_rep: "#22C55E", caller: "#0183FF" };
 
 // ─── Availability Editor ──────────────────────────────────────────────────────
 
@@ -131,7 +132,7 @@ function AvailabilityEditor({ userId }: { userId: string }) {
 function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", timezone: (user as { timezone?: string }).timezone || "America/New_York", isActive: user.isActive, canRecovery: !!user.canRecovery, password: "" });
+  const [form, setForm] = useState({ fullName: user.fullName, email: user.email, role: user.role, slug: user.slug || "", whatsappPhone: user.whatsappPhone || "", timezone: (user as { timezone?: string }).timezone || "America/New_York", isActive: user.isActive, canRecovery: !!user.canRecovery, modules: (user.modules && user.modules.length ? user.modules : null) as string[] | null, password: "" });
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
@@ -202,6 +203,28 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                       onBlur={e => e.currentTarget.style.borderColor = "#E5E7EB"} />
                   </div>
                 ))}
+                <div className="col-span-2 rounded-xl border p-3" style={{ borderColor: "#E5E7EB" }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold" style={{ color: "#000000" }}>Módulos habilitados</span>
+                    <button type="button" onClick={() => setForm(prev => ({ ...prev, modules: null }))} className="text-xs underline" style={{ color: "#6B7280" }}>
+                      {form.modules ? "Volver a los del rol" : "Según rol " + (ROLES[form.role] || form.role)}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {MODULES.filter(m => !m.always).map(m => {
+                      const current = form.modules ?? defaultModulesFor(form.role, form.canRecovery);
+                      const on = current.includes(m.key);
+                      return (
+                        <label key={m.key} className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: "#000000" }}>
+                          <input type="checkbox" checked={on} className="w-4 h-4" style={{ accentColor: "#0183FF" }}
+                            onChange={e => setForm(prev => { const base = prev.modules ?? defaultModulesFor(prev.role, prev.canRecovery); const next = e.target.checked ? [...new Set([...base, m.key])] : base.filter(k => k !== m.key); return { ...prev, modules: next }; })} />
+                          {m.label}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs mt-2" style={{ color: "#9CA3AF" }}>{form.modules ? "Personalizado para este usuario." : "Usando los permisos del rol."} El usuario debe volver a iniciar sesión para ver los cambios.</p>
+                </div>
                 <div className="col-span-2">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={form.canRecovery}
@@ -221,6 +244,7 @@ function UserRow({ user, onRefresh }: { user: User; onRefresh: () => void }) {
                     className="w-full px-3 py-2 rounded-lg border text-sm outline-none bg-white"
                     style={{ borderColor: "#E5E7EB", color: "#000000" }}>
                     <option value="sales_rep">Sales Rep</option>
+                    <option value="caller">Llamadas (SDR)</option>
                     <option value="sales_manager">Sales Manager</option>
                     <option value="admin">Admin</option>
                   </select>
@@ -314,6 +338,7 @@ function CreateUserModal({ onClose, onCreated }: { onClose: () => void; onCreate
               className="w-full px-4 py-3 rounded-xl border text-sm outline-none bg-white"
               style={{ borderColor: "#E5E7EB", color: "#000000" }}>
               <option value="sales_rep">Sales Rep</option>
+                    <option value="caller">Llamadas (SDR)</option>
               <option value="sales_manager">Sales Manager</option>
               <option value="admin">Admin</option>
             </select>

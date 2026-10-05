@@ -27,6 +27,13 @@ export async function POST(req: NextRequest) {
       .set({ status, durationSec: dur })
       .where(eq(callLogs.callSid, callSid));
 
+    // Módulo Llamadas: la llamada a un contacto de lista no genera nota de Recupero
+    if (log?.sourceType === "call_contact" && log?.sourceId) {
+      const { sql } = await import("drizzle-orm");
+      await db.execute(sql`UPDATE call_contacts SET last_called_at = now() WHERE id = ${log.sourceId}`).catch(() => {});
+      return new NextResponse("<Response/>", { headers: { "Content-Type": "text/xml" } });
+    }
+
     // La nota se escribe sola: quien llama no registra el resultado a mano,
     // solo agrega contexto si quiere.
     if (log?.sourceType && log?.sourceId) {

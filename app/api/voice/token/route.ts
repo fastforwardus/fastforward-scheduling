@@ -7,7 +7,7 @@ import { getSession } from "@/lib/session";
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.role === "sales_rep") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!["admin", "sales_manager", "recovery", "caller"].includes(session.role) && !session.canRecovery) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   if (process.env.VOICE_CALLS_ENABLED !== "true") {
     return NextResponse.json({ error: "Llamadas deshabilitadas" }, { status: 503 });
