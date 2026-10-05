@@ -262,16 +262,20 @@ export async function generateAvailableSlots(
 }
 
 /**
- * Reparto automatico: Francisco, Emiliano y Mauricio en round robin
- * puro por carga de citas futuras. Solo entra quien trabaja ese horario y
- * no tiene cita solapada (un rep = una cita por horario).
+ * Reparto automatico ponderado: Francisco 60 %, Mauricio 20 %, Emiliano 20 %
+ * (pesos 3/1/1) sobre la carga de citas futuras. Gana el rep con menor
+ * carga/peso; en empate, el de mayor peso. Solo entra quien trabaja ese
+ * horario y no tiene cita solapada (un rep = una cita por horario).
  */
 export async function elegirRepAutomatico(slot: Date): Promise<string | null> {
-  const REPS_ROTACION = [
-    "francisco logarzo",
-    "emiliano caracciolo",
-    "mauricio lobatón", "mauricio lobaton",
-  ];
+  // peso relativo: cada 10 citas -> 6 Francisco, 2 Mauricio, 2 Emiliano
+  const PESOS: Record<string, number> = {
+    "francisco logarzo": 3,
+    "emiliano caracciolo": 1,
+    "mauricio lobatón": 1, "mauricio lobaton": 1,
+  };
+  const pesoDe = (u: { fullName: string | null }) =>
+    PESOS[(u.fullName || "").toLowerCase().trim()] ?? 0;
 
   const disponibles = await getAvailableRepIds(slot);
   if (!disponibles.size) return null;
@@ -294,10 +298,12 @@ export async function elegirRepAutomatico(slot: Date): Promise<string | null> {
     if (a.assignedTo) carga.set(a.assignedTo, (carga.get(a.assignedTo) ?? 0) + 1);
   }
 
-  const candidatos = activos.filter((u) =>
-    disponibles.has(u.id) && REPS_ROTACION.includes((u.fullName || "").toLowerCase().trim()),
-  );
+  const candidatos = activos.filter((u) => disponibles.has(u.id) && pesoDe(u) > 0);
   if (!candidatos.length) return null;
-  candidatos.sort((a, b) => (carga.get(a.id) ?? 0) - (carga.get(b.id) ?? 0));
+  const cargaPonderada = (u: { id: string; fullName: string | null }) =>
+    (carga.get(u.id) ?? 0) / pesoDe(u);
+  candidatos.sort((a, b) =>
+    cargaPonderada(a) - cargaPonderada(b) || pesoDe(b) - pesoDe(a),
+  );
   return candidatos[0].id;
 }
