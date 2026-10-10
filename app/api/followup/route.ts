@@ -55,11 +55,12 @@ Profissional, caloroso, maximo 100 palavras, um CTA para reagendar em https://sc
 
   const message = await anthropic.messages.create({
     model: "claude-sonnet-5",
-    max_tokens: 400,
+    max_tokens: 1024,
     messages: [{ role: "user", content: prompts[lang] || prompts.es }],
   });
 
-  const raw = message.content[0].type === "text" ? message.content[0].text : "";
+  const textBlock = message.content.find((b) => b.type === "text");
+  const raw = textBlock && textBlock.type === "text" ? textBlock.text : "";
   // Strip markdown code fences if AI wraps in ```html ... ```
   const text = raw.replace(/^```(?:html)?\n?/i, "").replace(/\n?```$/i, "").trim();
   return text;
@@ -156,6 +157,8 @@ export async function GET(req: NextRequest) {
       await db.update(followUpSequences)
         .set({ [draftField]: emailBody })
         .where(eq(followUpSequences.id, seq.id));
+
+      if (!emailBody.trim()) throw new Error(`Borrador vacio para secuencia ${seq.id} (dia ${stepDay})`);
 
       const html = `<!DOCTYPE html>
 <html><body style="margin:0;padding:0;background:#F8F9FB;font-family:system-ui,sans-serif;">
